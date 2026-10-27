@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Zap, Eye, EyeOff, ArrowRight, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
+import GoogleButton from '@/components/ui/GoogleButton'
 import { useApp } from '@/context/AppContext'
 
 const signupSchema = z
@@ -30,6 +31,7 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
   const {
     register,
@@ -59,6 +61,22 @@ export default function Signup() {
     }, 1200)
   }
 
+  const handleGoogleSignUp = () => {
+    setIsGoogleLoading(true)
+    setTimeout(() => {
+      setIsGoogleLoading(false)
+      dispatch({
+        type: 'UPDATE_USER',
+        payload: {
+          name: 'Alex Chen',
+          email: 'alex.chen@university.edu',
+        },
+      })
+      toast.success('Account created with Google! Let us set up your study routine.')
+      navigate('/onboarding')
+    }, 1000)
+  }
+
   return (
     <div className="min-h-screen bg-[var(--color-bg-subtle)] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
@@ -83,6 +101,25 @@ export default function Signup() {
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0"
       >
         <div className="bg-[var(--color-surface)] py-8 px-6 sm:px-10 shadow-lg rounded-2xl border border-[var(--color-border)]">
+          <GoogleButton
+            text="Sign up with Google"
+            loadingText="Setting up Google account..."
+            onClick={handleGoogleSignUp}
+            isLoading={isGoogleLoading}
+            disabled={isLoading}
+          />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--color-border)]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[var(--color-surface)] px-2.5 text-[var(--color-text-muted)] font-medium">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
@@ -181,7 +218,7 @@ export default function Signup() {
             <div className="pt-2">
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
                 className="w-full justify-center h-11 text-sm font-semibold shadow-md"
               >
                 {isLoading ? (

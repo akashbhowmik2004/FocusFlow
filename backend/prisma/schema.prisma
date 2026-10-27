@@ -1,0 +1,108 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  avatar           String?
+  passwordHash     String?
+  emailVerifiedAt  DateTime?
+
+  studyGoal          String?
+  dailyStudyHours    Int      @default(5)
+  preferredStartTime String   @default("09:00")
+  preferredEndTime   String   @default("18:00")
+  reminderEnabled    Boolean  @default(true)
+  theme              String   @default("light")
+
+  oauthAccounts OAuthAccount[]
+  subjects      Subject[]
+  studySessions StudySession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OAuthAccount {
+  id                String   @id @default(cuid())
+  provider          String
+  providerAccountId String
+  userId            String
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String
+  code      String?
+  color     String   @default("#3b82f6")
+  colorBg   String?
+  examDate  DateTime?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studySessions StudySession[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics Topic[]
+
+  @@index([userId])
+}
+
+model Topic {
+  id           String    @id @default(cuid())
+  name         String
+  status       String    @default("not-started")
+  lastRevised  DateTime?
+  nextRevision DateTime?
+  subjectId    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  studySessions StudySession[]
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@index([subjectId])
+}
+
+
+model StudySession {
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime @db.Date
+  startTime String
+  endTime   String
+  duration  Int
+  status    String   @default("upcoming")
+
+  userId    String
+  subjectId String
+  topicId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topic   Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([subjectId])
+  @@index([topicId])
+}

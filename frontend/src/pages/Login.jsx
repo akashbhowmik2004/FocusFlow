@@ -8,6 +8,8 @@ import { Zap, Eye, EyeOff, ArrowRight, Loader2, Lock, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import GoogleButton from '@/components/ui/GoogleButton'
+import { useApp } from '@/context/AppContext'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -17,8 +19,10 @@ const loginSchema = z.object({
 
 export default function Login() {
   const navigate = useNavigate()
+  const { dispatch } = useApp()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
   const {
     register,
@@ -38,9 +42,29 @@ export default function Login() {
     // Simulate authentication delay
     setTimeout(() => {
       setIsLoading(false)
+      dispatch({
+        type: 'UPDATE_USER',
+        payload: { email: data.email },
+      })
       toast.success('Welcome back, Alex! Redirecting to dashboard...')
       navigate('/app/dashboard')
     }, 1200)
+  }
+
+  const handleGoogleSignIn = () => {
+    setIsGoogleLoading(true)
+    setTimeout(() => {
+      setIsGoogleLoading(false)
+      dispatch({
+        type: 'UPDATE_USER',
+        payload: {
+          name: 'Alex Chen',
+          email: 'alex.chen@university.edu',
+        },
+      })
+      toast.success('Welcome back, Alex! Signed in with Google.')
+      navigate('/app/dashboard')
+    }, 1000)
   }
 
   const handleForgotPassword = (e) => {
@@ -76,6 +100,25 @@ export default function Login() {
           <div className="mb-6 p-3 rounded-xl bg-[var(--color-brand-50)] border border-[var(--color-brand-100)] text-xs text-[var(--color-brand-text)] flex items-start gap-2">
             <span className="font-bold shrink-0">Demo mode:</span>
             <span>Pre-filled with student credentials. Click "Sign in" to explore.</span>
+          </div>
+
+          <GoogleButton
+            text="Sign in with Google"
+            loadingText="Signing in with Google..."
+            onClick={handleGoogleSignIn}
+            isLoading={isGoogleLoading}
+            disabled={isLoading}
+          />
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[var(--color-border)]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-[var(--color-surface)] px-2.5 text-[var(--color-text-muted)] font-medium">
+                Or continue with email
+              </span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -145,7 +188,7 @@ export default function Login() {
             <div className="pt-2">
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
                 className="w-full justify-center h-11 text-sm font-semibold shadow-md"
               >
                 {isLoading ? (
