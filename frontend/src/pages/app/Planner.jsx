@@ -27,9 +27,10 @@ import {
 } from '@/lib/dates'
 import { formatDuration, cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+import Card, { SessionCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Dialog from '@/components/ui/Dialog'
+import EmptyState from '@/components/ui/EmptyState'
 import { toast } from 'sonner'
 
 export default function Planner() {
@@ -380,13 +381,13 @@ export default function Planner() {
 
         {/* Selected Day Inspector Panel (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <Card className="p-5">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--color-border-light)]">
+          <Card variant="panel" className="p-5">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--card-border-subtle)]">
               <div>
-                <h3 className="text-base font-bold text-[var(--color-text)]">
+                <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
                   {formatDate(selectedDate, 'EEEE')}
                 </h3>
-                <p className="text-xs text-[var(--color-text-muted)]">
+                <p className="text-xs text-[var(--color-text-muted)] font-mono">
                   {formatDate(selectedDate, 'MMMM d, yyyy')}
                 </p>
               </div>
@@ -401,11 +402,11 @@ export default function Planner() {
 
             {/* Check for exam on this selected day */}
             {getExamOnDay(selectedDate) && (
-              <div className="mb-3 p-3 rounded-xl bg-[var(--color-error-light)] border border-[var(--color-error-border)] text-[var(--color-error-text)] text-xs flex items-start gap-2">
+              <div className="mb-3 p-3 rounded-lg bg-[var(--color-error-light)] border border-[var(--color-error-border)] text-[var(--color-error-text)] text-xs flex items-start gap-2">
                 <Timer className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold">Scheduled Examination Day</p>
-                  <p className="text-[11px] text-rose-700 dark:text-rose-300">
+                  <p className="text-[11px] text-rose-700 dark:text-rose-300 font-mono">
                     {getExamOnDay(selectedDate).name} ({getExamOnDay(selectedDate).code})
                   </p>
                 </div>
@@ -413,63 +414,36 @@ export default function Planner() {
             )}
 
             {selectedDaySessions.length === 0 ? (
-              <div className="py-8 text-center text-xs text-[var(--color-text-muted)]">
-                <Calendar className="w-8 h-8 mx-auto text-[var(--color-text-muted)] mb-2" />
-                <p>No study sessions booked for this day.</p>
-                <button
-                  onClick={() => setAddDialogOpen(true)}
-                  className="mt-2 text-xs font-semibold text-[var(--color-brand)] hover:underline cursor-pointer"
-                >
-                  Schedule a session now
-                </button>
-              </div>
+              <EmptyState
+                icon={Calendar}
+                bordered
+                title="No sessions booked"
+                description={`No study blocks scheduled for ${formatDate(selectedDate, 'MMM d')}.`}
+                action={
+                  <Button
+                    onClick={() => setAddDialogOpen(true)}
+                    size="sm"
+                    className="text-xs font-semibold gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Schedule Session
+                  </Button>
+                }
+              />
             ) : (
               <div className="space-y-2.5">
                 {selectedDaySessions.map((session) => {
                   const subject = state.subjects.find((s) => s.id === session.subjectId)
-                  const isDone = session.status === 'completed'
-
                   return (
-                    <div
+                    <SessionCard
                       key={session.id}
-                      className={cn(
-                        'p-3 rounded-xl border text-xs space-y-1.5 transition-colors',
-                        isDone
-                          ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)] opacity-60'
-                          : 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]'
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-[var(--color-text)] truncate">{session.title}</span>
-                        {subject && (
-                          <span
-                            className="px-1.5 py-0.5 rounded text-[10px] font-bold text-white shrink-0"
-                            style={{ backgroundColor: subject.color }}
-                          >
-                            {subject.code || subject.name}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {session.startTime} - {session.endTime} ({session.duration}m)
-                        </span>
-                        {!isDone ? (
-                          <button
-                            onClick={() => {
-                              completeSession(session.id)
-                              toast.success('Marked completed!')
-                            }}
-                            className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline cursor-pointer"
-                          >
-                            Mark Done
-                          </button>
-                        ) : (
-                          <span className="text-emerald-600 dark:text-emerald-400 font-bold">Completed</span>
-                        )}
-                      </div>
-                    </div>
+                      session={session}
+                      subject={subject}
+                      onComplete={(id) => {
+                        completeSession(id)
+                        toast.success('Marked session completed!')
+                      }}
+                      showActions={true}
+                    />
                   )
                 })}
               </div>

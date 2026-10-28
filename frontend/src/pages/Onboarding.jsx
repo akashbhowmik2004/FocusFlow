@@ -18,18 +18,20 @@ import {
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/AuthContext'
 import { subjectColors, generateId } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export default function Onboarding() {
   const navigate = useNavigate()
   const { state, dispatch } = useApp()
+  const { updateUser } = useAuth()
 
   const [step, setStep] = useState(1)
   const totalSteps = 6
 
   // Form states across steps
-  const [goal, setGoal] = useState(state.user.studyGoal || 'Ace my semester exams')
+  const [goal, setGoal] = useState(state.user?.studyGoal || '')
   const [context, setContext] = useState('University / College')
   const [subjectsList, setSubjectsList] = useState([
     { id: 'onb-1', name: 'Data Structures & Algorithms', code: 'CS201', color: '#3b82f6' },
@@ -68,7 +70,18 @@ export default function Onboarding() {
     setSubjectsList(subjectsList.filter((s) => s.id !== id))
   }
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    try {
+      if (updateUser) {
+        await updateUser({
+          studyGoal: goal,
+          dailyStudyHours: dailyHours,
+        })
+      }
+    } catch (err) {
+      console.warn('Failed to save onboarding preferences to server:', err)
+    }
+
     // Save onboarding preferences into global context
     dispatch({
       type: 'UPDATE_USER',

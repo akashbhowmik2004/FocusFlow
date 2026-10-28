@@ -5,11 +5,31 @@ import { AppProvider, useApp, useSubjects, useSessions } from './AppContext'
 describe('AppContext', () => {
   const wrapper = ({ children }) => <AppProvider>{children}</AppProvider>
 
-  it('provides initial state with subjects and user', () => {
+  it('provides initial state with subjects and null user when unauthenticated', () => {
     const { result } = renderHook(() => useApp(), { wrapper })
     expect(result.current.state.subjects.length).toBeGreaterThan(0)
-    expect(result.current.state.user.name).toBe('Alex Chen')
+    expect(result.current.state.user).toBeNull()
     expect(result.current.state.theme).toBe('light')
+  })
+
+  it('can set and update user state', () => {
+    const { result } = renderHook(() => useApp(), { wrapper })
+    act(() => {
+      result.current.dispatch({
+        type: 'SET_USER',
+        payload: { id: 'u1', name: 'Test Student', email: 'student@focusflow.test' },
+      })
+    })
+    expect(result.current.state.user?.name).toBe('Test Student')
+
+    act(() => {
+      result.current.dispatch({
+        type: 'UPDATE_USER',
+        payload: { studyGoal: 'Complete Finals Prep' },
+      })
+    })
+    expect(result.current.state.user?.studyGoal).toBe('Complete Finals Prep')
+    expect(result.current.state.user?.name).toBe('Test Student')
   })
 
   it('can toggle theme', () => {

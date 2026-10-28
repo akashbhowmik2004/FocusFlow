@@ -38,10 +38,11 @@ import {
   subjectProgressData
 } from '@/data/mockData'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+import Card, { StatCard, SessionCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Progress from '@/components/ui/Progress'
 import Dialog from '@/components/ui/Dialog'
+import EmptyState from '@/components/ui/EmptyState'
 import { toast } from 'sonner'
 
 export default function Dashboard() {
@@ -109,7 +110,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
-              {greeting}, {state.user.name.split(' ')[0]} 👋
+              {greeting}, {state.user?.name ? state.user.name.split(' ')[0] : 'there'} 👋
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] mt-1">
@@ -134,82 +135,73 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Row 1: Key Metric Highlights (4 Cards) */}
+      {/* Row 1: Key Metric Highlights (4 Distinctive Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Planned Study Time */}
-        <Card className="p-4 sm:p-5 border-l-4 border-l-[var(--color-brand)] transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">Today's Study</span>
-            <Clock className="w-4 h-4 text-[var(--color-brand)]" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[var(--color-text)]">{formatDuration(totalPlannedMinutes)}</span>
-            <span className="text-xs text-[var(--color-text-muted)]">planned</span>
-          </div>
-          <div className="mt-3">
-            <Progress value={completedMinutes} max={Math.max(totalPlannedMinutes, 1)} color="var(--color-brand)" size="sm" />
-            <div className="flex justify-between text-[11px] text-[var(--color-text-muted)] mt-1.5">
-              <span>{formatDuration(completedMinutes)} completed</span>
-              <span>{Math.round((completedMinutes / Math.max(totalPlannedMinutes, 1)) * 100)}%</span>
-            </div>
-          </div>
-        </Card>
+        <StatCard
+          label="Today's Study"
+          value={formatDuration(totalPlannedMinutes)}
+          unit="planned"
+          icon={Clock}
+          iconColor="var(--color-brand)"
+          accentColor="var(--color-brand)"
+          progress={{
+            value: completedMinutes,
+            max: Math.max(totalPlannedMinutes, 1),
+            label: `${formatDuration(completedMinutes)} completed`,
+            color: 'var(--color-brand)',
+          }}
+        />
 
         {/* Sessions Completed */}
-        <Card className="p-4 sm:p-5 border-l-4 border-l-emerald-500 transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">Sessions</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[var(--color-text)]">
-              {completedToday.length} of {todaySessions.length}
-            </span>
-            <span className="text-xs text-emerald-600 font-semibold">Done</span>
-          </div>
-          <p className="mt-3 text-xs text-[var(--color-text-muted)] truncate">
-            {todaySessions.length - completedToday.length} sessions remaining today
-          </p>
-        </Card>
+        <StatCard
+          label="Sessions"
+          value={`${completedToday.length} of ${todaySessions.length}`}
+          unit="done"
+          icon={CheckCircle2}
+          iconColor="#10b981"
+          accentColor="#10b981"
+          subtext={`${todaySessions.length - completedToday.length} remaining today`}
+          badge={
+            completedToday.length === todaySessions.length && todaySessions.length > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                All Done
+              </span>
+            ) : undefined
+          }
+        />
 
         {/* Nearest Exam Countdown */}
-        <Card className="p-4 sm:p-5 border-l-4 border-l-amber-500 transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">Next Exam</span>
-            <Timer className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-amber-600">
-              {upcomingExams[0]?.daysLeft ?? 21} Days
-            </span>
-            <span className="text-xs text-[var(--color-text-muted)]">left</span>
-          </div>
-          <p className="mt-3 text-xs text-[var(--color-text-secondary)] font-medium truncate">
-            {upcomingExams[0]?.subject ?? 'Linear Algebra'} ({upcomingExams[0]?.code ?? 'MATH202'})
-          </p>
-        </Card>
+        <StatCard
+          label="Next Exam"
+          value={`${upcomingExams[0]?.daysLeft ?? 21} Days`}
+          unit="left"
+          icon={Timer}
+          iconColor="#f59e0b"
+          accentColor="#f59e0b"
+          subtext={`${upcomingExams[0]?.subject ?? 'Linear Algebra'} (${upcomingExams[0]?.code ?? 'MATH202'})`}
+          onClick={() => navigate('/app/subjects')}
+        />
 
         {/* Current Habit Streak */}
-        <Card className="p-4 sm:p-5 border-l-4 border-l-rose-500 transition-shadow hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">Study Streak</span>
-            <Flame className="w-4 h-4 text-rose-500 fill-rose-500" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-rose-600">6 Days</span>
-            <span className="text-xs text-rose-500 font-semibold">On Fire!</span>
-          </div>
-          <p className="mt-3 text-xs text-[var(--color-text-muted)]">
-            Consistently hit &gt; 4 hrs daily
-          </p>
-        </Card>
+        <StatCard
+          label="Study Streak"
+          value="6 Days"
+          unit="active"
+          icon={Flame}
+          iconColor="#f43f5e"
+          accentColor="#f43f5e"
+          trend="up"
+          trendLabel="On Fire"
+          subtext="Target: > 4 hrs daily"
+        />
       </div>
 
       {/* Row 2: Today's Schedule (Left) + Exam Countdowns & Revision Queue (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Today's Schedule List (8 Columns) */}
         <div className="lg:col-span-8 space-y-4">
-          <Card className="p-5 sm:p-6">
+          <Card variant="panel" className="p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[var(--color-brand)]" />
@@ -222,123 +214,40 @@ export default function Dashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setAddDialogOpen(true)}
-                className="text-xs text-[var(--color-brand)] gap-1"
+                className="text-xs text-[var(--color-brand)] gap-1 font-semibold"
               >
-                <Plus className="w-3.5 h-3.5" /> Add
+                <Plus className="w-3.5 h-3.5" /> Add Session
               </Button>
             </div>
 
             {todaySessions.length === 0 ? (
-              <div className="py-12 text-center">
-                <p className="text-sm font-medium text-[var(--color-text-muted)]">No sessions scheduled for today yet.</p>
-                <Button
-                  onClick={() => setAddDialogOpen(true)}
-                  size="sm"
-                  className="mt-3 text-xs"
-                >
-                  Schedule Your First Session
-                </Button>
-              </div>
+              <EmptyState
+                icon={Calendar}
+                title="No study sessions scheduled for today yet"
+                description="Block out focused time to make consistent progress through your active courses."
+                bordered
+                action={
+                  <Button
+                    onClick={() => setAddDialogOpen(true)}
+                    size="sm"
+                    className="text-xs font-semibold gap-1.5"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Schedule Your First Session
+                  </Button>
+                }
+              />
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {todaySessions.map((session) => {
                   const subject = state.subjects.find((s) => s.id === session.subjectId)
-                  const isDone = session.status === 'completed'
-                  const isLive = session.status === 'in-progress'
-
                   return (
-                    <div
+                    <SessionCard
                       key={session.id}
-                      className={cn(
-                        'p-3.5 sm:p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3',
-                        isDone
-                          ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
-                          : isLive
-                          ? 'bg-[var(--item-live-bg)] border-[var(--item-live-border)] shadow-xs'
-                          : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-brand-light)]'
-                      )}
-                    >
-                      <div className="flex items-start gap-3">
-                        <button
-                          onClick={() => handleCompleteSession(session.id, session.title)}
-                          className={cn(
-                            'mt-0.5 w-5 h-5 rounded-full border flex items-center justify-center transition-colors cursor-pointer shrink-0',
-                            isDone
-                              ? 'bg-emerald-600 border-emerald-600 text-white'
-                              : 'border-[var(--color-border)] hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
-                          )}
-                          title={isDone ? 'Marked as completed' : 'Mark complete'}
-                        >
-                          {isDone && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        </button>
-
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span
-                              className={cn(
-                                'text-sm font-semibold',
-                                isDone ? 'line-through text-[var(--color-text-muted)]' : 'text-[var(--color-text)]'
-                              )}
-                            >
-                              {session.title}
-                            </span>
-                            {subject && (
-                              <span
-                                className="px-2 py-0.5 text-[10px] font-semibold rounded-md text-white"
-                                style={{ backgroundColor: subject.color }}
-                              >
-                                {subject.code || subject.name}
-                              </span>
-                            )}
-                            {isLive && (
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-[var(--color-brand-text)] bg-[var(--color-brand-50)] border border-[var(--color-brand-100)] px-2 py-0.5 rounded-full animate-pulse">
-                                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)]" />
-                                Current
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)] mt-1">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3.5 h-3.5" />
-                              {session.startTime} - {session.endTime}
-                            </span>
-                            <span>•</span>
-                            <span>{session.duration} minutes</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex items-center gap-1.5 sm:self-center ml-8 sm:ml-0">
-                        {!isDone && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleCompleteSession(session.id, session.title)}
-                              className="text-xs h-8 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-                              Done
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handlePostpone(session.id, session.title)}
-                              className="text-xs h-8 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                              title="Postpone to tomorrow"
-                            >
-                              Postpone
-                            </Button>
-                          </>
-                        )}
-                        {isDone && (
-                          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Completed
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                      session={session}
+                      subject={subject}
+                      onComplete={handleCompleteSession}
+                      onPostpone={handlePostpone}
+                    />
                   )
                 })}
               </div>
@@ -346,7 +255,7 @@ export default function Dashboard() {
           </Card>
 
           {/* Weekly Consistency Chart */}
-          <Card className="p-5 sm:p-6">
+          <Card variant="panel" className="p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-base font-bold text-[var(--color-text)]">Weekly Study Consistency</h3>
@@ -389,8 +298,8 @@ export default function Dashboard() {
         {/* Right Rail: Exam Countdowns & Subject Progress (4 Columns) */}
         <div className="lg:col-span-4 space-y-4">
           {/* Upcoming Examinations Countdown */}
-          <Card className="p-5">
-            <div className="flex items-center justify-between mb-3">
+          <Card variant="panel" className="p-5">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--card-border-subtle)]">
               <div className="flex items-center gap-2">
                 <Timer className="w-4 h-4 text-amber-500" />
                 <h3 className="text-sm font-bold text-[var(--color-text)]">Exam Countdowns</h3>
@@ -400,22 +309,22 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {upcomingExams.map((exam, idx) => (
                 <div
                   key={idx}
-                  className="p-3 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-between text-xs"
+                  className="p-2.5 rounded-lg bg-[var(--card-bg-subtle)] border border-[var(--card-border-subtle)] flex items-center justify-between text-xs transition-colors hover:border-[var(--card-border)]"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: exam.color }} />
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: exam.color }} />
                     <div className="min-w-0">
                       <p className="font-bold text-[var(--color-text)] truncate">{exam.subject}</p>
-                      <p className="text-[11px] text-[var(--color-text-muted)]">{exam.code} • {exam.date}</p>
+                      <p className="text-[10px] font-mono text-[var(--color-text-muted)]">{exam.code} • {exam.date}</p>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
                     <span className={cn(
-                      'px-2 py-0.5 rounded-full font-bold text-[11px]',
+                      'px-2 py-0.5 rounded-md font-bold text-[10px] font-mono',
                       exam.daysLeft <= 21
                         ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
                         : 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
@@ -429,10 +338,10 @@ export default function Dashboard() {
           </Card>
 
           {/* Subject Mastery / Progress */}
-          <Card className="p-5">
-            <div className="flex items-center justify-between mb-3">
+          <Card variant="panel" className="p-5">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--card-border-subtle)]">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-blue-500" />
+                <BookOpen className="w-4 h-4 text-[var(--color-brand)]" />
                 <h3 className="text-sm font-bold text-[var(--color-text)]">Course Syllabus Progress</h3>
               </div>
               <Link to="/app/subjects" className="text-xs font-semibold text-[var(--color-brand)] hover:underline">
@@ -440,22 +349,25 @@ export default function Dashboard() {
               </Link>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {state.subjects.map((sub) => {
                 const total = sub.topics.length
                 const completed = sub.topics.filter((t) => t.status === 'completed').length
                 const percent = total > 0 ? Math.round((completed / total) * 100) : 0
 
                 return (
-                  <div key={sub.id} className="space-y-1">
+                  <div key={sub.id} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-[var(--color-text)] truncate">{sub.name}</span>
-                      <span className="text-[11px] font-bold text-[var(--color-text-muted)]">{percent}%</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: sub.color }} />
+                        <span className="font-semibold text-[var(--color-text)] truncate">{sub.name}</span>
+                      </div>
+                      <span className="text-[11px] font-bold text-[var(--color-text-muted)] font-mono tabular-nums">{percent}%</span>
                     </div>
                     <Progress value={completed} max={Math.max(total, 1)} color={sub.color} size="sm" />
                     <div className="flex justify-between text-[10px] text-[var(--color-text-muted)]">
                       <span>{completed} of {total} topics mastered</span>
-                      <span>{sub.code}</span>
+                      {sub.code && <span className="font-mono font-semibold">{sub.code}</span>}
                     </div>
                   </div>
                 )
@@ -463,24 +375,29 @@ export default function Dashboard() {
             </div>
           </Card>
 
-          {/* Quick Revision Cue */}
-          <Card className="p-5 bg-gradient-to-br from-indigo-50/80 to-purple-50/50 dark:from-indigo-950/40 dark:to-purple-950/30 border border-indigo-100 dark:border-indigo-900/60">
-            <div className="flex items-center justify-between mb-2">
+          {/* Quick Revision Cue: Distinct Editorial Alert Card */}
+          <Card
+            variant="default"
+            className="p-5 border-[var(--color-brand-100)] bg-[var(--color-brand-50)]/30 dark:bg-[var(--color-brand-50)]/10"
+          >
+            <div className="flex items-center justify-between mb-2 pb-2 border-b border-[var(--color-brand-100)] dark:border-[var(--color-brand-100)]/20">
               <div className="flex items-center gap-2">
-                <RotateCcw className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                <h3 className="text-sm font-bold text-indigo-950 dark:text-indigo-200">Revision Alert</h3>
+                <RotateCcw className="w-4 h-4 text-[var(--color-brand)]" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-text)]">
+                  Spaced Revision Cue
+                </h3>
               </div>
-              <Badge variant="warning">
+              <Badge variant="warning" className="text-[10px]">
                 1 Overdue
               </Badge>
             </div>
-            <p className="text-xs text-indigo-900 dark:text-indigo-300 leading-relaxed mb-3">
-              <strong>Vector Spaces (MATH202)</strong> was last revised 2 days ago and is queued for retention today.
+            <p className="text-xs text-[var(--color-text)] leading-relaxed mb-3">
+              <strong className="text-[var(--color-brand-text)]">Vector Spaces (MATH202)</strong> was last revised 2 days ago and is queued for scientific retention today.
             </p>
             <Link to="/app/revision">
-              <Button size="sm" className="w-full text-xs font-semibold justify-center">
-                Open Revision Queue
-                <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              <Button size="sm" className="w-full text-xs font-semibold justify-center gap-1.5">
+                <span>Open Revision Queue</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Button>
             </Link>
           </Card>

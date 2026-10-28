@@ -1,14 +1,15 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Zap, Eye, EyeOff, ArrowRight, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react'
+import { Zap, Eye, EyeOff, ArrowRight, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
 import GoogleButton from '@/components/ui/GoogleButton'
 import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/AuthContext'
 
 const signupSchema = z
   .object({
@@ -27,11 +28,22 @@ const signupSchema = z
 
 export default function Signup() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { dispatch } = useApp()
+  const { signup, loginWithGoogle } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+  // Surface any errors passed back from Google OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const oauthError = params.get('error')
+    if (oauthError) {
+      toast.error(`Google sign-up error: ${oauthError}`)
+    }
+  }, [location.search])
 
   const {
     register,
@@ -50,31 +62,30 @@ export default function Signup() {
 
   const onSubmit = async (data) => {
     setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      dispatch({
-        type: 'UPDATE_USER',
-        payload: { name: data.name, email: data.email },
+    try {
+      const response = await signup({
+        name: data.name,
+        email: data.email,
+        password: data.password,
       })
+      if (response?.user) {
+        dispatch({
+          type: 'UPDATE_USER',
+          payload: response.user,
+        })
+      }
       toast.success('Account created! Let us set up your study routine.')
       navigate('/onboarding')
-    }, 1200)
+    } catch (err) {
+      toast.error(err.message || 'Failed to create account. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleGoogleSignUp = () => {
     setIsGoogleLoading(true)
-    setTimeout(() => {
-      setIsGoogleLoading(false)
-      dispatch({
-        type: 'UPDATE_USER',
-        payload: {
-          name: 'Alex Chen',
-          email: 'alex.chen@university.edu',
-        },
-      })
-      toast.success('Account created with Google! Let us set up your study routine.')
-      navigate('/onboarding')
-    }, 1000)
+    loginWithGoogle()
   }
 
   return (

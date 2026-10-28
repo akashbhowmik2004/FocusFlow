@@ -25,11 +25,13 @@ import {
   PanelLeft
 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/AuthContext'
 import { cn, getInitials } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export default function AppLayout() {
   const { state, dispatch } = useApp()
+  const { logout, updateTheme, isAuthenticated } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   
@@ -74,13 +76,21 @@ export default function AppLayout() {
     setMobileMenuOpen(false)
   }, [location.pathname])
 
-  const toggleTheme = () => {
+  const toggleTheme = async () => {
     const nextTheme = state.theme === 'dark' ? 'light' : 'dark'
     dispatch({ type: 'SET_THEME', payload: nextTheme })
     toast.success(`Switched to ${nextTheme} mode`)
+    if (isAuthenticated && updateTheme) {
+      try {
+        await updateTheme(nextTheme)
+      } catch (err) {
+        console.warn('Failed to update theme on server:', err)
+      }
+    }
   }
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await logout()
     toast.success('Signed out successfully')
     navigate('/login')
   }
@@ -376,11 +386,11 @@ export default function AppLayout() {
             <div className="mt-2 p-2.5 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-between">
               <div className="flex items-center gap-2.5 overflow-hidden">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-medium text-xs flex items-center justify-center shrink-0">
-                  {getInitials(state.user.name)}
+                  {getInitials(state.user?.name || 'User')}
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-semibold text-[var(--color-text)] truncate">{state.user.name}</span>
-                  <span className="text-[10px] text-[var(--color-text-muted)] truncate">{state.user.studyGoal}</span>
+                  <span className="text-xs font-semibold text-[var(--color-text)] truncate">{state.user?.name || 'User'}</span>
+                  <span className="text-[10px] text-[var(--color-text-muted)] truncate">{state.user?.studyGoal || 'Set your study goal'}</span>
                 </div>
               </div>
             </div>
@@ -475,7 +485,7 @@ export default function AppLayout() {
                 className="flex items-center gap-2 p-1 pl-1.5 rounded-full hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--color-brand)] to-purple-600 text-white font-medium text-xs flex items-center justify-center ring-2 ring-transparent hover:ring-[var(--color-brand-light)]">
-                  {getInitials(state.user.name)}
+                  {getInitials(state.user?.name || 'User')}
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
               </button>
@@ -489,8 +499,8 @@ export default function AppLayout() {
                     className="absolute right-0 mt-2 w-52 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg py-1.5 z-50"
                   >
                     <div className="px-3.5 py-2 border-b border-[var(--color-border-light)]">
-                      <p className="text-xs font-semibold text-[var(--color-text)]">{state.user.name}</p>
-                      <p className="text-[11px] text-[var(--color-text-muted)] truncate">{state.user.email}</p>
+                      <p className="text-xs font-semibold text-[var(--color-text)]">{state.user?.name || 'User'}</p>
+                      <p className="text-[11px] text-[var(--color-text-muted)] truncate">{state.user?.email || ''}</p>
                     </div>
                     <Link
                       to="/app/settings"

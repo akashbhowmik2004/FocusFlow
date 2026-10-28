@@ -133,17 +133,6 @@ export const mockSessions = [
   { id: 'ses-23', subjectId: 'sub-3', topicId: 'top-14', title: 'Vector Spaces — Problems', date: dateOffset(3), startTime: '14:00', endTime: '15:00', duration: 60, status: 'upcoming' },
 ]
 
-export const mockUser = {
-  name: 'Alex Chen',
-  email: 'alex.chen@university.edu',
-  avatar: null,
-  studyGoal: 'Ace my semester exams',
-  dailyStudyHours: 5,
-  preferredStartTime: '09:00',
-  preferredEndTime: '18:00',
-  reminderEnabled: true,
-  theme: 'light',
-}
 
 export const weeklyStudyData = [
   { day: 'Mon', planned: 300, completed: 270 },

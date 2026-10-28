@@ -32,7 +32,7 @@ import { useApp } from '@/context/AppContext'
 import { formatDuration, cn } from '@/lib/utils'
 import { weeklyStudyData, subjectProgressData } from '@/data/mockData'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+import Card, { StatCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Progress from '@/components/ui/Progress'
 
@@ -123,72 +123,66 @@ export default function ProgressPage() {
         </div>
       </div>
 
-      {/* Row 1: Key Metric Cards (4 cards) */}
+      {/* Row 1: Key Metric Cards (4 Distinctive Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-4 sm:p-5 border-l-4 border-l-indigo-600">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--color-text-muted)]">Total Study Volume</span>
-            <Clock className="w-4 h-4 text-indigo-600" />
-          </div>
-          <p className="text-2xl font-bold text-[var(--color-text)] mt-2">
-            {formatDuration(totalStudiedMinutes)}
-          </p>
-          <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5" /> +14% vs prior week
-          </p>
-        </Card>
+        <StatCard
+          label="Total Study Volume"
+          value={formatDuration(totalStudiedMinutes)}
+          unit="total"
+          icon={Clock}
+          iconColor="#4f46e5"
+          accentColor="#4f46e5"
+          trend="up"
+          trendLabel="+14% vs prior week"
+        />
 
-        <Card className="p-4 sm:p-5 border-l-4 border-l-emerald-600">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--color-text-muted)]">Session Completion</span>
-            <Target className="w-4 h-4 text-emerald-600" />
-          </div>
-          <p className="text-2xl font-bold text-[var(--color-text)] mt-2">
-            {totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0}%
-          </p>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            {completedSessions} of {totalSessions} scheduled blocks
-          </p>
-        </Card>
+        <StatCard
+          label="Session Completion"
+          value={`${totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0}%`}
+          unit="rate"
+          icon={Target}
+          iconColor="#10b981"
+          accentColor="#10b981"
+          subtext={`${completedSessions} of ${totalSessions} blocks`}
+        />
 
-        <Card className="p-4 sm:p-5 border-l-4 border-l-blue-600">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--color-text-muted)]">Topics Mastered</span>
-            <BookOpen className="w-4 h-4 text-blue-600" />
-          </div>
-          <p className="text-2xl font-bold text-[var(--color-text)] mt-2">
-            {completedTopics.length} / {allTopics.length}
-          </p>
-          <p className="text-xs text-blue-600 font-semibold mt-1">
-            {allTopics.length > 0 ? Math.round((completedTopics.length / allTopics.length) * 100) : 0}% syllabus coverage
-          </p>
-        </Card>
+        <StatCard
+          label="Topics Mastered"
+          value={`${completedTopics.length} / ${allTopics.length}`}
+          unit="topics"
+          icon={BookOpen}
+          iconColor="#3b82f6"
+          accentColor="#3b82f6"
+          trend="up"
+          trendLabel={`${allTopics.length > 0 ? Math.round((completedTopics.length / allTopics.length) * 100) : 0}% coverage`}
+        />
 
-        <Card className="p-4 sm:p-5 border-l-4 border-l-amber-600">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-[var(--color-text-muted)]">Active Streak</span>
-            <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
-          </div>
-          <p className="text-2xl font-bold text-amber-600 mt-2">6 Days</p>
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">Daily target: {state.user.dailyStudyHours || 5} hours</p>
-        </Card>
+        <StatCard
+          label="Active Streak"
+          value="6 Days"
+          unit="streak"
+          icon={Flame}
+          iconColor="#f59e0b"
+          accentColor="#f59e0b"
+          subtext={`Daily target: ${state.user?.dailyStudyHours || 5} hours`}
+        />
       </div>
 
       {/* Row 2: Study Time Trend (Area/Bar Chart) */}
-      <Card className="p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+      <Card variant="panel" className="p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-4 border-b border-[var(--card-border-subtle)]">
           <div>
-            <h2 className="text-base font-bold text-[var(--color-text)]">Study Hours Trend & Target Comparison</h2>
+            <h2 className="text-base font-bold text-[var(--color-text)] tracking-tight">Study Hours Trend & Target Comparison</h2>
             <p className="text-xs text-[var(--color-text-muted)]">
               Comparing allocated study time against actually completed minutes.
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs font-semibold">
             <span className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
-              <span className="w-3 h-3 rounded-sm bg-indigo-600" /> Actual Studied
+              <span className="w-2.5 h-2.5 rounded-sm bg-indigo-600" /> Actual Studied
             </span>
             <span className="flex items-center gap-1.5 text-indigo-500 dark:text-indigo-300">
-              <span className="w-3 h-3 rounded-sm bg-indigo-200 dark:bg-indigo-800" /> Planned Target
+              <span className="w-2.5 h-2.5 rounded-sm bg-indigo-200 dark:bg-indigo-800" /> Planned Target
             </span>
           </div>
         </div>
@@ -230,9 +224,11 @@ export default function ProgressPage() {
       {/* Row 3: Two Column Charts (Topic Status Breakdown & Session Distribution) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Topic Breakdown Pie Chart */}
-        <Card className="p-5">
-          <h3 className="text-base font-bold text-[var(--color-text)] mb-1">Curriculum Topic Distribution</h3>
-          <p className="text-xs text-[var(--color-text-muted)] mb-4">Mastery progression across all active courses</p>
+        <Card variant="panel" className="p-5">
+          <div className="pb-3 mb-3 border-b border-[var(--card-border-subtle)]">
+            <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">Curriculum Topic Distribution</h3>
+            <p className="text-xs text-[var(--color-text-muted)]">Mastery progression across all active courses</p>
+          </div>
 
           <div className="h-56 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -270,9 +266,11 @@ export default function ProgressPage() {
         </Card>
 
         {/* Session Status Pie Chart */}
-        <Card className="p-5">
-          <h3 className="text-base font-bold text-[var(--color-text)] mb-1">Session Execution Ratio</h3>
-          <p className="text-xs text-[var(--color-text-muted)] mb-4">Completed vs Upcoming vs Missed blocks</p>
+        <Card variant="panel" className="p-5">
+          <div className="pb-3 mb-3 border-b border-[var(--card-border-subtle)]">
+            <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">Session Execution Ratio</h3>
+            <p className="text-xs text-[var(--color-text-muted)]">Completed vs Upcoming vs Missed blocks</p>
+          </div>
 
           <div className="h-56 w-full flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -311,25 +309,27 @@ export default function ProgressPage() {
       </div>
 
       {/* Row 4: Subject-wise Mastery Progress */}
-      <Card className="p-5 sm:p-6">
-        <h3 className="text-base font-bold text-[var(--color-text)] mb-1">Subject-by-Subject Syllabus Mastery</h3>
-        <p className="text-xs text-[var(--color-text-muted)] mb-4">Detailed topic completion rates per registered subject</p>
+      <Card variant="panel" className="p-5 sm:p-6">
+        <div className="pb-3 mb-4 border-b border-[var(--card-border-subtle)]">
+          <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">Subject-by-Subject Syllabus Mastery</h3>
+          <p className="text-xs text-[var(--color-text-muted)]">Detailed topic completion rates per registered subject</p>
+        </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {state.subjects.map((sub) => {
             const total = sub.topics.length
             const completed = sub.topics.filter((t) => t.status === 'completed').length
             const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
             return (
-              <div key={sub.id} className="p-3.5 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)]">
+              <div key={sub.id} className="p-3.5 rounded-xl bg-[var(--card-bg-subtle)] border border-[var(--card-border-subtle)] hover:border-[var(--card-border)] transition-colors">
                 <div className="flex items-center justify-between text-xs mb-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: sub.color }} />
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: sub.color }} />
                     <span className="font-bold text-[var(--color-text)]">{sub.name}</span>
-                    {sub.code && <span className="text-[var(--color-text-muted)]">({sub.code})</span>}
+                    {sub.code && <span className="font-mono text-[var(--color-text-muted)]">({sub.code})</span>}
                   </div>
-                  <span className="font-bold text-[var(--color-text)]">{pct}% ({completed}/{total})</span>
+                  <span className="font-mono font-bold text-[var(--color-text)] tabular-nums">{pct}% ({completed}/{total})</span>
                 </div>
                 <Progress value={completed} max={Math.max(total, 1)} color={sub.color} size="sm" />
               </div>
@@ -339,10 +339,10 @@ export default function ProgressPage() {
       </Card>
 
       {/* Row 5: Consistency Heatmap Grid */}
-      <Card className="p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-4">
+      <Card variant="panel" className="p-5 sm:p-6">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--card-border-subtle)]">
           <div>
-            <h3 className="text-base font-bold text-[var(--color-text)]">Study Activity Heatmap</h3>
+            <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">Study Activity Heatmap</h3>
             <p className="text-xs text-[var(--color-text-muted)]">Consistency across the past 28 days</p>
           </div>
           <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
@@ -360,7 +360,7 @@ export default function ProgressPage() {
             <div
               key={d.day}
               className={cn(
-                'h-10 rounded-lg flex flex-col items-center justify-center text-[10px] font-semibold border transition-transform hover:scale-105 cursor-pointer',
+                'h-10 rounded-lg flex flex-col items-center justify-center text-[10px] font-semibold border transition-all hover:border-[var(--color-brand)] cursor-pointer',
                 d.intensity === 0 && 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] text-[var(--color-text-muted)]',
                 d.intensity === 1 && 'bg-indigo-100 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800/60 text-indigo-700 dark:text-indigo-300',
                 d.intensity === 2 && 'bg-indigo-300 dark:bg-indigo-900/60 border-indigo-400 dark:border-indigo-700/60 text-indigo-950 dark:text-indigo-200',
@@ -376,19 +376,19 @@ export default function ProgressPage() {
       </Card>
 
       {/* Row 6: Recent Milestones */}
-      <Card className="p-5 sm:p-6">
-        <div className="flex items-center gap-2 mb-4">
+      <Card variant="panel" className="p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--card-border-subtle)]">
           <Trophy className="w-4 h-4 text-amber-500" />
-          <h3 className="text-base font-bold text-[var(--color-text)]">Recent Academic Milestones</h3>
+          <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">Recent Academic Milestones</h3>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {[
             { title: 'Mastered Arrays & Linked Lists chapter', sub: 'CS201 Data Structures', time: '3 days ago', badge: 'Completed' },
             { title: 'Achieved 6-day unbroken study streak', sub: 'Surpassed personal record', time: 'Yesterday', badge: 'Streak Record' },
             { title: 'Completed first 100 hours of focused revision', sub: 'FocusFlow milestone', time: '1 week ago', badge: 'Century Club' },
           ].map((m, idx) => (
-            <div key={idx} className="p-3 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-between text-xs">
+            <div key={idx} className="p-3 rounded-xl bg-[var(--card-bg-subtle)] border border-[var(--card-border-subtle)] flex items-center justify-between text-xs transition-colors hover:border-[var(--card-border)]">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)] flex items-center justify-center font-bold">
                   <Award className="w-4 h-4" />
@@ -402,7 +402,7 @@ export default function ProgressPage() {
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-brand-50)] text-[var(--color-brand-text)] border border-[var(--color-brand-100)]">
                   {m.badge}
                 </span>
-                <p className="text-[10px] text-[var(--color-text-muted)] mt-1">{m.time}</p>
+                <p className="text-[10px] text-[var(--color-text-muted)] mt-1 font-mono">{m.time}</p>
               </div>
             </div>
           ))}

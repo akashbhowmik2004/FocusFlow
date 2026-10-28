@@ -131,27 +131,27 @@ export default function SubjectDetail() {
       </div>
 
       {/* Course Overview Banner */}
-      <Card className="p-6 overflow-hidden relative">
+      <Card variant="panel" className="p-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-white shadow-sm font-bold"
+              className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 text-white font-bold shadow-xs"
               style={{ backgroundColor: subject.color }}
             >
-              <BookOpen className="w-6 h-6" />
+              <BookOpen className="w-5 h-5" />
             </div>
 
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 {subject.code && (
-                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[var(--card-bg-subtle)] text-[var(--color-text)] border border-[var(--card-border)] tracking-wide">
                     {subject.code}
                   </span>
                 )}
                 {subject.examDate && (
                   <span
                     className={cn(
-                      'text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1',
+                      'text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 font-mono',
                       daysLeft !== null && daysLeft <= 21
                         ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
                         : 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
@@ -163,7 +163,7 @@ export default function SubjectDetail() {
                 )}
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)]">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
                 {subject.name}
               </h1>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">
@@ -177,7 +177,7 @@ export default function SubjectDetail() {
               variant="outline"
               size="sm"
               onClick={() => setEditSubjectOpen(true)}
-              className="text-xs gap-1"
+              className="text-xs gap-1 font-semibold"
             >
               <Edit2 className="w-3.5 h-3.5" /> Edit
             </Button>
@@ -186,6 +186,7 @@ export default function SubjectDetail() {
               size="sm"
               onClick={() => setDeleteConfirmOpen(true)}
               className="text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300"
+              title="Delete Course"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
@@ -193,18 +194,18 @@ export default function SubjectDetail() {
         </div>
 
         {/* Progress Bar Header */}
-        <div className="mt-6 pt-5 border-t border-[var(--color-border-light)]">
+        <div className="mt-6 pt-5 border-t border-[var(--card-border-subtle)]">
           <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="font-semibold text-[var(--color-text-secondary)]">Curriculum Completion</span>
-            <span className="font-bold text-[var(--color-text)]">{percentage}%</span>
+            <span className="font-semibold text-[var(--color-text-secondary)]">Curriculum Mastery</span>
+            <span className="font-bold text-[var(--color-text)] font-mono tabular-nums">{percentage}%</span>
           </div>
           <Progress value={completedTopics} max={Math.max(totalTopics, 1)} color={subject.color} size="default" />
         </div>
       </Card>
 
       {/* Topic List Table / Cards */}
-      <Card className="p-5 sm:p-6">
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--color-border-light)]">
+      <Card variant="panel" className="p-5 sm:p-6">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--card-border-subtle)]">
           <div>
             <h2 className="text-base font-bold text-[var(--color-text)]">Syllabus Chapters & Topics</h2>
             <p className="text-xs text-[var(--color-text-muted)]">
@@ -224,6 +225,7 @@ export default function SubjectDetail() {
         {topics.length === 0 ? (
           <EmptyState
             icon={BookOpen}
+            bordered
             title="No topics in this syllabus yet"
             description="Break down this course by adding chapters, modules, or lecture concepts."
             action={
@@ -233,8 +235,8 @@ export default function SubjectDetail() {
             }
           />
         ) : (
-          <div className="space-y-2.5">
-            {topics.map((topic, idx) => {
+          <div className="space-y-2">
+            {topics.map((topic) => {
               const isDone = topic.status === 'completed'
               const isInProgress = topic.status === 'in-progress'
 
@@ -246,29 +248,30 @@ export default function SubjectDetail() {
                     isDone
                       ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
                       : isInProgress
-                      ? 'bg-[var(--color-warning-light)] border-[var(--color-warning-border)]'
-                      : 'bg-[var(--color-surface)] border-[var(--color-border)]'
+                      ? 'bg-[var(--color-warning-light)]/40 border-[var(--color-warning-border)]'
+                      : 'bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border-hover)]'
                   )}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <button
                       onClick={() => handleToggleTopic(topic)}
                       className={cn(
-                        'w-5 h-5 rounded-full border flex items-center justify-center transition-colors cursor-pointer shrink-0',
+                        'w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:outline-none',
                         isDone
                           ? 'bg-emerald-600 border-emerald-600 text-white'
-                          : 'border-[var(--color-border)] hover:border-emerald-500'
+                          : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-emerald-500'
                       )}
                       title={isDone ? 'Mark as in-progress' : 'Mark as completed'}
+                      aria-label={isDone ? `Marked complete: ${topic.name}` : `Complete: ${topic.name}`}
                     >
-                      {isDone && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      {isDone && <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />}
                     </button>
 
-                    <div>
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span
                           className={cn(
-                            'text-sm font-semibold',
+                            'text-sm font-semibold tracking-tight transition-colors',
                             isDone ? 'line-through text-[var(--color-text-muted)]' : 'text-[var(--color-text)]'
                           )}
                         >
@@ -276,7 +279,7 @@ export default function SubjectDetail() {
                         </span>
                         <span
                           className={cn(
-                            'px-2 py-0.5 rounded-full text-[10px] font-bold',
+                            'px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-wide',
                             isDone
                               ? 'bg-[var(--color-success-light)] text-[var(--color-success-text)] border border-[var(--color-success-border)]'
                               : isInProgress
@@ -288,7 +291,7 @@ export default function SubjectDetail() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-3 text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                      <div className="flex items-center gap-3 text-[11px] text-[var(--color-text-muted)] mt-1 font-mono">
                         {topic.lastRevised && (
                           <span>Last revised: {formatDate(topic.lastRevised, 'MMM d')}</span>
                         )}
@@ -299,10 +302,10 @@ export default function SubjectDetail() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 self-end sm:self-center">
+                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
                     <button
                       onClick={() => handleDeleteTopic(topic.id, topic.name)}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
                       title="Delete topic"
                     >
                       <Trash2 className="w-4 h-4" />

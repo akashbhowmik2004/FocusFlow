@@ -5,7 +5,8 @@ import {
   useCallback,
   useEffect,
 } from "react";
-import { mockSubjects, mockSessions, mockUser } from "@/data/mockData";
+import { useAuth } from "./AuthContext";
+import { mockSubjects, mockSessions } from "@/data/mockData";
 import { generateId } from "@/lib/utils";
 
 const AppContext = createContext(null);
@@ -21,7 +22,7 @@ const getInitialTheme = () => {
 const initialState = {
   subjects: mockSubjects,
   sessions: mockSessions,
-  user: mockUser,
+  user: null,
   theme: getInitialTheme(),
   sidebarOpen: true,
   searchQuery: "",
@@ -152,8 +153,13 @@ function appReducer(state, action) {
       };
 
     // User
+    case "SET_USER":
+      return { ...state, user: action.payload };
     case "UPDATE_USER":
-      return { ...state, user: { ...state.user, ...action.payload } };
+      return {
+        ...state,
+        user: state.user ? { ...state.user, ...action.payload } : action.payload,
+      };
 
     // Notifications
     case "ADD_NOTIFICATION":
@@ -200,6 +206,19 @@ function appReducer(state, action) {
 
 export function AppProvider({ children }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
+  const auth = useAuth();
+
+  // Sync authenticated user into app state
+  useEffect(() => {
+    dispatch({ type: "SET_USER", payload: auth?.user ?? null });
+  }, [auth?.user]);
+
+  // Sync user theme preference when authenticated
+  useEffect(() => {
+    if (auth?.user?.theme && (auth.user.theme === "light" || auth.user.theme === "dark")) {
+      dispatch({ type: "SET_THEME", payload: auth.user.theme });
+    }
+  }, [auth?.user?.theme]);
 
   // Theme management & persistence
   useEffect(() => {

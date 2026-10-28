@@ -138,6 +138,18 @@
   --sidebar-width: 256px;
   --sidebar-collapsed-width: 64px;
   --header-height: 64px;
+
+  /* Card Design Tokens */
+  --card-bg: var(--color-surface);
+  --card-bg-subtle: #f8fafc;
+  --card-bg-muted: #f1f5f9;
+  --card-border: #e2e8f0;
+  --card-border-subtle: #f1f5f9;
+  --card-border-hover: #cbd5e1;
+  --card-border-active: #6366f1;
+  --card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --card-shadow-hover: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --card-shadow-elevated: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
 }
 
 /* Dark mode tokens */
@@ -216,6 +228,18 @@
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+
+  /* Card Design Tokens */
+  --card-bg: #151f32;
+  --card-bg-subtle: #111a2e;
+  --card-bg-muted: #1e293b;
+  --card-border: #233149;
+  --card-border-subtle: rgba(255, 255, 255, 0.06);
+  --card-border-hover: #334464;
+  --card-border-active: #818cf8;
+  --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 6px 16px -2px rgba(0, 0, 0, 0.5);
+  --card-shadow-elevated: 0 12px 28px -4px rgba(0, 0, 0, 0.6);
 }
 
 /* ── Base Styles ─────────────────────────────────────── */
@@ -282,3 +306,339 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* ── FocusFlow Toast Notification System ──────────────── */
+[data-sonner-toaster] {
+  --width: 360px;
+  font-family: var(--font-sans) !important;
+  z-index: 999999 !important;
+}
+
+[data-sonner-toast] {
+  --normal-bg: var(--color-surface);
+  --normal-border: var(--color-border);
+  --normal-text: var(--color-text);
+  font-family: var(--font-sans) !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 2px 8px -2px rgba(15, 23, 42, 0.04) !important;
+  border: 1px solid var(--color-border) !important;
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  min-height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              height 220ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms ease,
+              border-color 200ms ease !important;
+}
+
+/* Subtle left indicator accent bar */
+[data-sonner-toast]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3.5px;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--toast-accent, var(--color-brand));
+  transition: background-color 200ms ease;
+}
+
+/* Hover & Focus feedback */
+[data-sonner-toast]:hover {
+  box-shadow: 0 14px 32px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.06) !important;
+  border-color: var(--toast-accent-border, var(--color-border-hover, #cbd5e1)) !important;
+}
+
+/* Dark Mode */
+.dark [data-sonner-toast],
+[data-sonner-toaster][data-theme='dark'] [data-sonner-toast] {
+  --normal-bg: #151f32;
+  --normal-border: #233149;
+  --normal-text: #f1f5f9;
+  background-color: #151f32 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 14px 34px -4px rgba(0, 0, 0, 0.55), 0 4px 12px -2px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark [data-sonner-toast]:hover,
+[data-sonner-toaster][data-theme='dark'] [data-sonner-toast]:hover {
+  box-shadow: 0 18px 40px -4px rgba(0, 0, 0, 0.65), 0 6px 16px -2px rgba(0, 0, 0, 0.45) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* Content typography */
+[data-sonner-toast] [data-content] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--color-text) !important;
+}
+
+.dark [data-sonner-toast] [data-title],
+[data-sonner-toaster][data-theme='dark'] [data-sonner-toast] [data-title] {
+  color: #f1f5f9 !important;
+}
+
+[data-sonner-toast] [data-description] {
+  font-size: 12px !important;
+  font-weight: 450 !important;
+  line-height: 1.4 !important;
+  color: var(--color-text-secondary) !important;
+}
+
+.dark [data-sonner-toast] [data-description],
+[data-sonner-toaster][data-theme='dark'] [data-sonner-toast] [data-description] {
+  color: #94a3b8 !important;
+}
+
+/* Icon Container Styling */
+[data-sonner-toast] [data-icon] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+}
+
+.focusflow-toast-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+[data-sonner-toast]:hover .focusflow-toast-icon-badge {
+  transform: scale(1.05);
+}
+
+/* ── Type-Specific Accents ───────────────────────────── */
+
+/* 1. Success Variant (Emerald / Green) */
+[data-sonner-toast][data-type='success'],
+[data-sonner-toast].focusflow-toast-success {
+  --toast-accent: #10b981;
+  --toast-accent-border: rgba(16, 185, 129, 0.4);
+}
+
+.focusflow-toast-icon-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #059669;
+}
+
+.dark .focusflow-toast-icon-success,
+[data-sonner-toaster][data-theme='dark'] .focusflow-toast-icon-success {
+  background-color: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: #34d399;
+}
+
+/* 2. Error Variant (Coral / Rose Red) */
+[data-sonner-toast][data-type='error'],
+[data-sonner-toast].focusflow-toast-error {
+  --toast-accent: #f43f5e;
+  --toast-accent-border: rgba(244, 63, 94, 0.4);
+}
+
+.focusflow-toast-icon-error {
+  background-color: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  color: #e11d48;
+}
+
+.dark .focusflow-toast-icon-error,
+[data-sonner-toaster][data-theme='dark'] .focusflow-toast-icon-error {
+  background-color: rgba(244, 63, 94, 0.16);
+  border-color: rgba(251, 113, 133, 0.3);
+  color: #fb7185;
+}
+
+/* 3. Warning Variant (Warm Amber / Orange) */
+[data-sonner-toast][data-type='warning'],
+[data-sonner-toast].focusflow-toast-warning {
+  --toast-accent: #f59e0b;
+  --toast-accent-border: rgba(245, 158, 11, 0.4);
+}
+
+.focusflow-toast-icon-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  color: #d97706;
+}
+
+.dark .focusflow-toast-icon-warning,
+[data-sonner-toaster][data-theme='dark'] .focusflow-toast-icon-warning {
+  background-color: rgba(245, 158, 11, 0.16);
+  border-color: rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+}
+
+/* 4. Information Variant (Vivid Blue / Cyan) */
+[data-sonner-toast][data-type='info'],
+[data-sonner-toast].focusflow-toast-info {
+  --toast-accent: #3b82f6;
+  --toast-accent-border: rgba(59, 130, 246, 0.4);
+}
+
+.focusflow-toast-icon-info {
+  background-color: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: #2563eb;
+}
+
+.dark .focusflow-toast-icon-info,
+[data-sonner-toaster][data-theme='dark'] .focusflow-toast-icon-info {
+  background-color: rgba(59, 130, 246, 0.16);
+  border-color: rgba(96, 165, 250, 0.3);
+  color: #60a5fa;
+}
+
+/* 5. Study Reminder / Default (FocusFlow Brand Violet / Indigo) */
+[data-sonner-toast][data-type='default'],
+[data-sonner-toast].focusflow-toast-reminder {
+  --toast-accent: #6366f1;
+  --toast-accent-border: rgba(99, 102, 241, 0.4);
+}
+
+.focusflow-toast-icon-reminder {
+  background-color: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  color: #4f46e5;
+}
+
+.dark .focusflow-toast-icon-reminder,
+[data-sonner-toaster][data-theme='dark'] .focusflow-toast-icon-reminder {
+  background-color: rgba(99, 102, 241, 0.18);
+  border-color: rgba(129, 140, 248, 0.3);
+  color: #818cf8;
+}
+
+/* ── Close / Dismiss Button ──────────────────────────── */
+[data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  left: auto !important;
+  transform: none !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 9999px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--color-text-muted) !important;
+  cursor: pointer !important;
+  opacity: 0.65 !important;
+  transition: opacity 150ms ease, background-color 150ms ease, color 150ms ease, transform 150ms ease !important;
+  padding: 0 !important;
+  z-index: 2 !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  opacity: 1 !important;
+  color: var(--color-text) !important;
+  background-color: var(--color-bg-muted) !important;
+}
+
+.dark [data-sonner-toast] [data-close-button]:hover,
+[data-sonner-toaster][data-theme='dark'] [data-sonner-toast] [data-close-button]:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+[data-sonner-toast] [data-close-button]:active {
+  transform: scale(0.92) !important;
+}
+
+[data-sonner-toast] [data-close-button] svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+/* ── Action & Cancel Buttons ─────────────────────────── */
+[data-sonner-toast] [data-button] {
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  background-color: var(--color-brand) !important;
+  color: #ffffff !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 150ms ease, transform 150ms ease !important;
+  margin-left: auto !important;
+  flex-shrink: 0 !important;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  background-color: var(--color-brand-600) !important;
+}
+
+[data-sonner-toast] [data-button]:active {
+  transform: scale(0.96) !important;
+}
+
+[data-sonner-toast] [data-cancel] {
+  padding: 5px 10px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  background-color: transparent !important;
+  color: var(--color-text-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  cursor: pointer !important;
+  transition: background-color 150ms ease, color 150ms ease !important;
+}
+
+[data-sonner-toast] [data-cancel]:hover {
+  background-color: var(--color-bg-subtle) !important;
+  color: var(--color-text) !important;
+}
+
+/* ── Mobile Layout Polish ────────────────────────────── */
+@media (max-width: 640px) {
+  [data-sonner-toaster] {
+    --width: calc(100vw - 32px) !important;
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 16px !important;
+  }
+
+  [data-sonner-toast] {
+    width: 100% !important;
+    padding: 10px 12px !important;
+  }
+}
+
+/* ── Reduced Motion ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast] {
+    transition: opacity 120ms ease !important;
+    transform: none !important;
+  }
+}
+

@@ -16,7 +16,7 @@ import { useApp, useSubjects } from '@/context/AppContext'
 import { subjectColors, generateId, cn } from '@/lib/utils'
 import { getDaysUntil, formatDate } from '@/lib/dates'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+import Card, { SubjectCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Progress from '@/components/ui/Progress'
 import Dialog from '@/components/ui/Dialog'
@@ -101,6 +101,7 @@ export default function Subjects() {
       {filteredSubjects.length === 0 ? (
         <EmptyState
           icon={BookOpen}
+          bordered
           title={search ? 'No matching subjects found' : 'No subjects added yet'}
           description={
             search
@@ -118,93 +119,16 @@ export default function Subjects() {
           {filteredSubjects.map((sub) => {
             const total = sub.topics?.length || 0
             const completed = sub.topics?.filter((t) => t.status === 'completed').length || 0
-            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0
             const daysLeft = sub.examDate ? getDaysUntil(sub.examDate) : null
 
             return (
-              <Card
+              <SubjectCard
                 key={sub.id}
-                hover
-                className="overflow-hidden flex flex-col justify-between transition-all group"
-              >
-                <div>
-                  {/* Color Header Stripe */}
-                  <div className="h-2 w-full" style={{ backgroundColor: sub.color }} />
-
-                  <div className="p-5 space-y-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {sub.code && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-                              {sub.code}
-                            </span>
-                          )}
-                          <span className="text-xs text-[var(--color-text-muted)]">
-                            {total} {total === 1 ? 'Topic' : 'Topics'}
-                          </span>
-                        </div>
-                        <h3 className="text-base font-bold text-[var(--color-text)] truncate group-hover:text-[var(--color-brand)] transition-colors">
-                          {sub.name}
-                        </h3>
-                      </div>
-
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${sub.color}20`, color: sub.color }}
-                      >
-                        <BookOpen className="w-4 h-4" />
-                      </div>
-                    </div>
-
-                    {/* Progress Bar & Metric */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[var(--color-text-muted)] font-medium">Syllabus Completion</span>
-                        <span className="font-bold text-[var(--color-text)]">{percentage}%</span>
-                      </div>
-                      <Progress value={completed} max={Math.max(total, 1)} color={sub.color} size="sm" />
-                      <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
-                        <span>{completed} mastered</span>
-                        <span>{total - completed} remaining</span>
-                      </div>
-                    </div>
-
-                    {/* Exam Date Tag */}
-                    {sub.examDate && (
-                      <div className="pt-2 border-t border-[var(--color-border-light)] flex items-center justify-between text-xs">
-                        <span className="text-[var(--color-text-muted)] flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>{formatDate(sub.examDate, 'MMM d, yyyy')}</span>
-                        </span>
-                        <span
-                          className={cn(
-                            'px-2 py-0.5 rounded-full text-[11px] font-bold',
-                            daysLeft !== null && daysLeft <= 21
-                              ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
-                              : 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
-                          )}
-                        >
-                          {daysLeft !== null ? `${daysLeft}d left` : 'Upcoming'}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Card Action Link */}
-                <div className="p-3 bg-[var(--color-bg-subtle)] border-t border-[var(--color-border-light)] flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
-                    Explore Syllabus Topics
-                  </span>
-                  <Link
-                    to={`/app/subjects/${sub.id}`}
-                    className="p-1 rounded-lg text-[var(--color-brand)] hover:bg-[var(--color-surface)] transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </Card>
+                subject={sub}
+                totalTopics={total}
+                completedTopics={completed}
+                daysLeft={daysLeft}
+              />
             )
           })}
         </div>

@@ -1,28 +1,39 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Zap, Eye, EyeOff, ArrowRight, Loader2, Lock, Mail } from 'lucide-react'
+import { Zap, Eye, EyeOff, ArrowRight, Loader2, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
 import GoogleButton from '@/components/ui/GoogleButton'
 import { useApp } from '@/context/AppContext'
+import { useAuth } from '@/context/AuthContext'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(1, 'Password is required'),
   rememberMe: z.boolean().optional(),
 })
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { dispatch } = useApp()
+  const { login, loginWithGoogle } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+  // Surface any errors passed back from Google OAuth redirect
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const oauthError = params.get('error')
+    if (oauthError) {
+      toast.error(`Google sign-in error: ${oauthError}`)
+    }
+  }, [location.search])
 
   const {
     register,
@@ -31,40 +42,37 @@ export default function Login() {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'alex.chen@university.edu',
-      password: 'password123',
+      email: '',
+      password: '',
       rememberMe: true,
     },
   })
 
   const onSubmit = async (data) => {
     setIsLoading(true)
-    // Simulate authentication delay
-    setTimeout(() => {
+    try {
+      const response = await login({ email: data.email, password: data.password })
+      if (response?.user) {
+        dispatch({
+          type: 'UPDATE_USER',
+          payload: response.user,
+        })
+        toast.success(`Welcome back, ${response.user.name}! Redirecting to dashboard...`)
+      } else {
+        toast.success('Welcome back! Redirecting to dashboard...')
+      }
+      const destination = location.state?.from?.pathname || '/app/dashboard'
+      navigate(destination, { replace: true })
+    } catch (err) {
+      toast.error(err.message || 'Login failed. Please check your credentials.')
+    } finally {
       setIsLoading(false)
-      dispatch({
-        type: 'UPDATE_USER',
-        payload: { email: data.email },
-      })
-      toast.success('Welcome back, Alex! Redirecting to dashboard...')
-      navigate('/app/dashboard')
-    }, 1200)
+    }
   }
 
   const handleGoogleSignIn = () => {
     setIsGoogleLoading(true)
-    setTimeout(() => {
-      setIsGoogleLoading(false)
-      dispatch({
-        type: 'UPDATE_USER',
-        payload: {
-          name: 'Alex Chen',
-          email: 'alex.chen@university.edu',
-        },
-      })
-      toast.success('Welcome back, Alex! Signed in with Google.')
-      navigate('/app/dashboard')
-    }, 1000)
+    loginWithGoogle()
   }
 
   const handleForgotPassword = (e) => {
@@ -96,12 +104,6 @@ export default function Login() {
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0"
       >
         <div className="bg-[var(--color-surface)] py-8 px-6 sm:px-10 shadow-lg rounded-2xl border border-[var(--color-border)]">
-          {/* Quick Demo Credentials Info */}
-          <div className="mb-6 p-3 rounded-xl bg-[var(--color-brand-50)] border border-[var(--color-brand-100)] text-xs text-[var(--color-brand-text)] flex items-start gap-2">
-            <span className="font-bold shrink-0">Demo mode:</span>
-            <span>Pre-filled with student credentials. Click "Sign in" to explore.</span>
-          </div>
-
           <GoogleButton
             text="Sign in with Google"
             loadingText="Signing in with Google..."

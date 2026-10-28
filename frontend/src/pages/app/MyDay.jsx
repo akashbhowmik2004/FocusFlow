@@ -18,7 +18,7 @@ import { useApp, useSessions } from '@/context/AppContext'
 import { formatDuration, cn } from '@/lib/utils'
 import { formatDate, addDays, subDays, isToday } from '@/lib/dates'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
+import Card, { StatCard, SessionCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Progress from '@/components/ui/Progress'
 import Dialog from '@/components/ui/Dialog'
@@ -141,34 +141,38 @@ export default function MyDay() {
 
       {/* Daily Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="p-4 bg-[var(--color-surface)]">
-          <span className="text-xs font-medium text-[var(--color-text-muted)]">Planned Duration</span>
-          <p className="text-xl font-bold text-[var(--color-text)] mt-1">{formatDuration(totalPlannedMinutes)}</p>
-          <p className="text-[11px] text-[var(--color-text-muted)] mt-1">{daySessions.length} sessions booked</p>
-        </Card>
+        <StatCard
+          label="Planned Duration"
+          value={formatDuration(totalPlannedMinutes)}
+          unit="total"
+          icon={Clock}
+          iconColor="var(--color-brand)"
+          accentColor="var(--color-brand)"
+          subtext={`${daySessions.length} sessions booked`}
+        />
 
-        <Card className="p-4 bg-[var(--color-surface)]">
-          <span className="text-xs font-medium text-[var(--color-text-muted)]">Completed Time</span>
-          <p className="text-xl font-bold text-emerald-600 mt-1">{formatDuration(completedMinutes)}</p>
-          <p className="text-[11px] text-emerald-600 font-medium mt-1">
-            {completedSessions.length} of {daySessions.length} finished
-          </p>
-        </Card>
+        <StatCard
+          label="Completed Time"
+          value={formatDuration(completedMinutes)}
+          unit="done"
+          icon={CheckCircle2}
+          iconColor="#10b981"
+          accentColor="#10b981"
+          subtext={`${completedSessions.length} of ${daySessions.length} finished`}
+        />
 
-        <Card className="p-4 bg-[var(--color-surface)] flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">Day Progress</span>
-            <span className="text-xs font-bold text-[var(--color-brand)]">
-              {totalPlannedMinutes > 0 ? Math.round((completedMinutes / totalPlannedMinutes) * 100) : 0}%
-            </span>
-          </div>
-          <div className="my-2">
-            <Progress value={completedMinutes} max={Math.max(totalPlannedMinutes, 1)} size="sm" />
-          </div>
-          <span className="text-[11px] text-[var(--color-text-muted)]">
-            Target: {state.user.dailyStudyHours || 5}h study goal
-          </span>
-        </Card>
+        <StatCard
+          label="Day Progress"
+          value={`${totalPlannedMinutes > 0 ? Math.round((completedMinutes / totalPlannedMinutes) * 100) : 0}%`}
+          unit="completed"
+          progress={{
+            value: completedMinutes,
+            max: Math.max(totalPlannedMinutes, 1),
+            label: `Target: ${state.user?.dailyStudyHours || 5}h study goal`,
+            color: 'var(--color-brand)',
+          }}
+          accentColor="var(--color-brand)"
+        />
       </div>
 
       {/* Celebratory Banner if All Done */}
@@ -176,14 +180,14 @@ export default function MyDay() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 flex items-center justify-between shadow-xs"
+          className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 flex items-center justify-between shadow-xs"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
-              <Trophy className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+              <Trophy className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-sm font-bold">Incredible job! All sessions completed for today 🎯</p>
+              <p className="text-sm font-bold tracking-tight">Incredible job! All sessions completed for today 🎯</p>
               <p className="text-xs text-emerald-700 dark:text-emerald-400">You've hit 100% of your targeted learning time for this date.</p>
             </div>
           </div>
@@ -191,133 +195,37 @@ export default function MyDay() {
       )}
 
       {/* Timeline Sessions List */}
-      <Card className="p-5 sm:p-6">
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--color-border-light)]">
-          <h2 className="text-base font-bold text-[var(--color-text)]">Chronological Timeline</h2>
-          <span className="text-xs text-[var(--color-text-muted)]">{daySessions.length} entries</span>
+      <Card variant="panel" className="p-5 sm:p-6">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--card-border-subtle)]">
+          <h2 className="text-base font-bold text-[var(--color-text)] tracking-tight">Chronological Timeline</h2>
+          <span className="text-xs font-mono text-[var(--color-text-muted)]">{daySessions.length} entries</span>
         </div>
 
         {daySessions.length === 0 ? (
           <EmptyState
             icon={Calendar}
+            bordered
             title="No sessions scheduled for this date"
             description="Add your first focused study block to organize your syllabus goals for this day."
             action={
-              <Button onClick={() => setAddDialogOpen(true)} size="sm" className="mt-2 text-xs">
-                <Plus className="w-3.5 h-3.5 mr-1" /> Schedule Session
+              <Button onClick={() => setAddDialogOpen(true)} size="sm" className="mt-2 text-xs font-semibold gap-1.5">
+                <Plus className="w-3.5 h-3.5" /> Schedule Session
               </Button>
             }
           />
         ) : (
-          <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-[var(--color-border)]">
-            {daySessions.map((session, idx) => {
+          <div className="space-y-3">
+            {daySessions.map((session) => {
               const subject = state.subjects.find((s) => s.id === session.subjectId)
-              const isDone = session.status === 'completed'
-              const isLive = session.status === 'in-progress'
-
               return (
-                <div key={session.id} className="relative group">
-                  {/* Timeline Node Bullet */}
-                  <div
-                    className={cn(
-                      'absolute -left-6 sm:-left-8 top-3.5 w-6 h-6 rounded-full border-2 bg-[var(--color-surface)] flex items-center justify-center transition-colors',
-                      isDone
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
-                        : isLive
-                        ? 'border-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-950/60 text-indigo-600'
-                        : 'border-[var(--color-border)] text-[var(--color-text-muted)]'
-                    )}
-                  >
-                    {isDone ? (
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-current" />
-                    )}
-                  </div>
-
-                  {/* Session Detail Card */}
-                  <div
-                    className={cn(
-                      'p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4',
-                      isDone
-                        ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
-                        : isLive
-                        ? 'bg-[var(--item-live-bg)] border-[var(--item-live-border)] shadow-xs'
-                        : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-brand-light)]'
-                    )}
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded border border-[var(--color-border-light)]">
-                          {session.startTime} – {session.endTime}
-                        </span>
-                        {subject && (
-                          <span
-                            className="px-2 py-0.5 rounded-md text-[10px] font-bold text-white"
-                            style={{ backgroundColor: subject.color }}
-                          >
-                            {subject.code || subject.name}
-                          </span>
-                        )}
-                        {isLive && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[var(--color-brand-50)] text-[var(--color-brand-text)] border border-[var(--color-brand-100)]">
-                            In Progress
-                          </span>
-                        )}
-                      </div>
-
-                      <h3
-                        className={cn(
-                          'text-base font-bold',
-                          isDone ? 'line-through text-[var(--color-text-muted)]' : 'text-[var(--color-text)]'
-                        )}
-                      >
-                        {session.title}
-                      </h3>
-
-                      <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>Duration: {session.duration} minutes</span>
-                        {subject && <span>• {subject.name}</span>}
-                      </p>
-                    </div>
-
-                    {/* Interactive Action Toolbar */}
-                    <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-                      {!isDone ? (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleComplete(session.id, session.title)}
-                            className="text-xs h-8 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Complete
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handlePostpone(session.id, session.title)}
-                            className="text-xs h-8 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                          >
-                            Postpone
-                          </Button>
-                        </>
-                      ) : (
-                        <span className="text-xs font-semibold text-[var(--color-success-text)] px-2 py-1 bg-[var(--color-success-light)] border border-[var(--color-success-border)] rounded-lg">
-                          Done
-                        </span>
-                      )}
-                      <button
-                        onClick={() => handleDelete(session.id, session.title)}
-                        className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                        title="Delete session"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  subject={subject}
+                  onComplete={handleComplete}
+                  onPostpone={handlePostpone}
+                  onDelete={handleDelete}
+                />
               )
             })}
           </div>

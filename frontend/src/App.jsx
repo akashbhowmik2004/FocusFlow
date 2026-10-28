@@ -1,8 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 
-// Layouts
+// Layouts & Route guards
 import AppLayout from '@/layouts/AppLayout'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+import PublicRoute from '@/components/auth/PublicRoute'
 
 // Pages - lazy loaded for code splitting
 const Landing = lazy(() => import('@/pages/Landing'))
@@ -33,23 +35,29 @@ export default function App() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        {/* Public routes */}
+        {/* Public landing page */}
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/onboarding" element={<Onboarding />} />
 
-        {/* App routes */}
-        <Route path="/app" element={<AppLayout />}>
-          <Route index element={<Navigate to="/app/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="day" element={<MyDay />} />
-          <Route path="planner" element={<Planner />} />
-          <Route path="subjects" element={<Subjects />} />
-          <Route path="subjects/:id" element={<SubjectDetail />} />
-          <Route path="revision" element={<Revision />} />
-          <Route path="progress" element={<ProgressPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+        {/* Public auth pages: Redirect to /app/dashboard if user is already logged in */}
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Route>
+
+        {/* Protected routes: User CANNOT access anything here without logging in or signing up */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/app" element={<AppLayout />}>
+            <Route index element={<Navigate to="/app/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="day" element={<MyDay />} />
+            <Route path="planner" element={<Planner />} />
+            <Route path="subjects" element={<Subjects />} />
+            <Route path="subjects/:id" element={<SubjectDetail />} />
+            <Route path="revision" element={<Revision />} />
+            <Route path="progress" element={<ProgressPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
         </Route>
 
         {/* Catch all */}
