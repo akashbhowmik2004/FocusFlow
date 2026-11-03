@@ -1,23 +1,15 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
 import {
-  BarChart3,
   Clock,
   Target,
   BookOpen,
   Flame,
   Award,
-  TrendingUp,
-  CheckCircle2,
-  Calendar,
-  Sparkles,
   Trophy
 } from 'lucide-react'
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -30,8 +22,13 @@ import {
 } from 'recharts'
 import { useApp } from '@/context/AppContext'
 import { formatDuration, cn } from '@/lib/utils'
-import { weeklyStudyData, subjectProgressData } from '@/data/mockData'
-import Button from '@/components/ui/Button'
+import {
+  getActiveStudyStreak,
+  getStudyPeriodComparison,
+  getWeeklyStudyTrends,
+  getSubjectStudyTotals,
+  getDailyStudyTotals,
+} from '@/lib/analytics'
 import Card, { StatCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Progress from '@/components/ui/Progress'
@@ -49,11 +46,15 @@ export default function ProgressPage() {
   const totalSessions = state.sessions.length
   const completedSessions = state.sessions.filter((s) => s.status === 'completed').length
   const upcomingSessions = state.sessions.filter((s) => s.status === 'upcoming').length
+  const cancelledSessions = state.sessions.filter((s) => s.status === 'cancelled').length
   const missedSessions = state.sessions.filter((s) => s.status === 'missed').length
 
-  const totalStudiedMinutes = state.sessions
-    .filter((s) => s.status === 'completed')
-    .reduce((acc, s) => acc + s.duration, 0)
+  const periodDays = timeRange === '30d' ? 30 : 7
+  const comparison = getStudyPeriodComparison(state.sessions, periodDays, new Date())
+  const activeStreak = getActiveStudyStreak(state.sessions, new Date())
+  const weeklyStudyData = getWeeklyStudyTrends(state.sessions, periodDays, new Date())
+  const subjectStudyData = getSubjectStudyTotals(state.sessions, state.subjects)
+  const totalActualMinutes = comparison.currentMinutes
 
   // Pie chart data for topics
   const topicData = [
@@ -66,17 +67,24 @@ export default function ProgressPage() {
   const sessionStatusData = [
     { name: 'Completed', value: completedSessions, color: '#6366f1' },
     { name: 'Upcoming', value: upcomingSessions, color: '#38bdf8' },
+    { name: 'Cancelled', value: cancelledSessions, color: '#f59e0b' },
     { name: 'Missed', value: missedSessions, color: '#f43f5e' },
-  ]
+  ].filter((item) => item.value > 0)
 
-  // Consistency heatmap mock (last 28 days = 4 weeks x 7 days)
+  // Consistency heatmap from actual study totals across the past 28 days
   const heatmapDays = Array.from({ length: 28 }, (_, i) => {
-    // mock intensities: 0 (none), 1 (light), 2 (medium), 3 (heavy)
-    const intensity = (i * 7 + 3) % 4
+    const date = new Date()
+    date.setHours(0, 0, 0, 0)
+    date.setDate(date.getDate() - (27 - i))
+    const dayTotals = getDailyStudyTotals(state.sessions, date)
+    const minutes = dayTotals.actualMinutes
+    const intensity = minutes >= 240 ? 3 : minutes >= 120 ? 2 : minutes > 0 ? 1 : 0
     return {
       day: i + 1,
       intensity,
-      hours: intensity === 3 ? '5h' : intensity === 2 ? '3.5h' : intensity === 1 ? '1.5h' : '0h',
+      hours: `${Math.floor(minutes / 60)}h ${minutes % 60}m`,
+      actualMinutes: minutes,
+      untrackedSessions: dayTotals.untrackedSessions,
     }
   })
 
@@ -126,14 +134,20 @@ export default function ProgressPage() {
       {/* Row 1: Key Metric Cards (4 Distinctive Cards) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label="Total Study Volume"
-          value={formatDuration(totalStudiedMinutes)}
-          unit="total"
+          label="Actual Study Time"
+          value={formatDuration(totalActualMinutes)}
+          unit="actual"
           icon={Clock}
           iconColor="#4f46e5"
           accentColor="#4f46e5"
-          trend="up"
-          trendLabel="+14% vs prior week"
+          trend={comparison.percentage === null ? undefined : comparison.percentage >= 0 ? 'up' : 'down'}
+          trendLabel={
+            comparison.percentage === null
+              ? comparison.currentUntrackedSessions > 0
+                ? `${comparison.currentUntrackedSessions} untracked completed session${comparison.currentUntrackedSessions > 1 ? 's' : ''}`
+                : 'No prior comparison data'
+              : `${comparison.percentage >= 0 ? '+' : ''}${comparison.percentage}% vs prior period`
+          }
         />
 
         <StatCard
@@ -158,13 +172,21 @@ export default function ProgressPage() {
         />
 
         <StatCard
-          label="Active Streak"
-          value="6 Days"
+          label="Study Streak"
+          value={activeStreak === null ? '—' : `${activeStreak} Days`}
           unit="streak"
           icon={Flame}
           iconColor="#f59e0b"
           accentColor="#f59e0b"
-          subtext={`Daily target: ${state.user?.dailyStudyHours || 5} hours`}
+          trend={activeStreak === null || activeStreak === 0 ? undefined : 'up'}
+          trendLabel={activeStreak === null || activeStreak === 0 ? undefined : 'On Track'}
+          subtext={
+            activeStreak === null
+              ? 'No measured study days yet'
+              : activeStreak === 0
+              ? 'Streak broken'
+              : `Daily target: ${state.user?.dailyStudyHours || 5} hours`
+          }
         />
       </div>
 
@@ -212,10 +234,10 @@ export default function ProgressPage() {
                 }}
                 itemStyle={{ color: 'var(--chart-tooltip-text)' }}
                 labelStyle={{ color: 'var(--color-text-muted)' }}
-                formatter={(val) => [`${val} mins (${Math.round(val / 60)}h ${val % 60}m)`, '']}
+                formatter={(val, name) => [`${val} mins (${Math.floor(val / 60)}h ${val % 60}m)`, name]}
               />
               <Area type="monotone" dataKey="planned" stroke="var(--chart-secondary)" fillOpacity={1} fill="url(#colorPlanned)" name="Planned Target" />
-              <Area type="monotone" dataKey="completed" stroke="var(--chart-primary)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCompleted)" name="Completed" />
+              <Area type="monotone" dataKey="actual" stroke="var(--chart-primary)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorCompleted)" name="Actual Studied" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -312,7 +334,7 @@ export default function ProgressPage() {
       <Card variant="panel" className="p-5 sm:p-6">
         <div className="pb-3 mb-4 border-b border-[var(--card-border-subtle)]">
           <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">Subject-by-Subject Syllabus Mastery</h3>
-          <p className="text-xs text-[var(--color-text-muted)]">Detailed topic completion rates per registered subject</p>
+          <p className="text-xs text-[var(--color-text-muted)]">Detailed topic completion rates and actual study volume per registered subject</p>
         </div>
 
         <div className="space-y-3">
@@ -320,6 +342,9 @@ export default function ProgressPage() {
             const total = sub.topics.length
             const completed = sub.topics.filter((t) => t.status === 'completed').length
             const pct = total > 0 ? Math.round((completed / total) * 100) : 0
+            const subTotals = subjectStudyData.find((s) => s.subjectId === sub.id)
+            const actualMinutes = subTotals ? subTotals.actualMinutes : 0
+            const untrackedCount = subTotals ? subTotals.untrackedSessions : 0
 
             return (
               <div key={sub.id} className="p-3.5 rounded-xl bg-[var(--card-bg-subtle)] border border-[var(--card-border-subtle)] hover:border-[var(--card-border)] transition-colors">
@@ -329,7 +354,17 @@ export default function ProgressPage() {
                     <span className="font-bold text-[var(--color-text)]">{sub.name}</span>
                     {sub.code && <span className="font-mono text-[var(--color-text-muted)]">({sub.code})</span>}
                   </div>
-                  <span className="font-mono font-bold text-[var(--color-text)] tabular-nums">{pct}% ({completed}/{total})</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[var(--color-text-secondary)] font-mono text-[11px]">
+                      {formatDuration(actualMinutes)} actual
+                      {untrackedCount > 0 && (
+                        <span className="text-[10px] text-[var(--color-text-muted)] ml-1">
+                          ({untrackedCount} untracked)
+                        </span>
+                      )}
+                    </span>
+                    <span className="font-mono font-bold text-[var(--color-text)] tabular-nums">{pct}% ({completed}/{total})</span>
+                  </div>
                 </div>
                 <Progress value={completed} max={Math.max(total, 1)} color={sub.color} size="sm" />
               </div>
@@ -384,9 +419,44 @@ export default function ProgressPage() {
 
         <div className="space-y-2.5">
           {[
-            { title: 'Mastered Arrays & Linked Lists chapter', sub: 'CS201 Data Structures', time: '3 days ago', badge: 'Completed' },
-            { title: 'Achieved 6-day unbroken study streak', sub: 'Surpassed personal record', time: 'Yesterday', badge: 'Streak Record' },
-            { title: 'Completed first 100 hours of focused revision', sub: 'FocusFlow milestone', time: '1 week ago', badge: 'Century Club' },
+            {
+              title:
+                completedTopics.length > 0
+                  ? `${completedTopics.length} topic${completedTopics.length > 1 ? 's' : ''} mastered`
+                  : 'Begin mastering syllabus topics',
+              sub:
+                completedTopics.length > 0
+                  ? `Across ${state.subjects.length} registered subject${state.subjects.length > 1 ? 's' : ''}`
+                  : 'Complete topics in Focus Mode to unlock verified mastery',
+              badge: completedTopics.length > 0 ? 'Mastered' : 'In Progress',
+              time: completedTopics.length > 0 ? 'All-time' : 'Upcoming',
+            },
+            {
+              title:
+                activeStreak && activeStreak > 0
+                  ? `${activeStreak}-day unbroken study streak`
+                  : 'Start a measured study streak',
+              sub:
+                activeStreak && activeStreak > 0
+                  ? 'Maintaining daily focused revisions'
+                  : 'Complete a measured Focus Mode session to activate your streak',
+              badge: activeStreak && activeStreak > 0 ? 'Streak Record' : 'Building',
+              time: activeStreak && activeStreak > 0 ? 'Active' : 'Today',
+            },
+            {
+              title:
+                totalActualMinutes > 0
+                  ? `${formatDuration(totalActualMinutes)} of measured study time`
+                  : completedSessions > 0
+                  ? `${completedSessions} completed study session${completedSessions > 1 ? 's' : ''}`
+                  : 'No study time measured yet',
+              sub:
+                totalActualMinutes > 0
+                  ? `Tracked across ${timeRange === '30d' ? 'past 30 days' : 'past 7 days'}`
+                  : 'Start Focus Mode to log verified study hours',
+              badge: totalActualMinutes > 0 ? 'Verified' : 'Get Started',
+              time: totalActualMinutes > 0 ? 'Recent' : 'Ready',
+            },
           ].map((m, idx) => (
             <div key={idx} className="p-3 rounded-xl bg-[var(--card-bg-subtle)] border border-[var(--card-border-subtle)] flex items-center justify-between text-xs transition-colors hover:border-[var(--card-border)]">
               <div className="flex items-center gap-3">

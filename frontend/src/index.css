@@ -25,9 +25,9 @@
 /* ── Design Tokens ─────────────────────────────────────── */
 :root {
   /* Brand */
-  --color-brand: #6366f1;
+  --color-brand: #5b5ce2;
   --color-brand-light: #818cf8;
-  --color-brand-dark: #4f46e5;
+  --color-brand-dark: #494ac4;
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
   --color-brand-600: #4f46e5;
@@ -35,13 +35,13 @@
   --color-brand-text: #4338ca;
 
   /* Neutrals & Surfaces */
-  --color-bg: #ffffff;
-  --color-bg-subtle: #f8fafc;
-  --color-bg-muted: #f1f5f9;
+  --color-bg: #f6f7fb;
+  --color-bg-subtle: #f1f3f9;
+  --color-bg-muted: #e9ecf4;
   --color-surface: #ffffff;
   --color-surface-hover: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-border-light: #f1f5f9;
+  --color-border: #e2e5ef;
+  --color-border-light: #edf0f6;
   --color-text: #0f172a;
   --color-text-secondary: #64748b;
   --color-text-muted: #94a3b8;
@@ -85,7 +85,7 @@
   --chart-tooltip-text: #0f172a;
 
   /* Sidebar */
-  --sidebar-bg: #ffffff;
+  --sidebar-bg: #fbfcff;
   --sidebar-fg: #0f172a;
   --sidebar-border: #e2e8f0;
   --sidebar-accent: #f8fafc;
@@ -147,8 +147,8 @@
   --card-border-subtle: #f1f5f9;
   --card-border-hover: #cbd5e1;
   --card-border-active: #6366f1;
-  --card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
-  --card-shadow-hover: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+  --card-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.035), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+  --card-shadow-hover: 0 12px 28px -12px rgba(15, 23, 42, 0.18), 0 4px 10px -4px rgba(15, 23, 42, 0.06);
   --card-shadow-elevated: 0 10px 24px -4px rgba(15, 23, 42, 0.08);
 }
 
@@ -263,6 +263,26 @@ body {
   line-height: 1.6;
 }
 
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a {
+  transition: color var(--transition-fast), background-color var(--transition-fast),
+    border-color var(--transition-fast), box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+::selection {
+  background: var(--color-brand-100);
+  color: var(--color-brand-text);
+}
+
 /* ── Reduced Motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -309,9 +329,20 @@ body {
 
 /* ── FocusFlow Toast Notification System ──────────────── */
 [data-sonner-toaster] {
-  --width: 360px;
+  --width: 380px;
   font-family: var(--font-sans) !important;
   z-index: 999999 !important;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+/* Keep the viewport-level Sonner container independent of page scroll containers. */
+[data-sonner-toaster][data-y-position='bottom'][data-x-position='right'] {
+  position: fixed !important;
+  bottom: var(--offset-bottom, 24px) !important;
+  right: var(--offset-right, 24px) !important;
+  transform: none !important;
+  width: min(var(--width), calc(100vw - 32px)) !important;
 }
 
 [data-sonner-toast] {
@@ -323,6 +354,7 @@ body {
   padding: 12px 14px !important;
   box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 2px 8px -2px rgba(15, 23, 42, 0.04) !important;
   border: 1px solid var(--color-border) !important;
+  border-left: 4px solid var(--toast-accent, var(--color-brand)) !important;
   background-color: var(--color-surface) !important;
   color: var(--color-text) !important;
   min-height: 52px !important;
@@ -330,25 +362,14 @@ body {
   align-items: center !important;
   gap: 12px !important;
   position: relative !important;
-  overflow: hidden !important;
-  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
-              height 220ms cubic-bezier(0.16, 1, 0.3, 1),
+  pointer-events: auto !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 300ms ease,
+              height 300ms ease,
               box-shadow 200ms ease,
               border-color 200ms ease !important;
-}
-
-/* Subtle left indicator accent bar */
-[data-sonner-toast]::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 10px;
-  bottom: 10px;
-  width: 3.5px;
-  border-radius: 0 4px 4px 0;
-  background-color: var(--toast-accent, var(--color-brand));
-  transition: background-color 200ms ease;
 }
 
 /* Hover & Focus feedback */
@@ -621,24 +642,31 @@ body {
 
 /* ── Mobile Layout Polish ────────────────────────────── */
 @media (max-width: 640px) {
-  [data-sonner-toaster] {
+  [data-sonner-toaster][data-y-position='bottom'][data-x-position='right'] {
     --width: calc(100vw - 32px) !important;
     left: 16px !important;
     right: 16px !important;
     bottom: 16px !important;
+    width: auto !important;
+    max-width: calc(100vw - 32px) !important;
   }
 
   [data-sonner-toast] {
     width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
     padding: 10px 12px !important;
   }
 }
 
 /* ── Reduced Motion ──────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  [data-sonner-toast] {
-    transition: opacity 120ms ease !important;
-    transform: none !important;
+  [data-sonner-toaster],
+  [data-sonner-toast],
+  [data-sonner-toast] *,
+  .focusflow-toast-icon-badge {
+    transition: none !important;
+    animation: none !important;
   }
 }
-

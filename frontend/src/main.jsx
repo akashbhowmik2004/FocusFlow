@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from '@/components/ui/Toaster'
+import RateLimitDialog from '@/components/ui/RateLimitDialog'
 import { AuthProvider } from '@/context/AuthContext'
 import { AppProvider } from '@/context/AppContext'
 import App from './App.jsx'
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')).render(
         <AppProvider>
           <App />
           <Toaster />
+          <RateLimitDialog />
         </AppProvider>
       </AuthProvider>
     </BrowserRouter>

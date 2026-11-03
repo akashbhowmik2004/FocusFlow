@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { useState, useRef } from 'react'
+import { motion } from 'motion/react'
+import { useNavigate } from 'react-router-dom'
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,78 +8,74 @@ import {
   Clock,
   CheckCircle2,
   Plus,
-  ArrowRight,
-  Trash2,
-  Edit2,
-  Sparkles,
   Trophy,
-  AlertCircle
 } from 'lucide-react'
 import { useApp, useSessions } from '@/context/AppContext'
-import { formatDuration, cn } from '@/lib/utils'
+import { formatDuration } from '@/lib/utils'
 import { formatDate, addDays, subDays, isToday } from '@/lib/dates'
+import { getCalendarDateKey } from '@/lib/revisionSummary'
+import { getDailyStudyTotals } from '@/lib/analytics'
+import { notifySessionSuccess } from '@/lib/sessionPresentation'
 import Button from '@/components/ui/Button'
 import Card, { StatCard, SessionCard } from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
-import Progress from '@/components/ui/Progress'
-import Dialog from '@/components/ui/Dialog'
+import ScheduleSessionDialog from '@/components/sessions/ScheduleSessionDialog'
 import EmptyState from '@/components/ui/EmptyState'
 import { toast } from 'sonner'
 
 export default function MyDay() {
   const { state } = useApp()
-  const { sessions, completeSession, postponeSession, addSession, deleteSession } = useSessions()
+  const {
+    sessions,
+    completeSession,
+    postponeSession,
+    addSession,
+    deleteSession,
+    activeFocusSession,
+    startFocusSession,
+    resumeFocusSession,
+  } = useSessions()
+  const navigate = useNavigate()
 
   const [currentDate, setCurrentDate] = useState(new Date())
-  const dateStr = currentDate.toISOString().split('T')[0]
+  const dateStr = getCalendarDateKey(currentDate)
 
-  // Add Session Dialog
+  // Add / Edit Session Dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newSubjectId, setNewSubjectId] = useState(state.subjects[0]?.id || '')
-  const [newStartTime, setNewStartTime] = useState('10:00')
-  const [newEndTime, setNewEndTime] = useState('11:30')
-  const [newDuration, setNewDuration] = useState(90)
+  const [editingSession, setEditingSession] = useState(null)
+
+  const handleOpenAddDialog = () => {
+    setEditingSession(null)
+    setAddDialogOpen(true)
+  }
 
   // Filter sessions for currently selected day
   const daySessions = sessions
     .filter((s) => s.date === dateStr)
     .sort((a, b) => a.startTime.localeCompare(b.startTime))
 
-  const completedSessions = daySessions.filter((s) => s.status === 'completed')
-  const totalPlannedMinutes = daySessions.reduce((acc, s) => acc + s.duration, 0)
-  const completedMinutes = completedSessions.reduce((acc, s) => acc + s.duration, 0)
-  const allDone = daySessions.length > 0 && completedSessions.length === daySessions.length
+  const dayTotals = getDailyStudyTotals(sessions, currentDate)
+  const totalPlannedMinutes = dayTotals.plannedMinutes
+  const actualStudyMinutes = dayTotals.actualMinutes
+  const dailyTargetMinutes = (state.user?.dailyStudyHours || 5) * 60
+  const allDone = daySessions.length > 0 && dayTotals.completedSessions === daySessions.length
 
   const handlePrevDay = () => setCurrentDate(subDays(currentDate, 1))
   const handleNextDay = () => setCurrentDate(addDays(currentDate, 1))
   const handleToday = () => setCurrentDate(new Date())
 
-  const handleCreateSession = (e) => {
-    e.preventDefault()
-    if (!newTitle.trim()) {
-      toast.error('Please enter a session title')
-      return
+  const completingRef = useRef(new Set())
+
+  const handleComplete = async (id, title) => {
+    if (!id || completingRef.current.has(id)) return
+    completingRef.current.add(id)
+    try {
+      await completeSession(id)
+      notifySessionSuccess('completed', id, `Completed "${title}"!`)
+    } catch (error) {
+      toast.error(error.message || `Could not complete "${title}".`)
+    } finally {
+      completingRef.current.delete(id)
     }
-
-    addSession({
-      title: newTitle.trim(),
-      subjectId: newSubjectId,
-      date: dateStr,
-      startTime: newStartTime,
-      endTime: newEndTime,
-      duration: Number(newDuration),
-      status: 'upcoming',
-    })
-
-    toast.success(`Session added for ${formatDate(currentDate, 'MMM d')}`)
-    setNewTitle('')
-    setAddDialogOpen(false)
-  }
-
-  const handleComplete = (id, title) => {
-    completeSession(id)
-    toast.success(`Completed "${title}"!`)
   }
 
   const handlePostpone = (id, title) => {
@@ -91,8 +88,35 @@ export default function MyDay() {
     toast.info(`Removed "${title}"`)
   }
 
+  const handleFocus = async (id, title, status = 'upcoming') => {
+    if (status === 'in-progress' && activeFocusSession?.id === id) {
+      navigate(`/app/focus/${id}`)
+      return
+    }
+    try {
+      if (status === 'paused') {
+        await resumeFocusSession(id)
+      } else {
+        await startFocusSession(id)
+      }
+      navigate(`/app/focus/${id}`)
+    } catch (error) {
+      if (error?.status === 409 && activeFocusSession?.id) {
+        toast.error('Another session is active. Opening it instead.')
+        navigate(`/app/focus/${activeFocusSession.id}`)
+      } else {
+        toast.error(error.message || `Could not start "${title}".`)
+      }
+    }
+  }
+
   return (
     <div className="space-y-6 pb-12 max-w-4xl mx-auto">
+      {state.sessionsError && (
+        <div role="alert" className="rounded-xl border border-[var(--color-error-border)] bg-[var(--color-error-light)] px-4 py-3 text-sm text-[var(--color-error-text)]">
+          We couldn’t load your study sessions. Refresh the page to try again.
+        </div>
+      )}
       {/* Date Navigation Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs">
         <div className="flex items-center gap-3">
@@ -131,7 +155,7 @@ export default function MyDay() {
           )}
           <Button
             size="sm"
-            onClick={() => setAddDialogOpen(true)}
+            onClick={handleOpenAddDialog}
             className="text-xs font-semibold gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" /> Add Study Block
@@ -144,31 +168,35 @@ export default function MyDay() {
         <StatCard
           label="Planned Duration"
           value={formatDuration(totalPlannedMinutes)}
-          unit="total"
+          unit="planned"
           icon={Clock}
           iconColor="var(--color-brand)"
           accentColor="var(--color-brand)"
-          subtext={`${daySessions.length} sessions booked`}
+          subtext={`${daySessions.length} session${daySessions.length !== 1 ? 's' : ''} planned`}
         />
 
         <StatCard
-          label="Completed Time"
-          value={formatDuration(completedMinutes)}
-          unit="done"
+          label="Actual Study Time"
+          value={formatDuration(actualStudyMinutes)}
+          unit="actual"
           icon={CheckCircle2}
           iconColor="#10b981"
           accentColor="#10b981"
-          subtext={`${completedSessions.length} of ${daySessions.length} finished`}
+          subtext={
+            dayTotals.untrackedSessions > 0
+              ? `${dayTotals.completedSessions} completed (${dayTotals.untrackedSessions} untracked)`
+              : `${dayTotals.completedSessions} of ${daySessions.length} completed`
+          }
         />
 
         <StatCard
           label="Day Progress"
-          value={`${totalPlannedMinutes > 0 ? Math.round((completedMinutes / totalPlannedMinutes) * 100) : 0}%`}
-          unit="completed"
+          value={`${dailyTargetMinutes > 0 ? Math.min(100, Math.round((actualStudyMinutes / dailyTargetMinutes) * 100)) : 0}%`}
+          unit="of goal"
           progress={{
-            value: completedMinutes,
-            max: Math.max(totalPlannedMinutes, 1),
-            label: `Target: ${state.user?.dailyStudyHours || 5}h study goal`,
+            value: actualStudyMinutes,
+            max: Math.max(dailyTargetMinutes, 1),
+            label: `Target: ${state.user?.dailyStudyHours || 5}h study goal (${formatDuration(actualStudyMinutes)} actual)`,
             color: 'var(--color-brand)',
           }}
           accentColor="var(--color-brand)"
@@ -208,7 +236,7 @@ export default function MyDay() {
             title="No sessions scheduled for this date"
             description="Add your first focused study block to organize your syllabus goals for this day."
             action={
-              <Button onClick={() => setAddDialogOpen(true)} size="sm" className="mt-2 text-xs font-semibold gap-1.5">
+              <Button onClick={handleOpenAddDialog} size="sm" className="mt-2 text-xs font-semibold gap-1.5">
                 <Plus className="w-3.5 h-3.5" /> Schedule Session
               </Button>
             }
@@ -224,7 +252,13 @@ export default function MyDay() {
                   subject={subject}
                   onComplete={handleComplete}
                   onPostpone={handlePostpone}
+                  onEdit={(sess) => {
+                    setEditingSession(sess)
+                    setAddDialogOpen(true)
+                  }}
                   onDelete={handleDelete}
+                  onStartFocus={(id, title) => handleFocus(id, title)}
+                  onResumeFocus={(id, title, status) => handleFocus(id, title, status)}
                 />
               )
             })}
@@ -232,96 +266,20 @@ export default function MyDay() {
         )}
       </Card>
 
-      {/* Add Session Dialog */}
-      <Dialog
+      {/* Add / Edit Study Session Dialog */}
+      <ScheduleSessionDialog
         open={addDialogOpen}
-        onClose={() => setAddDialogOpen(false)}
-        title="New Study Session"
+        onClose={() => {
+          setAddDialogOpen(false)
+          setEditingSession(null)
+        }}
+        initialSession={editingSession}
+        defaultDate={dateStr}
+        defaultStartTime="10:00"
+        defaultEndTime="11:30"
         description={`Schedule a study block for ${formatDate(currentDate, 'MMMM d, yyyy')}.`}
-      >
-        <form onSubmit={handleCreateSession} className="space-y-4 mt-2">
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Topic or Focus Area
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. CPU Scheduling Algorithms — Round Robin"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Course / Subject
-            </label>
-            <select
-              value={newSubjectId}
-              onChange={(e) => setNewSubjectId(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-            >
-              {state.subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.code ? `(${s.code})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-                Start Time
-              </label>
-              <input
-                type="time"
-                value={newStartTime}
-                onChange={(e) => setNewStartTime(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-                End Time
-              </label>
-              <input
-                type="time"
-                value={newEndTime}
-                onChange={(e) => setNewEndTime(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-                Duration (min)
-              </label>
-              <input
-                type="number"
-                value={newDuration}
-                onChange={(e) => setNewDuration(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              />
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-[var(--color-border-light)] flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setAddDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" size="sm" className="font-semibold">
-              Save Session
-            </Button>
-          </div>
-        </form>
-      </Dialog>
+        submitLabel="Save Session"
+      />
     </div>
   )
 }

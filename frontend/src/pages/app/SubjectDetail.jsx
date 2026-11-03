@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   ArrowLeft,
   BookOpen,
@@ -10,13 +12,22 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  RotateCcw,
   Sparkles,
-  Timer
+  Timer,
+  Loader2,
 } from 'lucide-react'
 import { useApp, useSubjects, useTopics } from '@/context/AppContext'
-import { formatDate, getDaysUntil } from '@/lib/dates'
+import { formatDate, getExamCountdown } from '@/lib/dates'
 import { subjectColors, cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { TOPIC_STATUS_CONFIG, getTopicRevisionMeta } from '@/lib/spacedRepetition'
+import TopicRow from '@/components/topics/TopicRow'
+import TopicDetailsDrawer from '@/components/topics/TopicDetailsDrawer'
+import TopicReviewDialog from '@/components/topics/TopicReviewDialog'
+import ScheduleRevisionDialog from '@/components/topics/ScheduleRevisionDialog'
+import { topicService } from '@/services/topicService'
+import { subjectService } from '@/services/subjectService'
+import { subjectSchema } from '@/schemas/subject.schema'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -28,11 +39,36 @@ import { toast } from 'sonner'
 export default function SubjectDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { state } = useApp()
+  const { state, dispatch } = useApp()
   const { getSubject, updateSubject, deleteSubject } = useSubjects()
   const { topics, addTopic, updateTopic, deleteTopic } = useTopics(id)
 
   const subject = getSubject(id)
+  const [isLoadingSubject, setIsLoadingSubject] = useState(false)
+
+  // Fetch subject from backend if not present in client state (e.g. on direct navigation or page refresh)
+  useEffect(() => {
+    let isMounted = true
+    if (!subject && id && !id.startsWith('sub-')) {
+      setIsLoadingSubject(true)
+      subjectService
+        .getSubjectById(id)
+        .then((res) => {
+          if (isMounted && res?.subject) {
+            dispatch({ type: 'ADD_SUBJECT', payload: res.subject })
+          }
+        })
+        .catch(() => {
+          // If subject not found or unauthenticated, let fallback handle it
+        })
+        .finally(() => {
+          if (isMounted) setIsLoadingSubject(false)
+        })
+    }
+    return () => {
+      isMounted = false
+    }
+  }, [id, subject, dispatch])
 
   // Dialog States
   const [addTopicOpen, setAddTopicOpen] = useState(false)
@@ -40,12 +76,67 @@ export default function SubjectDetail() {
   const [newTopicStatus, setNewTopicStatus] = useState('not-started')
 
   const [editSubjectOpen, setEditSubjectOpen] = useState(false)
-  const [editName, setEditName] = useState(subject?.name || '')
-  const [editCode, setEditCode] = useState(subject?.code || '')
-  const [editColor, setEditColor] = useState(subject?.color || '#3b82f6')
-  const [editExamDate, setEditExamDate] = useState(subject?.examDate || '')
-
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Topic Revision & Spaced Repetition States
+  const [selectedTopicId, setSelectedTopicId] = useState(null)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('addTopic') === 'true') {
+      setAddTopicOpen(true)
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('addTopic')
+      setSearchParams(nextParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
+
+  const activeTopic = topics.find((t) => t.id === selectedTopicId) || topics[0] || null
+
+  const formatExamDate = (dateVal) => {
+    if (!dateVal) return ''
+    if (typeof dateVal === 'string') return dateVal.split('T')[0]
+    try {
+      return new Date(dateVal).toISOString().split('T')[0]
+    } catch {
+      return ''
+    }
+  }
+
+  const {
+    register: registerEdit,
+    handleSubmit: handleEditSubmit,
+    watch: watchEdit,
+    setValue: setEditValue,
+    reset: resetEdit,
+    formState: { errors: editErrors, isSubmitting: isUpdating },
+  } = useForm({
+    resolver: zodResolver(subjectSchema),
+    values: subject
+      ? {
+          name: subject.name || '',
+          code: subject.code || '',
+          color: subject.color || '#3b82f6',
+          examDate: formatExamDate(subject.examDate),
+        }
+      : undefined,
+  })
+
+  const selectedEditColor = watchEdit('color')
+
+  if (isLoadingSubject) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-brand)]" />
+        <p className="text-sm text-[var(--color-text-muted)]">Loading course...</p>
+      </div>
+    )
+  }
 
   if (!subject) {
     return (
@@ -65,56 +156,138 @@ export default function SubjectDetail() {
   const completedTopics = topics.filter((t) => t.status === 'completed').length
   const inProgressTopics = topics.filter((t) => t.status === 'in-progress').length
   const percentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0
-  const daysLeft = subject.examDate ? getDaysUntil(subject.examDate) : null
+  const examStatus = getExamCountdown(subject?.examDate)
 
-  const handleAddTopic = (e) => {
+  const handleAddTopic = async (e) => {
     e.preventDefault()
     if (!newTopicName.trim()) {
       toast.error('Topic name is required')
       return
     }
 
-    addTopic({
-      name: newTopicName.trim(),
-      status: newTopicStatus,
-      lastRevised: null,
-      nextRevision: null,
-    })
+    try {
+      const added = await addTopic({
+        name: newTopicName.trim(),
+        status: newTopicStatus,
+      })
 
-    toast.success(`Added topic "${newTopicName.trim()}"!`)
-    setNewTopicName('')
-    setNewTopicStatus('not-started')
-    setAddTopicOpen(false)
+      toast.success(`Added topic "${added?.name || newTopicName.trim()}"!`)
+      setNewTopicName('')
+      setNewTopicStatus('not-started')
+      setAddTopicOpen(false)
+    } catch (err) {
+      toast.error(err.message || 'Failed to add topic')
+    }
   }
 
   const handleToggleTopic = (topic) => {
     const nextStatus = topic.status === 'completed' ? 'in-progress' : 'completed'
     updateTopic(topic.id, { status: nextStatus })
-    toast.success(`Marked "${topic.name}" as ${nextStatus}!`)
+    const statusLabel = nextStatus === 'completed' ? 'completed' : 'in-progress'
+    toast.success(`Marked "${topic.name}" as ${statusLabel}!`)
+  }
+
+  const handleChangeTopicStatus = (topicId, newStatus) => {
+    updateTopic(topicId, { status: newStatus })
+    const config = TOPIC_STATUS_CONFIG[newStatus]
+    toast.success(`Status updated to ${config?.label || newStatus}`)
   }
 
   const handleDeleteTopic = (topicId, topicName) => {
     deleteTopic(topicId)
+    if (selectedTopicId === topicId) {
+      setDetailsOpen(false)
+      setReviewOpen(false)
+      setScheduleOpen(false)
+      setSelectedTopicId(null)
+    }
     toast.info(`Deleted topic "${topicName}"`)
   }
 
-  const handleUpdateSubject = (e) => {
-    e.preventDefault()
-    updateSubject({
-      id: subject.id,
-      name: editName.trim(),
-      code: editCode.trim() || undefined,
-      color: editColor,
-      examDate: editExamDate || undefined,
-    })
-    toast.success('Subject details updated')
-    setEditSubjectOpen(false)
+  const handleOpenDetails = (topic) => {
+    setSelectedTopicId(topic.id)
+    setDetailsOpen(true)
   }
 
-  const handleDeleteSubject = () => {
-    deleteSubject(subject.id)
-    toast.success(`Removed ${subject.name}`)
-    navigate('/app/subjects')
+  const handleOpenReview = (topic) => {
+    setSelectedTopicId(topic.id)
+    setReviewOpen(true)
+  }
+
+  const handleOpenSchedule = (topic) => {
+    setSelectedTopicId(topic.id)
+    setScheduleOpen(true)
+  }
+
+  const handleSaveReview = async ({ topicId, rating, recall }) => {
+    const targetTopic = topics.find((t) => t.id === topicId) || activeTopic
+    const finalRating = (rating || recall || 'GOOD').toUpperCase()
+
+    const res = await topicService.submitTopicRevision(topicId, finalRating)
+    if (res?.topic) {
+      updateTopic(topicId, res.topic)
+    }
+    toast.success(
+      `Review saved for "${res?.topic?.name || targetTopic?.name}"! Next revision: ${formatDate(res?.topic?.nextRevision, 'MMM d')}`
+    )
+    return res?.topic
+  }
+
+  const handleMarkRevisedToday = async (topic) => {
+    if (!topic) return
+    try {
+      const res = await topicService.submitTopicRevision(topic.id, 'GOOD')
+      if (res?.topic) {
+        updateTopic(topic.id, res.topic)
+      }
+      toast.success(
+        `Marked "${res?.topic?.name || topic.name}" as revised today! Next repetition scheduled for ${formatDate(res?.topic?.nextRevision, 'MMM d')}.`
+      )
+    } catch (err) {
+      toast.error(err.message || 'Failed to record revision')
+    }
+  }
+
+  const handleSaveSchedule = async ({ topicId, nextRevision }) => {
+    const targetTopic = topics.find((t) => t.id === topicId) || activeTopic
+    const res = await topicService.scheduleTopicRevision(topicId, nextRevision)
+    if (res?.topic) {
+      updateTopic(topicId, res.topic)
+    }
+    toast.success(
+      `Rescheduled "${res?.topic?.name || targetTopic?.name || 'Topic'}" to ${formatDate(res?.topic?.nextRevision || nextRevision, 'MMM d, yyyy')}`
+    )
+    return res?.topic
+  }
+
+  const handleUpdateSubject = async (data) => {
+    try {
+      await updateSubject({
+        id: subject.id,
+        name: data.name,
+        code: data.code || null,
+        color: data.color,
+        examDate: data.examDate || null,
+      })
+      toast.success('Subject details updated successfully')
+      setEditSubjectOpen(false)
+    } catch (err) {
+      toast.error(err.message || 'Failed to update subject')
+    }
+  }
+
+  const handleDeleteSubject = async () => {
+    setIsDeleting(true)
+    try {
+      await deleteSubject(subject.id)
+      toast.success(`Removed ${subject.name}`)
+      navigate('/app/subjects')
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete subject')
+    } finally {
+      setIsDeleting(false)
+      setDeleteConfirmOpen(false)
+    }
   }
 
   return (
@@ -148,17 +321,31 @@ export default function SubjectDetail() {
                     {subject.code}
                   </span>
                 )}
-                {subject.examDate && (
+                {subject.examDate && examStatus.isValid && (
                   <span
                     className={cn(
                       'text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 font-mono',
-                      daysLeft !== null && daysLeft <= 21
+                      examStatus.isCompleted
+                        ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                        : examStatus.isUrgent
                         ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
                         : 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
                     )}
                   >
-                    <Timer className="w-3 h-3" />
-                    <span>Exam in {daysLeft} days ({formatDate(subject.examDate, 'MMM d')})</span>
+                    {examStatus.isCompleted ? (
+                      <CheckCircle2 className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    ) : (
+                      <Timer className="w-3 h-3" />
+                    )}
+                    <span>
+                      {examStatus.isCompleted
+                        ? `Exam completed (${formatDate(subject.examDate, 'MMM d')})`
+                        : examStatus.status === 'today'
+                        ? `Exam today (${formatDate(subject.examDate, 'MMM d')})`
+                        : examStatus.status === 'tomorrow'
+                        ? `Exam tomorrow (${formatDate(subject.examDate, 'MMM d')})`
+                        : `Exam in ${examStatus.daysLeft} days (${formatDate(subject.examDate, 'MMM d')})`}
+                    </span>
                   </span>
                 )}
               </div>
@@ -236,84 +423,18 @@ export default function SubjectDetail() {
           />
         ) : (
           <div className="space-y-2">
-            {topics.map((topic) => {
-              const isDone = topic.status === 'completed'
-              const isInProgress = topic.status === 'in-progress'
-
-              return (
-                <div
-                  key={topic.id}
-                  className={cn(
-                    'p-3.5 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3',
-                    isDone
-                      ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
-                      : isInProgress
-                      ? 'bg-[var(--color-warning-light)]/40 border-[var(--color-warning-border)]'
-                      : 'bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border-hover)]'
-                  )}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <button
-                      onClick={() => handleToggleTopic(topic)}
-                      className={cn(
-                        'w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:outline-none',
-                        isDone
-                          ? 'bg-emerald-600 border-emerald-600 text-white'
-                          : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-emerald-500'
-                      )}
-                      title={isDone ? 'Mark as in-progress' : 'Mark as completed'}
-                      aria-label={isDone ? `Marked complete: ${topic.name}` : `Complete: ${topic.name}`}
-                    >
-                      {isDone && <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />}
-                    </button>
-
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className={cn(
-                            'text-sm font-semibold tracking-tight transition-colors',
-                            isDone ? 'line-through text-[var(--color-text-muted)]' : 'text-[var(--color-text)]'
-                          )}
-                        >
-                          {topic.name}
-                        </span>
-                        <span
-                          className={cn(
-                            'px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-wide',
-                            isDone
-                              ? 'bg-[var(--color-success-light)] text-[var(--color-success-text)] border border-[var(--color-success-border)]'
-                              : isInProgress
-                              ? 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
-                              : 'bg-[var(--color-bg-muted)] text-[var(--color-text-muted)] border border-[var(--color-border-light)]'
-                          )}
-                        >
-                          {isDone ? 'Mastered' : isInProgress ? 'In Progress' : 'Not Started'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 text-[11px] text-[var(--color-text-muted)] mt-1 font-mono">
-                        {topic.lastRevised && (
-                          <span>Last revised: {formatDate(topic.lastRevised, 'MMM d')}</span>
-                        )}
-                        {topic.nextRevision && (
-                          <span>• Next revision: {formatDate(topic.nextRevision, 'MMM d')}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                    <button
-                      onClick={() => handleDeleteTopic(topic.id, topic.name)}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                      title="Delete topic"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
+            {topics.map((topic) => (
+              <TopicRow
+                key={topic.id}
+                topic={topic}
+                subject={subject}
+                onOpenDetails={handleOpenDetails}
+                onToggleComplete={handleToggleTopic}
+                onChangeStatus={handleChangeTopicStatus}
+                onQuickReview={handleOpenReview}
+                onDeleteTopic={handleDeleteTopic}
+              />
+            ))}
           </div>
         )}
       </Card>
@@ -378,29 +499,51 @@ export default function SubjectDetail() {
         title="Edit Course Details"
         description="Update course title, code, color, or scheduled exam date."
       >
-        <form onSubmit={handleUpdateSubject} className="space-y-4 mt-2">
+        <form onSubmit={handleEditSubmit(handleUpdateSubject)} className="space-y-4 mt-2" noValidate>
           <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Subject Name
+            <label htmlFor="edit-subject-name" className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+              Subject Name *
             </label>
             <input
+              id="edit-subject-name"
               type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+              {...registerEdit('name')}
+              aria-invalid={editErrors.name ? 'true' : 'false'}
+              className={cn(
+                'w-full rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2',
+                editErrors.name
+                  ? 'border-rose-500 focus:ring-rose-400'
+                  : 'border-[var(--color-border)] focus:ring-[var(--color-brand)]'
+              )}
             />
+            {editErrors.name && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {editErrors.name.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Course Code
+            <label htmlFor="edit-subject-code" className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+              Course Code (Optional)
             </label>
             <input
+              id="edit-subject-code"
               type="text"
-              value={editCode}
-              onChange={(e) => setEditCode(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+              {...registerEdit('code')}
+              aria-invalid={editErrors.code ? 'true' : 'false'}
+              className={cn(
+                'w-full rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2',
+                editErrors.code
+                  ? 'border-rose-500 focus:ring-rose-400'
+                  : 'border-[var(--color-border)] focus:ring-[var(--color-brand)]'
+              )}
             />
+            {editErrors.code && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {editErrors.code.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -412,26 +555,47 @@ export default function SubjectDetail() {
                 <button
                   key={c.value}
                   type="button"
-                  onClick={() => setEditColor(c.value)}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
-                    editColor === c.value ? 'scale-115 border-slate-900 shadow-xs' : 'border-transparent'
-                  }`}
+                  onClick={() => setEditValue('color', c.value, { shouldValidate: true })}
+                  className={cn(
+                    'w-7 h-7 rounded-full border-2 transition-transform cursor-pointer',
+                    selectedEditColor === c.value
+                      ? 'scale-115 border-slate-900 dark:border-white shadow-xs'
+                      : 'border-transparent'
+                  )}
                   style={{ backgroundColor: c.value }}
+                  title={c.name}
+                  aria-label={c.name}
                 />
               ))}
             </div>
+            {editErrors.color && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {editErrors.color.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Exam Date
+            <label htmlFor="edit-subject-exam-date" className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+              Exam Date (Optional)
             </label>
             <input
+              id="edit-subject-exam-date"
               type="date"
-              value={editExamDate}
-              onChange={(e) => setEditExamDate(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+              {...registerEdit('examDate')}
+              aria-invalid={editErrors.examDate ? 'true' : 'false'}
+              className={cn(
+                'w-full rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2',
+                editErrors.examDate
+                  ? 'border-rose-500 focus:ring-rose-400'
+                  : 'border-[var(--color-border)] focus:ring-[var(--color-brand)]'
+              )}
             />
+            {editErrors.examDate && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {editErrors.examDate.message}
+              </p>
+            )}
           </div>
 
           <div className="pt-3 border-t border-[var(--color-border-light)] flex justify-end gap-2">
@@ -440,11 +604,19 @@ export default function SubjectDetail() {
               variant="outline"
               size="sm"
               onClick={() => setEditSubjectOpen(false)}
+              disabled={isUpdating}
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="font-semibold">
-              Save Changes
+            <Button type="submit" size="sm" className="font-semibold" disabled={isUpdating}>
+              {isUpdating ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </Button>
           </div>
         </form>
@@ -462,6 +634,7 @@ export default function SubjectDetail() {
             variant="outline"
             size="sm"
             onClick={() => setDeleteConfirmOpen(false)}
+            disabled={isDeleting}
           >
             Cancel
           </Button>
@@ -469,11 +642,49 @@ export default function SubjectDetail() {
             variant="destructive"
             size="sm"
             onClick={handleDeleteSubject}
+            disabled={isDeleting}
           >
-            Delete Subject
+            {isDeleting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                Deleting...
+              </>
+            ) : (
+              'Delete Subject'
+            )}
           </Button>
         </div>
       </Dialog>
+
+      {/* Topic Details Slide-Over Drawer */}
+      <TopicDetailsDrawer
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+        topic={activeTopic}
+        subject={subject}
+        onChangeStatus={(newStatus) => handleChangeTopicStatus(activeTopic?.id, newStatus)}
+        onReviewNow={() => handleOpenReview(activeTopic)}
+        onMarkRevisedToday={() => handleMarkRevisedToday(activeTopic)}
+        onOpenSchedule={() => handleOpenSchedule(activeTopic)}
+      />
+
+      {/* Spaced Repetition Recall Assessment Dialog */}
+      <TopicReviewDialog
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        topic={activeTopic}
+        subject={subject}
+        onSaveReview={handleSaveReview}
+      />
+
+      {/* Manual Date Scheduling Dialog */}
+      <ScheduleRevisionDialog
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        topic={activeTopic}
+        subject={subject}
+        onSaveSchedule={handleSaveSchedule}
+      />
     </div>
   )
 }

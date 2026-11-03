@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { authService } from '@/services/authService'
 import { userService } from '@/services/userService'
 
-const AuthContext = createContext(null)
+export const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   // Start with clean null state; session is verified with backend

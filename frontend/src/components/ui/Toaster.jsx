@@ -14,20 +14,28 @@ import { useApp } from '@/context/AppContext'
  * Polished, vibrant, accessible notification UI extending Sonner
  * with dedicated semantic accents for light and dark themes.
  */
-export function Toaster(props) {
-  const { state } = useApp()
-  const theme = state?.theme === 'dark' ? 'dark' : 'light'
+export function Toaster({ theme: themeProp, ...props }) {
+  let appTheme = 'light'
+  try {
+    const { state } = useApp()
+    if (state?.theme === 'dark') {
+      appTheme = 'dark'
+    }
+  } catch {
+    // Graceful fallback if rendered outside AppProvider
+  }
+  const theme = themeProp || appTheme
 
   return (
     <SonnerToaster
       theme={theme}
       position="bottom-right"
       closeButton
-      expand={false}
-      visibleToasts={4}
-      duration={3600}
-      offset="20px"
-      gap={10}
+      expand={true}
+      visibleToasts={3}
+      duration={4000}
+      offset="24px"
+      gap={12}
       icons={{
         success: (
           <div className="focusflow-toast-icon-badge focusflow-toast-icon-success" aria-hidden="true">

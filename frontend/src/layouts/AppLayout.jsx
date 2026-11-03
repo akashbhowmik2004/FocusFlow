@@ -1,625 +1,257 @@
-import { useState, useRef, useEffect } from 'react'
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'motion/react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
 import {
-  Zap,
-  LayoutDashboard,
-  Sun,
-  CalendarDays,
-  BookOpen,
-  RotateCcw,
   BarChart3,
-  Settings,
-  Menu,
-  X,
   Bell,
-  Search,
-  ChevronDown,
-  LogOut,
-  User,
-  Moon,
+  BookOpen,
+  CalendarDays,
   CheckCircle2,
-  Clock,
-  Sparkles,
+  ChevronDown,
+  Command,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Moon,
+  PanelLeft,
   PanelLeftClose,
-  PanelLeft
+  RotateCcw,
+  Search,
+  Settings,
+  Sun,
+  User,
+  X,
+  Zap,
 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
 import { cn, getInitials } from '@/lib/utils'
+import { getRevisionSummary } from '@/lib/revisionSummary'
 import { toast } from 'sonner'
+
+const primaryNavigation = [
+  { label: 'Overview', description: 'Your academic pulse', path: '/app/dashboard', icon: LayoutDashboard },
+  { label: 'My Day', description: 'Execute today’s plan', path: '/app/day', icon: CheckCircle2 },
+  { label: 'Planner', description: 'Shape your schedule', path: '/app/planner', icon: CalendarDays },
+]
+
+const learningNavigation = [
+  { label: 'Subjects', description: 'Syllabus and topics', path: '/app/subjects', icon: BookOpen },
+  { label: 'Revision Center', description: 'Remember what you learn', path: '/app/revision', icon: RotateCcw },
+  { label: 'Insights', description: 'Progress and patterns', path: '/app/progress', icon: BarChart3 },
+]
+
+function isCurrentPath(pathname, path) {
+  return pathname === path || (path !== '/app/dashboard' && pathname.startsWith(path))
+}
+
+function Navigation({ items, pathname, collapsed, onNavigate }) {
+  return (
+    <div className="space-y-1">
+      {items.map((item) => {
+        const active = isCurrentPath(pathname, item.path)
+        const Icon = item.icon
+        return (
+          <Link
+            key={item.path}
+            to={item.path}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={cn(
+              'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all',
+              collapsed && 'justify-center px-0',
+              active
+                ? 'bg-[var(--color-brand)] text-white shadow-[0_8px_20px_rgba(99,102,241,0.22)]'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
+            )}
+          >
+            <Icon className={cn('h-[18px] w-[18px] shrink-0', active ? 'text-white' : 'text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]')} />
+            {!collapsed && (
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{item.label}</span>
+                <span className={cn('mt-0.5 block truncate text-[10px]', active ? 'text-indigo-100' : 'text-[var(--color-text-muted)]')}>
+                  {item.description}
+                </span>
+              </span>
+            )}
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function AppLayout() {
   const { state, dispatch } = useApp()
   const { logout, updateTheme, isAuthenticated } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
-  const [searchModalOpen, setSearchModalOpen] = useState(false)
-  const [localSearch, setLocalSearch] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const userMenuRef = useRef(null)
+  const notificationsRef = useRef(null)
 
-  const userDropdownRef = useRef(null)
-  const notifDropdownRef = useRef(null)
+  const allTopics = useMemo(
+    () => state.subjects.flatMap((subject) => (subject.topics || []).map((topic) => ({ ...topic, subjectName: subject.name, subjectId: subject.id }))),
+    [state.subjects],
+  )
+  const filteredSubjects = state.subjects.filter((subject) => `${subject.name} ${subject.code || ''}`.toLowerCase().includes(search.toLowerCase()))
+  const filteredTopics = allTopics.filter((topic) => `${topic.name} ${topic.subjectName}`.toLowerCase().includes(search.toLowerCase()))
+  const revisionSummary = useMemo(() => getRevisionSummary(state.subjects), [state.subjects])
+  const dueCount = revisionSummary.overdueCount + revisionSummary.dueTodayCount
+  const pageTitle = location.pathname.includes('/day') ? 'My Day'
+    : location.pathname.includes('/planner') ? 'Planner'
+      : location.pathname.includes('/subjects/') ? 'Subject details'
+        : location.pathname.includes('/subjects') ? 'Subjects'
+          : location.pathname.includes('/revision') ? 'Revision Center'
+            : location.pathname.includes('/progress') ? 'Insights'
+              : location.pathname.includes('/settings') ? 'Settings'
+                : 'Overview'
 
-  const navItems = [
-    { label: 'Overview', path: '/app/dashboard', icon: LayoutDashboard },
-    { label: 'My Day', path: '/app/day', icon: Sun },
-    { label: 'Planner', path: '/app/planner', icon: CalendarDays },
-    { label: 'Subjects & Topics', path: '/app/subjects', icon: BookOpen },
-    { label: 'Revision', path: '/app/revision', icon: RotateCcw, badge: 'Due' },
-    { label: 'Progress', path: '/app/progress', icon: BarChart3 },
-  ]
-
-  const bottomNavItems = [
-    { label: 'Settings', path: '/app/settings', icon: Settings },
-  ]
-
-  // Close dropdowns on outside click
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) {
-        setUserDropdownOpen(false)
-      }
-      if (notifDropdownRef.current && !notifDropdownRef.current.contains(e.target)) {
-        setNotificationsOpen(false)
-      }
+    const closeMenus = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) setUserMenuOpen(false)
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) setNotificationsOpen(false)
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', closeMenus)
+    return () => document.removeEventListener('mousedown', closeMenus)
   }, [])
 
-  // Close mobile drawer on route change
   useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [location.pathname])
+    const handleShortcut = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    document.addEventListener('keydown', handleShortcut)
+    return () => document.removeEventListener('keydown', handleShortcut)
+  }, [])
 
   const toggleTheme = async () => {
     const nextTheme = state.theme === 'dark' ? 'light' : 'dark'
     dispatch({ type: 'SET_THEME', payload: nextTheme })
-    toast.success(`Switched to ${nextTheme} mode`)
     if (isAuthenticated && updateTheme) {
       try {
         await updateTheme(nextTheme)
-      } catch (err) {
-        console.warn('Failed to update theme on server:', err)
+      } catch {
+        toast.error('Theme preference could not be saved')
       }
     }
   }
 
   const handleSignOut = async () => {
     await logout()
-    toast.success('Signed out successfully')
     navigate('/login')
+    toast.success('Signed out successfully')
   }
 
-  // Quick filter for global search
-  const filteredSubjects = state.subjects.filter(s =>
-    s.name.toLowerCase().includes(localSearch.toLowerCase()) ||
-    (s.code && s.code.toLowerCase().includes(localSearch.toLowerCase()))
-  )
-  const allTopics = state.subjects.flatMap(s =>
-    s.topics.map(t => ({ ...t, subjectName: s.name, subjectId: s.id }))
-  )
-  const filteredTopics = allTopics.filter(t =>
-    t.name.toLowerCase().includes(localSearch.toLowerCase())
-  )
-
-  // Current page title mapping
-  const getPageTitle = () => {
-    if (location.pathname.includes('/app/dashboard')) return 'Overview'
-    if (location.pathname.includes('/app/day')) return 'My Day'
-    if (location.pathname.includes('/app/planner')) return 'Study Planner'
-    if (location.pathname.includes('/app/subjects/')) return 'Subject Details'
-    if (location.pathname.includes('/app/subjects')) return 'Subjects & Topics'
-    if (location.pathname.includes('/app/revision')) return 'Revision Queue'
-    if (location.pathname.includes('/app/progress')) return 'Analytics & Progress'
-    if (location.pathname.includes('/app/settings')) return 'Preferences & Settings'
-    return 'Dashboard'
-  }
-
-  return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col md:flex-row text-[var(--color-text)] antialiased transition-colors duration-200">
-      {/* Mobile Header Bar */}
-      <div className="md:hidden flex items-center justify-between h-16 px-4 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] focus:outline-none"
-            aria-label="Open menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <Link to="/app/dashboard" className="flex items-center gap-2 font-bold text-lg text-[var(--color-text)]">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white shadow-sm">
-              <Zap className="w-4 h-4 fill-white" />
-            </div>
-            <span>FocusFlow</span>
-          </Link>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
-            aria-label="Search"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
-            aria-label="Toggle theme"
-          >
-            {state.theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
-        </div>
+  const sidebar = (mobile = false) => (
+    <div className={cn('flex h-full flex-col', mobile ? 'p-4' : '')}>
+      <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-1 pb-5">
+        <Link to="/app/dashboard" className={cn('flex items-center gap-2.5', state.sidebarOpen || mobile ? '' : 'mx-auto')}>
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-[0_8px_18px_rgba(99,102,241,0.25)]">
+            <Zap className="h-5 w-5 fill-current" />
+          </span>
+          {(state.sidebarOpen || mobile) && (
+            <span>
+              <span className="block text-[15px] font-bold tracking-tight text-[var(--color-text)]">FocusFlow</span>
+              <span className="block text-[10px] font-medium uppercase tracking-[0.18em] text-[var(--color-text-muted)]">Study workspace</span>
+            </span>
+          )}
+        </Link>
+        {mobile ? (
+          <button onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]" aria-label="Close menu"><X className="h-5 w-5" /></button>
+        ) : state.sidebarOpen ? (
+          <button onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })} className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]" title="Collapse sidebar"><PanelLeftClose className="h-4 w-4" /></button>
+        ) : null}
       </div>
 
-      {/* Mobile Drawer Backdrop & Menu */}
+      <div className="flex-1 space-y-6 overflow-y-auto py-6">
+        {(state.sidebarOpen || mobile) && <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Plan</p>}
+        <Navigation items={primaryNavigation} pathname={location.pathname} collapsed={!mobile && !state.sidebarOpen} onNavigate={() => mobile && setMobileMenuOpen(false)} />
+        {(state.sidebarOpen || mobile) && <p className="px-3 pb-2 pt-4 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Learn</p>}
+        <Navigation items={learningNavigation} pathname={location.pathname} collapsed={!mobile && !state.sidebarOpen} onNavigate={() => mobile && setMobileMenuOpen(false)} />
+        {!mobile && state.sidebarOpen && state.subjects.length > 0 && (
+          <div className="border-t border-[var(--color-border-light)] pt-5">
+            <div className="flex items-center justify-between px-3 pb-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Your subjects</span>
+              <Link to="/app/subjects" className="text-[10px] font-semibold text-[var(--color-brand)]">View all</Link>
+            </div>
+            <div className="space-y-0.5">
+              {state.subjects.slice(0, 4).map((subject) => (
+                <Link key={subject.id} to={`/app/subjects/${subject.id}`} onClick={() => mobile && setMobileMenuOpen(false)} className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: subject.color }} />
+                  <span className="truncate">{subject.name}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2 border-t border-[var(--color-border-light)] pt-4">
+        <Link to="/app/settings" onClick={() => mobile && setMobileMenuOpen(false)} className={cn('flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]', !mobile && !state.sidebarOpen && 'justify-center px-0')} title={!mobile && !state.sidebarOpen ? 'Settings' : undefined}>
+          <Settings className="h-[18px] w-[18px]" />{(state.sidebarOpen || mobile) && <span>Settings</span>}
+        </Link>
+        {(state.sidebarOpen || mobile) && (
+          <div className="flex items-center gap-2.5 rounded-xl bg-[var(--color-bg-subtle)] p-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-semibold text-white">{getInitials(state.user?.name || 'User')}</div>
+            <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-[var(--color-text)]">{state.user?.name || 'Student'}</p><p className="truncate text-[10px] text-[var(--color-text-muted)]">{state.user?.studyGoal || 'Keep learning'}</p></div>
+            <button onClick={handleSignOut} className="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-rose-500" title="Sign out"><LogOut className="h-4 w-4" /></button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <div className="flex h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:hidden">
+        <button onClick={() => setMobileMenuOpen(true)} className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]" aria-label="Open menu"><Menu className="h-5 w-5" /></button>
+        <Link to="/app/dashboard" className="flex items-center gap-2 font-bold"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand)] text-white"><Zap className="h-4 w-4 fill-current" /></span>FocusFlow</Link>
+        <button onClick={toggleTheme} className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]" aria-label="Toggle theme">{state.theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}</button>
+      </div>
+
       <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden flex">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-xs"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <motion.div
-              initial={{ x: -280 }}
-              animate={{ x: 0 }}
-              exit={{ x: -280 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 250 }}
-              className="relative w-72 max-w-[80vw] h-full bg-[var(--color-surface)] border-r border-[var(--color-border)] p-4 flex flex-col justify-between z-10 shadow-xl"
-            >
-              <div>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--color-border-light)]">
-                  <div className="flex items-center gap-2.5 font-bold text-lg">
-                    <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white">
-                      <Zap className="w-4 h-4 fill-white" />
-                    </div>
-                    <span>FocusFlow</span>
-                  </div>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
-                    aria-label="Close menu"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <nav className="space-y-1">
-                  {navItems.map((item) => {
-                    const isActive = location.pathname === item.path || (item.path !== '/app/dashboard' && location.pathname.startsWith(item.path))
-                    return (
-                      <Link
-                        key={item.path}
-                        to={item.path}
-                        className={cn(
-                          'flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                          isActive
-                            ? 'bg-[var(--color-brand-50)] text-[var(--color-brand)] font-semibold'
-                            : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]'
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <item.icon className={cn('w-4 h-4', isActive ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]')} />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge && (
-                          <span className="px-2 py-0.5 text-[11px] font-semibold bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)] rounded-full">
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    )
-                  })}
-                </nav>
-              </div>
-
-              <div className="pt-4 border-t border-[var(--color-border-light)] space-y-1">
-                <Link
-                  to="/app/settings"
-                  className={cn(
-                    'flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium',
-                    location.pathname === '/app/settings'
-                      ? 'bg-[var(--color-brand-50)] text-[var(--color-brand-text)] font-semibold border border-[var(--color-brand-100)]'
-                      : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
-                  )}
-                >
-                  <Settings className="w-4 h-4" />
-                  <span>Settings</span>
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Sign Out</span>
-                </button>
-              </div>
-            </motion.div>
+          <div className="fixed inset-0 z-50 md:hidden">
+            <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setMobileMenuOpen(false)} className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" aria-label="Close navigation" />
+            <motion.aside initial={{ x: -320 }} animate={{ x: 0 }} exit={{ x: -320 }} transition={{ type: 'spring', damping: 26, stiffness: 260 }} className="relative z-10 h-full w-[min(84vw,320px)] bg-[var(--color-surface)] shadow-2xl">{sidebar(true)}</motion.aside>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Desktop Sidebar */}
-      <aside
-        className={cn(
-          'hidden md:flex flex-col justify-between border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-300 sticky top-0 h-screen z-30 select-none',
-          state.sidebarOpen ? 'w-64 min-w-[16rem]' : 'w-20 min-w-[5rem]'
-        )}
-      >
-        {/* Top: Logo & Toggle */}
-        <div className="p-4 border-b border-[var(--color-border-light)] flex items-center justify-between">
-          <Link
-            to="/app/dashboard"
-            className={cn(
-              'flex items-center gap-2.5 font-bold transition-opacity duration-200 overflow-hidden',
-              !state.sidebarOpen && 'justify-center w-full'
-            )}
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--color-brand)] to-[var(--color-brand-light)] flex items-center justify-center text-white shadow-sm shrink-0">
-              <Zap className="w-5 h-5 fill-white" />
+      <div className="flex min-h-[calc(100vh-4rem)] md:min-h-screen">
+        <aside className={cn('sticky top-0 hidden h-screen shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-[width] duration-300 md:block', state.sidebarOpen ? 'w-64' : 'w-[76px]')}>{sidebar()}</aside>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-20 hidden h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 px-6 backdrop-blur-xl md:flex">
+            <div className="flex items-center gap-3"><button onClick={() => !state.sidebarOpen && dispatch({ type: 'TOGGLE_SIDEBAR' })} className={cn('rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]', state.sidebarOpen && 'invisible')} aria-label="Expand sidebar"><PanelLeft className="h-4 w-4" /></button><div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">Workspace</p><h1 className="text-sm font-semibold">{pageTitle}</h1></div></div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setSearchOpen(true)} className="flex w-52 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-2 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-brand-light)]"><Search className="h-3.5 w-3.5" /><span>Search your workspace</span><kbd className="ml-auto flex items-center gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1 text-[9px]"><Command className="h-2.5 w-2.5" />K</kbd></button>
+              <button onClick={toggleTheme} className="rounded-xl p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]" title="Toggle theme">{state.theme === 'dark' ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}</button>
+              <div ref={notificationsRef} className="relative"><button onClick={() => setNotificationsOpen((open) => !open)} className="relative rounded-xl p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]" title="Notifications"><Bell className="h-4 w-4" />{dueCount > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-2 ring-[var(--color-surface)]" />}</button>{notificationsOpen && <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl"><p className="border-b border-[var(--color-border-light)] px-2 pb-2 text-xs font-semibold">Your attention</p>{dueCount > 0 ? <Link to="/app/revision" onClick={() => setNotificationsOpen(false)} className="mt-2 flex items-start gap-2 rounded-xl bg-[var(--color-bg-subtle)] p-2.5"><RotateCcw className="mt-0.5 h-4 w-4 text-amber-500" /><span className="text-xs"><strong>{dueCount} revision{dueCount === 1 ? '' : 's'}</strong> ready for review<span className="mt-0.5 block text-[10px] text-[var(--color-text-muted)]">Open Revision Center to keep your memory fresh.</span></span></Link> : <p className="px-2 py-5 text-center text-xs text-[var(--color-text-muted)]">You’re all caught up.</p>}</div>}</div>
+              <div ref={userMenuRef} className="relative"><button onClick={() => setUserMenuOpen((open) => !open)} className="flex items-center gap-2 rounded-xl p-1.5 hover:bg-[var(--color-bg-subtle)]"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-semibold text-white">{getInitials(state.user?.name || 'User')}</span><ChevronDown className="h-3.5 w-3.5 text-[var(--color-text-muted)]" /></button>{userMenuOpen && <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-1.5 shadow-xl"><div className="border-b border-[var(--color-border-light)] px-3 py-2"><p className="truncate text-xs font-semibold">{state.user?.name || 'Student'}</p><p className="truncate text-[10px] text-[var(--color-text-muted)]">{state.user?.email || ''}</p></div><Link to="/app/settings" onClick={() => setUserMenuOpen(false)} className="mt-1 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs hover:bg-[var(--color-bg-subtle)]"><User className="h-3.5 w-3.5" />Account settings</Link><button onClick={handleSignOut} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30"><LogOut className="h-3.5 w-3.5" />Sign out</button></div>}</div>
             </div>
-            {state.sidebarOpen && (
-              <div className="flex flex-col leading-none">
-                <span className="text-base font-bold tracking-tight text-[var(--color-text)]">FocusFlow</span>
-                <span className="text-[10px] font-medium text-[var(--color-text-muted)] tracking-wider uppercase mt-0.5">Study Suite</span>
-              </div>
-            )}
-          </Link>
-
-          {state.sidebarOpen && (
-            <button
-              onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
-              className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
-              title="Collapse sidebar"
-            >
-              <PanelLeftClose className="w-4 h-4" />
-            </button>
-          )}
+          </header>
+          <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8"><Outlet /></main>
         </div>
-
-        {/* Center: Navigation Links */}
-        <div className="flex-1 py-4 px-3 overflow-y-auto space-y-6">
-          <div className="space-y-1">
-            {state.sidebarOpen && (
-              <p className="px-3 text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-                Workspace
-              </p>
-            )}
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path || (item.path !== '/app/dashboard' && location.pathname.startsWith(item.path))
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  title={!state.sidebarOpen ? item.label : undefined}
-                  className={cn(
-                    'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
-                    isActive
-                      ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
-                      : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
-                    !state.sidebarOpen && 'justify-center px-0'
-                  )}
-                >
-                  <item.icon className={cn('w-4 h-4 shrink-0 transition-transform group-hover:scale-110', isActive ? 'text-white' : 'text-[var(--color-text-secondary)]')} />
-                  {state.sidebarOpen && <span className="truncate">{item.label}</span>}
-                  {state.sidebarOpen && item.badge && !isActive && (
-                    <span className="ml-auto px-1.5 py-0.5 text-[10px] font-semibold bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)] rounded-md">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-
-          {/* Quick Subject List in Sidebar */}
-          {state.sidebarOpen && (
-            <div className="space-y-1 pt-2 border-t border-[var(--color-border-light)]">
-              <div className="flex items-center justify-between px-3 mb-2">
-                <span className="text-[11px] font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">
-                  Subjects
-                </span>
-                <Link to="/app/subjects" className="text-[11px] text-[var(--color-brand)] hover:underline font-medium">
-                  View all
-                </Link>
-              </div>
-              <div className="space-y-0.5">
-                {state.subjects.slice(0, 4).map((sub) => (
-                  <Link
-                    key={sub.id}
-                    to={`/app/subjects/${sub.id}`}
-                    className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors truncate"
-                  >
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: sub.color }} />
-                    <span className="truncate">{sub.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Section */}
-        <div className="p-3 border-t border-[var(--color-border-light)] space-y-2">
-          {!state.sidebarOpen && (
-            <button
-              onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
-              className="w-full py-2 flex justify-center text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] rounded-lg transition-colors cursor-pointer"
-              title="Expand sidebar"
-            >
-              <PanelLeft className="w-4 h-4" />
-            </button>
-          )}
-
-          {bottomNavItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.path)
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                title={!state.sidebarOpen ? item.label : undefined}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-[var(--color-brand-50)] text-[var(--color-brand-text)] font-semibold border border-[var(--color-brand-100)]'
-                    : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
-                  !state.sidebarOpen && 'justify-center px-0'
-                )}
-              >
-                <item.icon className="w-4 h-4 shrink-0" />
-                {state.sidebarOpen && <span>{item.label}</span>}
-              </Link>
-            )
-          })}
-
-          {/* User mini banner */}
-          {state.sidebarOpen && (
-            <div className="mt-2 p-2.5 rounded-xl bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-between">
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-medium text-xs flex items-center justify-center shrink-0">
-                  {getInitials(state.user?.name || 'User')}
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-semibold text-[var(--color-text)] truncate">{state.user?.name || 'User'}</span>
-                  <span className="text-[10px] text-[var(--color-text-muted)] truncate">{state.user?.studyGoal || 'Set your study goal'}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        {/* Top Header */}
-        <header className="hidden md:flex items-center justify-between h-16 px-6 border-b border-[var(--color-border)] bg-[var(--color-surface)] sticky top-0 z-20">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold text-[var(--color-text)] tracking-tight">
-              {getPageTitle()}
-            </h1>
-            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs text-[var(--color-text-secondary)]">
-              <Sparkles className="w-3 h-3 text-indigo-500" />
-              <span>Exam in 21 days (MATH202)</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Search Trigger */}
-            <button
-              onClick={() => setSearchModalOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-brand-light)] text-xs text-[var(--color-text-muted)] w-48 transition-colors cursor-pointer"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span>Search anything...</span>
-              <kbd className="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">⌘K</kbd>
-            </button>
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
-              title="Toggle theme"
-            >
-              {state.theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            {/* Notifications Dropdown */}
-            <div className="relative" ref={notifDropdownRef}>
-              <button
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
-                title="Notifications"
-              >
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[var(--color-surface)]" />
-              </button>
-
-              <AnimatePresence>
-                {notificationsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    className="absolute right-0 mt-2 w-80 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg p-3 z-50"
-                  >
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--color-border-light)]">
-                      <span className="text-xs font-semibold text-[var(--color-text)]">Notifications</span>
-                      <span className="text-[10px] text-[var(--color-brand)] font-medium cursor-pointer hover:underline">
-                        Mark all as read
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="p-2 rounded-lg bg-[var(--color-bg-subtle)] flex items-start gap-2.5">
-                        <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-xs font-medium text-[var(--color-text)]">Study Session in 30 mins</p>
-                          <p className="text-[11px] text-[var(--color-text-muted)]">Memory Management — Paging</p>
-                        </div>
-                      </div>
-                      <div className="p-2 rounded-lg bg-[var(--color-bg-subtle)] flex items-start gap-2.5">
-                        <RotateCcw className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-xs font-medium text-[var(--color-text)]">Revision Due Today</p>
-                          <p className="text-[11px] text-[var(--color-text-muted)]">Binary Trees Traversals</p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* User Avatar & Dropdown */}
-            <div className="relative" ref={userDropdownRef}>
-              <button
-                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 p-1 pl-1.5 rounded-full hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[var(--color-brand)] to-purple-600 text-white font-medium text-xs flex items-center justify-center ring-2 ring-transparent hover:ring-[var(--color-brand-light)]">
-                  {getInitials(state.user?.name || 'User')}
-                </div>
-                <ChevronDown className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
-              </button>
-
-              <AnimatePresence>
-                {userDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
-                    className="absolute right-0 mt-2 w-52 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-lg py-1.5 z-50"
-                  >
-                    <div className="px-3.5 py-2 border-b border-[var(--color-border-light)]">
-                      <p className="text-xs font-semibold text-[var(--color-text)]">{state.user?.name || 'User'}</p>
-                      <p className="text-[11px] text-[var(--color-text-muted)] truncate">{state.user?.email || ''}</p>
-                    </div>
-                    <Link
-                      to="/app/settings"
-                      onClick={() => setUserDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors"
-                    >
-                      <User className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
-                      <span>Profile & Settings</span>
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </header>
-
-        {/* Global Search Modal */}
-        <AnimatePresence>
-          {searchModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/40 backdrop-blur-xs"
-                onClick={() => setSearchModalOpen(false)}
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                className="relative w-full max-w-lg rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl overflow-hidden z-10"
-              >
-                <div className="flex items-center px-4 py-3 border-b border-[var(--color-border)] gap-3">
-                  <Search className="w-4 h-4 text-[var(--color-text-muted)]" />
-                  <input
-                    type="text"
-                    value={localSearch}
-                    onChange={(e) => setLocalSearch(e.target.value)}
-                    placeholder="Search subjects, topics, sessions..."
-                    className="w-full bg-transparent text-sm focus:outline-none text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]"
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => setSearchModalOpen(false)}
-                    className="p-1 rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="p-3 max-h-80 overflow-y-auto space-y-3">
-                  {filteredSubjects.length > 0 && (
-                    <div>
-                      <p className="px-2 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-                        Subjects
-                      </p>
-                      {filteredSubjects.map(s => (
-                        <div
-                          key={s.id}
-                          onClick={() => {
-                            navigate(`/app/subjects/${s.id}`)
-                            setSearchModalOpen(false)
-                          }}
-                          className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-[var(--color-bg-subtle)] cursor-pointer text-xs"
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                          <span className="font-medium text-[var(--color-text)]">{s.name}</span>
-                          <span className="text-[var(--color-text-muted)] ml-auto">{s.code}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {filteredTopics.length > 0 && (
-                    <div>
-                      <p className="px-2 text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1">
-                        Topics
-                      </p>
-                      {filteredTopics.slice(0, 6).map(t => (
-                        <div
-                          key={t.id}
-                          onClick={() => {
-                            navigate(`/app/subjects/${t.subjectId}`)
-                            setSearchModalOpen(false)
-                          }}
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-bg-subtle)] cursor-pointer text-xs"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
-                          <span className="text-[var(--color-text)]">{t.name}</span>
-                          <span className="text-[10px] text-[var(--color-text-muted)] ml-auto">{t.subjectName}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {localSearch && filteredSubjects.length === 0 && filteredTopics.length === 0 && (
-                    <div className="py-8 text-center text-xs text-[var(--color-text-muted)]">
-                      No matching subjects or topics found for "{localSearch}"
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Dynamic Route Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-          <Outlet />
-        </main>
       </div>
+
+      <AnimatePresence>
+        {searchOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/40 p-4 pt-[12vh] backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -12, scale: 0.98 }} className="w-full max-w-xl overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl">
+              <div className="flex items-center gap-3 border-b border-[var(--color-border)] px-4 py-3"><Search className="h-4 w-4 text-[var(--color-text-muted)]" /><input autoFocus value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search subjects and topics..." className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]" /><button onClick={() => { setSearchOpen(false); setSearch('') }} aria-label="Close search"><X className="h-4 w-4 text-[var(--color-text-muted)]" /></button></div>
+              <div className="max-h-80 overflow-y-auto p-3">{search && filteredSubjects.length === 0 && filteredTopics.length === 0 ? <p className="py-8 text-center text-xs text-[var(--color-text-muted)]">No subjects or topics found.</p> : <div className="space-y-3">{filteredSubjects.length > 0 && <div><p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Subjects</p>{filteredSubjects.map((subject) => <button key={subject.id} onClick={() => { navigate(`/app/subjects/${subject.id}`); setSearchOpen(false); setSearch('') }} className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-xs hover:bg-[var(--color-bg-subtle)]"><span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: subject.color }} /><span className="font-medium">{subject.name}</span><span className="ml-auto text-[10px] text-[var(--color-text-muted)]">{subject.code}</span></button>)}</div>}{filteredTopics.length > 0 && <div><p className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Topics</p>{filteredTopics.slice(0, 8).map((topic) => <button key={topic.id} onClick={() => { navigate(`/app/subjects/${topic.subjectId}`); setSearchOpen(false); setSearch('') }} className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-xs hover:bg-[var(--color-bg-subtle)]"><BookOpen className="h-3.5 w-3.5 text-[var(--color-text-muted)]" /><span>{topic.name}</span><span className="ml-auto text-[10px] text-[var(--color-text-muted)]">{topic.subjectName}</span></button>)}</div>}</div>}</div>
+            </motion.div>
+            <button onClick={() => { setSearchOpen(false); setSearch('') }} className="absolute inset-0 -z-10 cursor-default" aria-label="Close search" />
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

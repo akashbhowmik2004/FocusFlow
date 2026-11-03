@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 .idea
 
 test-results/
+
+testUser.js
+testAuth.js

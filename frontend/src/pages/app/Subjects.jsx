@@ -1,39 +1,45 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { motion } from 'motion/react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   BookOpen,
   Plus,
   Search,
-  Timer,
-  ChevronRight,
-  CheckCircle2,
-  Calendar,
-  Layers,
-  GraduationCap
+  Loader2,
 } from 'lucide-react'
-import { useApp, useSubjects } from '@/context/AppContext'
-import { subjectColors, generateId, cn } from '@/lib/utils'
-import { getDaysUntil, formatDate } from '@/lib/dates'
+import { useSubjects } from '@/context/AppContext'
+import { subjectColors, cn } from '@/lib/utils'
+import { subjectSchema } from '@/schemas/subject.schema'
 import Button from '@/components/ui/Button'
-import Card, { SubjectCard } from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
-import Progress from '@/components/ui/Progress'
+import { SubjectCard } from '@/components/ui/Card'
 import Dialog from '@/components/ui/Dialog'
 import EmptyState from '@/components/ui/EmptyState'
 import { toast } from 'sonner'
 
 export default function Subjects() {
-  const { state } = useApp()
   const { subjects, addSubject } = useSubjects()
-  const navigate = useNavigate()
 
   const [search, setSearch] = useState('')
   const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [code, setCode] = useState('')
-  const [color, setColor] = useState(subjectColors[0].value)
-  const [examDate, setExamDate] = useState('')
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(subjectSchema),
+    defaultValues: {
+      name: '',
+      code: '',
+      color: subjectColors[0].value,
+      examDate: '',
+    },
+  })
+
+  const selectedColor = watch('color')
 
   const filteredSubjects = subjects.filter(
     (s) =>
@@ -41,25 +47,36 @@ export default function Subjects() {
       (s.code && s.code.toLowerCase().includes(search.toLowerCase()))
   )
 
-  const handleCreate = (e) => {
-    e.preventDefault()
-    if (!name.trim()) {
-      toast.error('Subject name is required')
-      return
+  const handleCreate = async (data) => {
+    try {
+      const created = await addSubject({
+        name: data.name,
+        code: data.code || null,
+        color: data.color,
+        examDate: data.examDate || null,
+      })
+
+      toast.success(`Created subject "${created?.name || data.name}"!`)
+      reset({
+        name: '',
+        code: '',
+        color: subjectColors[0].value,
+        examDate: '',
+      })
+      setAddDialogOpen(false)
+    } catch (err) {
+      toast.error(err.message || 'Failed to create subject')
     }
+  }
 
-    addSubject({
-      name: name.trim(),
-      code: code.trim() || undefined,
-      color,
-      examDate: examDate || undefined,
+  const handleOpenDialog = () => {
+    reset({
+      name: '',
+      code: '',
+      color: subjectColors[0].value,
+      examDate: '',
     })
-
-    toast.success(`Created subject "${name.trim()}"!`)
-    setName('')
-    setCode('')
-    setExamDate('')
-    setAddDialogOpen(false)
+    setAddDialogOpen(true)
   }
 
   return (
@@ -67,7 +84,7 @@ export default function Subjects() {
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
+          <h1 className="text-2xl sm:text-3xl lg:whitespace-nowrap font-extrabold tracking-tight text-[var(--color-text)]">
             Subjects & Syllabus
           </h1>
           <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] mt-1">
@@ -89,7 +106,7 @@ export default function Subjects() {
 
           <Button
             size="default"
-            onClick={() => setAddDialogOpen(true)}
+            onClick={handleOpenDialog}
             className="text-xs font-semibold gap-1.5 shadow-xs"
           >
             <Plus className="w-4 h-4" /> Add Subject
@@ -109,7 +126,7 @@ export default function Subjects() {
               : 'Add your first semester course to organize its syllabus topics.'
           }
           action={
-            <Button onClick={() => setAddDialogOpen(true)} size="sm" className="text-xs">
+            <Button onClick={handleOpenDialog} size="sm" className="text-xs">
               <Plus className="w-3.5 h-3.5 mr-1" /> Add Subject
             </Button>
           }
@@ -119,7 +136,6 @@ export default function Subjects() {
           {filteredSubjects.map((sub) => {
             const total = sub.topics?.length || 0
             const completed = sub.topics?.filter((t) => t.status === 'completed').length || 0
-            const daysLeft = sub.examDate ? getDaysUntil(sub.examDate) : null
 
             return (
               <SubjectCard
@@ -127,7 +143,6 @@ export default function Subjects() {
                 subject={sub}
                 totalTopics={total}
                 completedTopics={completed}
-                daysLeft={daysLeft}
               />
             )
           })}
@@ -141,32 +156,54 @@ export default function Subjects() {
         title="Add Course / Subject"
         description="Enter the course title, optional course code, color theme, and exam date."
       >
-        <form onSubmit={handleCreate} className="space-y-4 mt-2">
+        <form onSubmit={handleSubmit(handleCreate)} className="space-y-4 mt-2" noValidate>
           <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+            <label htmlFor="add-subject-name" className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
               Subject Name *
             </label>
             <input
+              id="add-subject-name"
               type="text"
               placeholder="e.g. Distributed Systems"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+              {...register('name')}
+              aria-invalid={errors.name ? 'true' : 'false'}
+              className={cn(
+                'w-full rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2',
+                errors.name
+                  ? 'border-rose-500 focus:ring-rose-400'
+                  : 'border-[var(--color-border)] focus:ring-[var(--color-brand)]'
+              )}
               autoFocus
             />
+            {errors.name && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {errors.name.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+            <label htmlFor="add-subject-code" className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
               Course Code (Optional)
             </label>
             <input
+              id="add-subject-code"
               type="text"
               placeholder="e.g. CS450"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+              {...register('code')}
+              aria-invalid={errors.code ? 'true' : 'false'}
+              className={cn(
+                'w-full rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2',
+                errors.code
+                  ? 'border-rose-500 focus:ring-rose-400'
+                  : 'border-[var(--color-border)] focus:ring-[var(--color-brand)]'
+              )}
             />
+            {errors.code && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {errors.code.message}
+              </p>
+            )}
           </div>
 
           <div>
@@ -178,27 +215,45 @@ export default function Subjects() {
                 <button
                   key={c.value}
                   type="button"
-                  onClick={() => setColor(c.value)}
-                  className={`w-7 h-7 rounded-full border-2 transition-transform cursor-pointer ${
-                    color === c.value ? 'scale-115 border-slate-900 shadow-xs' : 'border-transparent'
-                  }`}
+                  onClick={() => setValue('color', c.value, { shouldValidate: true })}
+                  className={cn(
+                    'w-7 h-7 rounded-full border-2 transition-transform cursor-pointer',
+                    selectedColor === c.value ? 'scale-115 border-slate-900 dark:border-white shadow-xs' : 'border-transparent'
+                  )}
                   style={{ backgroundColor: c.value }}
                   title={c.name}
+                  aria-label={c.name}
                 />
               ))}
             </div>
+            {errors.color && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {errors.color.message}
+              </p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
+            <label htmlFor="add-subject-exam-date" className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
               Upcoming Exam Date (Optional)
             </label>
             <input
+              id="add-subject-exam-date"
               type="date"
-              value={examDate}
-              onChange={(e) => setExamDate(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
+              {...register('examDate')}
+              aria-invalid={errors.examDate ? 'true' : 'false'}
+              className={cn(
+                'w-full rounded-lg border bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2',
+                errors.examDate
+                  ? 'border-rose-500 focus:ring-rose-400'
+                  : 'border-[var(--color-border)] focus:ring-[var(--color-brand)]'
+              )}
             />
+            {errors.examDate && (
+              <p className="text-xs text-rose-500 mt-1 font-medium" role="alert">
+                {errors.examDate.message}
+              </p>
+            )}
           </div>
 
           <div className="pt-3 border-t border-[var(--color-border-light)] flex justify-end gap-2">
@@ -207,11 +262,19 @@ export default function Subjects() {
               variant="outline"
               size="sm"
               onClick={() => setAddDialogOpen(false)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" size="sm" className="font-semibold">
-              Create Subject
+            <Button type="submit" size="sm" className="font-semibold" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                  Creating...
+                </>
+              ) : (
+                'Create Subject'
+              )}
             </Button>
           </div>
         </form>

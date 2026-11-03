@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
+import { startTransition, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'motion/react'
 import {
   User,
   Clock,
@@ -8,14 +7,10 @@ import {
   Palette,
   Shield,
   KeyRound,
-  Trash2,
   Download,
   Sun,
   Moon,
-  Laptop,
-  CheckCircle2,
   LogOut,
-  AlertTriangle
 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
@@ -50,9 +45,30 @@ export default function SettingsPage() {
 
   // Notification Toggles State
   const [sessionReminders, setSessionReminders] = useState(currentUser?.reminderEnabled ?? true)
-  const [revisionReminders, setRevisionReminders] = useState(true)
-  const [dailySummary, setDailySummary] = useState(false)
-  const [examAlerts, setExamAlerts] = useState(true)
+  const [revisionReminders, setRevisionReminders] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('focusflow_notification_preferences') || '{}')
+      return typeof saved.revisionReminders === 'boolean' ? saved.revisionReminders : true
+    } catch {
+      return true
+    }
+  })
+  const [dailySummary, setDailySummary] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('focusflow_notification_preferences') || '{}')
+      return typeof saved.dailySummary === 'boolean' ? saved.dailySummary : false
+    } catch {
+      return false
+    }
+  })
+  const [examAlerts, setExamAlerts] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('focusflow_notification_preferences') || '{}')
+      return typeof saved.examAlerts === 'boolean' ? saved.examAlerts : true
+    } catch {
+      return true
+    }
+  })
 
   // Password Change State
   const [currentPassword, setCurrentPassword] = useState('')
@@ -66,17 +82,35 @@ export default function SettingsPage() {
   // Synchronize state if user details load or change
   useEffect(() => {
     if (currentUser) {
-      setName(currentUser.name || '')
-      setEmail(currentUser.email || '')
-      setGoal(currentUser.studyGoal || '')
-      if (currentUser.dailyStudyHours) {
-        setDailyHours(currentUser.dailyStudyHours)
-      }
-      if (currentUser.reminderEnabled !== undefined) {
-        setSessionReminders(currentUser.reminderEnabled)
-      }
+      startTransition(() => {
+        setName(currentUser.name || '')
+        setEmail(currentUser.email || '')
+        setGoal(currentUser.studyGoal || '')
+        if (currentUser.dailyStudyHours) {
+          setDailyHours(currentUser.dailyStudyHours)
+        }
+        if (currentUser.reminderEnabled !== undefined) {
+          setSessionReminders(currentUser.reminderEnabled)
+        }
+        if (currentUser.preferredStartTime === '13:00') setPreferredTime('afternoon')
+        else if (currentUser.preferredStartTime === '18:00') setPreferredTime('evening')
+        else setPreferredTime('morning')
+      })
     }
-  }, [currentUser?.id, currentUser?.name, currentUser?.email, currentUser?.studyGoal, currentUser?.dailyStudyHours, currentUser?.reminderEnabled])
+  }, [currentUser])
+
+  const updateLocalNotificationPreference = (key, value, label) => {
+    const next = { revisionReminders, dailySummary, examAlerts, [key]: value }
+    try {
+      localStorage.setItem('focusflow_notification_preferences', JSON.stringify(next))
+      if (key === 'revisionReminders') setRevisionReminders(value)
+      if (key === 'dailySummary') setDailySummary(value)
+      if (key === 'examAlerts') setExamAlerts(value)
+      toast.success(`Updated ${label}`)
+    } catch {
+      toast.error('Could not save notification preference')
+    }
+  }
 
   const handleSaveProfile = async (e) => {
     e.preventDefault()
@@ -302,13 +336,9 @@ export default function SettingsPage() {
                 <div>
                   <h3 className="font-bold text-sm text-[var(--color-text)]">{name || 'Your Name'}</h3>
                   <p className="text-xs text-[var(--color-text-muted)]">{email || 'No email registered'}</p>
-                  <button
-                    type="button"
-                    onClick={() => toast.info('Photo upload available in cloud edition.')}
-                    className="mt-1 text-xs font-semibold text-[var(--color-brand)] hover:underline cursor-pointer"
-                  >
-                    Change avatar
-                  </button>
+                  <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+                    Avatar uses your initials
+                  </p>
                 </div>
               </div>
 
@@ -469,28 +499,19 @@ export default function SettingsPage() {
                     title: 'Daily Spaced Revision Alerts',
                     desc: 'Morning digest of topics due for retention today',
                     state: revisionReminders,
-                    onChange: (checked) => {
-                      setRevisionReminders(checked)
-                      toast.success(`Updated Daily Spaced Revision Alerts`)
-                    },
+                    onChange: (checked) => updateLocalNotificationPreference('revisionReminders', checked, 'Daily Spaced Revision Alerts'),
                   },
                   {
                     title: 'Nightly Consistency Summary',
                     desc: 'Recap of planned vs. actual minutes logged today',
                     state: dailySummary,
-                    onChange: (checked) => {
-                      setDailySummary(checked)
-                      toast.success(`Updated Nightly Consistency Summary`)
-                    },
+                    onChange: (checked) => updateLocalNotificationPreference('dailySummary', checked, 'Nightly Consistency Summary'),
                   },
                   {
                     title: 'Exam Proximity Warnings',
                     desc: 'Elevate alerts when examinations are within 14 days',
                     state: examAlerts,
-                    onChange: (checked) => {
-                      setExamAlerts(checked)
-                      toast.success(`Updated Exam Proximity Warnings`)
-                    },
+                    onChange: (checked) => updateLocalNotificationPreference('examAlerts', checked, 'Exam Proximity Warnings'),
                   },
                 ].map((item, idx) => (
                   <div
@@ -574,7 +595,7 @@ export default function SettingsPage() {
             <Card className="p-6">
               <h2 className="text-base font-bold text-[var(--color-text)] mb-1">Data Portability & Privacy</h2>
               <p className="text-xs text-[var(--color-text-muted)] mb-5">
-                Export your structured subjects and study logs or reset local state.
+              Export your structured subjects and study logs or clear notification history.
               </p>
 
               <div className="space-y-4">
@@ -590,8 +611,8 @@ export default function SettingsPage() {
 
                 <div className="p-4 rounded-xl border border-[var(--color-error-border)] bg-[var(--color-error-light)] flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-[var(--color-error-text)]">Reset State</p>
-                    <p className="text-[11px] text-rose-700 dark:text-rose-300">Clear notifications and reset temporary data.</p>
+                    <p className="text-xs font-bold text-[var(--color-error-text)]">Clear Notification History</p>
+                    <p className="text-[11px] text-rose-700 dark:text-rose-300">Remove notification entries from this workspace.</p>
                   </div>
                   <Button
                     variant="destructive"
@@ -599,7 +620,7 @@ export default function SettingsPage() {
                     onClick={() => setClearDataOpen(true)}
                     className="text-xs"
                   >
-                    Reset Data
+                    Clear History
                   </Button>
                 </div>
               </div>
@@ -681,15 +702,15 @@ export default function SettingsPage() {
       <Dialog
         open={clearDataOpen}
         onClose={() => setClearDataOpen(false)}
-        title="Reset Study Data?"
-        description="Are you sure you want to reset notification logs?"
+        title="Clear notification history?"
+        description="This removes notification entries from the current workspace."
       >
         <div className="pt-4 flex justify-end gap-2">
           <Button variant="outline" size="sm" onClick={() => setClearDataOpen(false)}>
             Cancel
           </Button>
           <Button variant="destructive" size="sm" onClick={handleClearData}>
-            Confirm Reset
+            Clear History
           </Button>
         </div>
       </Dialog>

@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node src/scripts/testAuth.js && node src/scripts/testUser.js && node src/scripts/testSubject.js && node src/scripts/testRateLimit.js && node --test src/test/spacedRepetition.test.js src/test/revisionApi.test.js src/test/focusSession.test.js",
+    "test": "node src/scripts/testAuth.js && node src/scripts/testUser.js && node src/scripts/testSubject.js && node src/scripts/testRateLimit.js && node --test src/test/spacedRepetition.test.js src/test/revisionApi.test.js src/test/focusSession.test.js src/test/sessionValidation.test.js",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },

@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { parseTimeToMinutes } from "../schemas/session.schema.js";
 import {
   cancelFocusSession,
   completeFocusSession,
@@ -58,9 +59,29 @@ export const addSession = async (req, res) => {
       return res.status(404).json({ error: "Subject not found" });
     }
 
+    const startMins = parseTimeToMinutes(data.startTime);
+    const endMins = parseTimeToMinutes(data.endTime);
+    if (startMins === null || endMins === null) {
+      return res.status(400).json({ error: "Invalid start or end time format" });
+    }
+    if (endMins === startMins) {
+      return res.status(400).json({ error: "End time must be later than start time" });
+    }
+    if (endMins < startMins) {
+      return res.status(400).json({ error: "End time cannot be earlier than start time" });
+    }
+
+    const derivedDuration = endMins - startMins;
+    if (data.duration !== undefined && data.duration !== derivedDuration) {
+      return res.status(400).json({
+        error: `Duration (${data.duration}) does not match the difference between start time and end time (${derivedDuration})`,
+      });
+    }
+
     const session = await prisma.studySession.create({
       data: {
         ...data,
+        duration: derivedDuration,
         date: parseDate(date),
         subjectId,
         topicId: topicId || null,
@@ -118,6 +139,30 @@ export const updateSession = async (req, res) => {
       });
       if (!topic) return res.status(404).json({ error: "Topic not found" });
     }
+
+    const nextStartTime = data.startTime ?? existing.startTime;
+    const nextEndTime = data.endTime ?? existing.endTime;
+    const startMins = parseTimeToMinutes(nextStartTime);
+    const endMins = parseTimeToMinutes(nextEndTime);
+
+    if (startMins === null || endMins === null) {
+      return res.status(400).json({ error: "Invalid start or end time format" });
+    }
+    if (endMins === startMins) {
+      return res.status(400).json({ error: "End time must be later than start time" });
+    }
+    if (endMins < startMins) {
+      return res.status(400).json({ error: "End time cannot be earlier than start time" });
+    }
+
+    const derivedDuration = endMins - startMins;
+    if (data.duration !== undefined && data.duration !== derivedDuration) {
+      return res.status(400).json({
+        error: `Duration (${data.duration}) does not match the difference between start time and end time (${derivedDuration})`,
+      });
+    }
+
+    data.duration = derivedDuration;
 
     const manualCompletion =
       data.status === "completed" && existing.status !== "completed";

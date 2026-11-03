@@ -1,5 +1,3 @@
-import { generateId } from '@/lib/utils'
-
 const today = new Date()
 const todayStr = today.toISOString().split('T')[0]
 
@@ -19,13 +17,95 @@ export const mockSubjects = [
     colorBg: '#dbeafe',
     examDate: dateOffset(28),
     topics: [
-      { id: 'top-1', name: 'Arrays & Linked Lists', status: 'completed', lastRevised: dateOffset(-3), nextRevision: dateOffset(4) },
-      { id: 'top-2', name: 'Stacks & Queues', status: 'completed', lastRevised: dateOffset(-5), nextRevision: dateOffset(2) },
-      { id: 'top-3', name: 'Binary Trees', status: 'in-progress', lastRevised: dateOffset(-1), nextRevision: dateOffset(6) },
-      { id: 'top-4', name: 'Graph Algorithms', status: 'in-progress', lastRevised: null, nextRevision: dateOffset(1) },
-      { id: 'top-5', name: 'Dynamic Programming', status: 'not-started', lastRevised: null, nextRevision: dateOffset(8) },
-      { id: 'top-6', name: 'Sorting Algorithms', status: 'completed', lastRevised: dateOffset(-2), nextRevision: dateOffset(5) },
-      { id: 'top-7', name: 'Hashing', status: 'not-started', lastRevised: null, nextRevision: dateOffset(10) },
+      {
+        id: 'top-1',
+        name: 'Arrays & Linked Lists',
+        status: 'completed',
+        lastRevised: dateOffset(-3),
+        nextRevision: dateOffset(4),
+        revisionCount: 3,
+        intervalDays: 7,
+        schedulingType: 'algorithm',
+        revisionHistory: [
+          { id: 'rev-1', revisionNumber: 1, date: dateOffset(-17), recall: 'good', intervalDays: 3, type: 'algorithm' },
+          { id: 'rev-2', revisionNumber: 2, date: dateOffset(-10), recall: 'easy', intervalDays: 7, type: 'algorithm' },
+          { id: 'rev-3', revisionNumber: 3, date: dateOffset(-3), recall: 'good', intervalDays: 7, type: 'algorithm' },
+        ],
+      },
+      {
+        id: 'top-2',
+        name: 'Stacks & Queues',
+        status: 'completed',
+        lastRevised: dateOffset(-5),
+        nextRevision: dateOffset(2),
+        revisionCount: 2,
+        intervalDays: 7,
+        schedulingType: 'algorithm',
+        revisionHistory: [
+          { id: 'rev-4', revisionNumber: 1, date: dateOffset(-12), recall: 'hard', intervalDays: 3, type: 'algorithm' },
+          { id: 'rev-5', revisionNumber: 2, date: dateOffset(-5), recall: 'good', intervalDays: 7, type: 'algorithm' },
+        ],
+      },
+      {
+        id: 'top-3',
+        name: 'Binary Trees',
+        status: 'in-progress',
+        lastRevised: dateOffset(-1),
+        nextRevision: dateOffset(6),
+        revisionCount: 1,
+        intervalDays: 7,
+        schedulingType: 'manual',
+        revisionHistory: [
+          { id: 'rev-6', revisionNumber: 1, date: dateOffset(-1), recall: 'hard', intervalDays: 7, type: 'manual' },
+        ],
+      },
+      {
+        id: 'top-4',
+        name: 'Graph Algorithms',
+        status: 'in-progress',
+        lastRevised: null,
+        nextRevision: dateOffset(1),
+        revisionCount: 0,
+        intervalDays: 3,
+        schedulingType: 'algorithm',
+        revisionHistory: [],
+      },
+      {
+        id: 'top-5',
+        name: 'Dynamic Programming',
+        status: 'not-started',
+        lastRevised: null,
+        nextRevision: dateOffset(8),
+        revisionCount: 0,
+        intervalDays: 7,
+        schedulingType: 'algorithm',
+        revisionHistory: [],
+      },
+      {
+        id: 'top-6',
+        name: 'Sorting Algorithms',
+        status: 'completed',
+        lastRevised: dateOffset(-2),
+        nextRevision: dateOffset(5),
+        revisionCount: 2,
+        intervalDays: 7,
+        schedulingType: 'algorithm',
+        revisionHistory: [
+          { id: 'rev-7', revisionNumber: 1, date: dateOffset(-9), recall: 'good', intervalDays: 4, type: 'algorithm' },
+          { id: 'rev-8', revisionNumber: 2, date: dateOffset(-2), recall: 'easy', intervalDays: 7, type: 'algorithm' },
+        ],
+      },
+      {
+        id: 'top-7',
+        name: 'Hashing',
+        status: 'not-started',
+        lastRevised: null,
+        nextRevision: dateOffset(10),
+        revisionCount: 0,
+        intervalDays: 7,
+        schedulingType: 'algorithm',
+        revisionHistory: [],
+      },
     ],
   },
   {
@@ -132,95 +212,3 @@ export const mockSessions = [
   { id: 'ses-22', subjectId: 'sub-1', topicId: 'top-5', title: 'DP — Fibonacci & Knapsack', date: dateOffset(3), startTime: '09:00', endTime: '11:00', duration: 120, status: 'upcoming' },
   { id: 'ses-23', subjectId: 'sub-3', topicId: 'top-14', title: 'Vector Spaces — Problems', date: dateOffset(3), startTime: '14:00', endTime: '15:00', duration: 60, status: 'upcoming' },
 ]
-
-
-export const weeklyStudyData = [
-  { day: 'Mon', planned: 300, completed: 270 },
-  { day: 'Tue', planned: 240, completed: 240 },
-  { day: 'Wed', planned: 300, completed: 210 },
-  { day: 'Thu', planned: 270, completed: 270 },
-  { day: 'Fri', planned: 240, completed: 180 },
-  { day: 'Sat', planned: 180, completed: 180 },
-  { day: 'Sun', planned: 120, completed: 90 },
-]
-
-export const subjectProgressData = mockSubjects.map((s) => {
-  const completed = s.topics.filter((t) => t.status === 'completed').length
-  const total = s.topics.length
-  return {
-    name: s.code || s.name.substring(0, 8),
-    fullName: s.name,
-    completed,
-    total,
-    percentage: Math.round((completed / total) * 100),
-    color: s.color,
-  }
-})
-
-export function getSubjectById(id) {
-  return mockSubjects.find((s) => s.id === id)
-}
-
-export function getSessionsForDate(dateStr) {
-  return mockSessions.filter((s) => s.date === dateStr)
-}
-
-export function getTodaySessions() {
-  return getSessionsForDate(todayStr)
-}
-
-export function getUpcomingExams() {
-  return mockSubjects
-    .filter((s) => s.examDate)
-    .map((s) => ({
-      subject: s.name,
-      code: s.code,
-      color: s.color,
-      date: s.examDate,
-      daysLeft: Math.ceil((new Date(s.examDate) - today) / (1000 * 60 * 60 * 24)),
-    }))
-    .sort((a, b) => a.daysLeft - b.daysLeft)
-}
-
-export function getRevisionsDue() {
-  const allTopics = mockSubjects.flatMap((s) =>
-    s.topics.map((t) => ({ ...t, subjectName: s.name, subjectColor: s.color, subjectId: s.id }))
-  )
-
-  const overdue = allTopics.filter(
-    (t) => t.nextRevision && new Date(t.nextRevision) < today && t.status !== 'completed'
-  )
-  const dueToday = allTopics.filter(
-    (t) => t.nextRevision && t.nextRevision === todayStr
-  )
-  const upcoming = allTopics.filter(
-    (t) => t.nextRevision && new Date(t.nextRevision) > today
-  ).sort((a, b) => new Date(a.nextRevision) - new Date(b.nextRevision))
-
-  return { overdue, dueToday, upcoming }
-}
-
-export function getStudyStats() {
-  const todaySessions = getTodaySessions()
-  const completedToday = todaySessions.filter((s) => s.status === 'completed')
-  const totalPlannedMinutes = todaySessions.reduce((acc, s) => acc + s.duration, 0)
-  const completedMinutes = completedToday.reduce((acc, s) => acc + s.duration, 0)
-
-  const allCompleted = mockSessions.filter((s) => s.status === 'completed')
-  const totalStudiedMinutes = allCompleted.reduce((acc, s) => acc + s.duration, 0)
-
-  const allTopics = mockSubjects.flatMap((s) => s.topics)
-  const completedTopics = allTopics.filter((t) => t.status === 'completed')
-
-  return {
-    todayPlanned: totalPlannedMinutes,
-    todayCompleted: completedMinutes,
-    todaySessions: todaySessions.length,
-    todayCompletedSessions: completedToday.length,
-    totalStudiedMinutes,
-    totalTopics: allTopics.length,
-    completedTopics: completedTopics.length,
-    completionRate: Math.round((completedTopics.length / allTopics.length) * 100),
-    weeklyAverage: Math.round(totalStudiedMinutes / 7),
-  }
-}

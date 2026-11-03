@@ -51,7 +51,7 @@ export default function Dialog({ open, onClose, title, description, children, cl
             aria-modal="true"
             aria-label={title}
             className={cn(
-              'relative w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-lg)] overflow-hidden',
+              'relative w-full max-h-[calc(100vh-2rem)] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-lg)]',
               sizes[size],
               className
             )}

@@ -1,15 +1,10 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
   Plus,
-  Clock,
-  CheckCircle2,
-  Filter,
-  Layers,
-  Sparkles,
   Timer
 } from 'lucide-react'
 import { useApp, useSessions } from '@/context/AppContext'
@@ -25,30 +20,42 @@ import {
   isSameMonth,
   isToday
 } from '@/lib/dates'
-import { formatDuration, cn } from '@/lib/utils'
+import { getCalendarDateKey } from '@/lib/revisionSummary'
+import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import Card, { SessionCard } from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
-import Dialog from '@/components/ui/Dialog'
+import ScheduleSessionDialog from '@/components/sessions/ScheduleSessionDialog'
 import EmptyState from '@/components/ui/EmptyState'
 import { toast } from 'sonner'
+import { notifySessionSuccess } from '@/lib/sessionPresentation'
 
 export default function Planner() {
   const { state } = useApp()
-  const { sessions, addSession, completeSession } = useSessions()
+  const {
+    sessions,
+    addSession,
+    completeSession,
+    activeFocusSession,
+    startFocusSession,
+    resumeFocusSession,
+  } = useSessions()
+  const navigate = useNavigate()
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState('month') // 'month' | 'week'
+  const [viewMode, setViewMode] = useState(() =>
+    typeof window !== 'undefined' && window.innerWidth < 640 ? 'week' : 'month',
+  ) // 'month' | 'week'
   const [subjectFilter, setSubjectFilter] = useState('all')
 
-  // Add Session Dialog
+  // Add / Edit Session Dialog
   const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newSubjectId, setNewSubjectId] = useState(state.subjects[0]?.id || '')
-  const [newStartTime, setNewStartTime] = useState('09:00')
-  const [newEndTime, setNewEndTime] = useState('10:30')
-  const [newDuration, setNewDuration] = useState(90)
+  const [editingSession, setEditingSession] = useState(null)
+
+  const handleOpenAddDialog = () => {
+    setEditingSession(null)
+    setAddDialogOpen(true)
+  }
 
   // Navigation handlers
   const handlePrev = () => {
@@ -80,7 +87,7 @@ export default function Planner() {
   })
 
   // Selected date sessions
-  const selectedDateStr = selectedDate.toISOString().split('T')[0]
+  const selectedDateStr = getCalendarDateKey(selectedDate)
   const selectedDaySessions = filteredSessions.filter((s) => s.date === selectedDateStr)
 
   // Calendar cells
@@ -89,34 +96,54 @@ export default function Planner() {
 
   // Helper to check if any subject has an exam on this day
   const getExamOnDay = (date) => {
-    const dStr = date.toISOString().split('T')[0]
+    const dStr = getCalendarDateKey(date)
     return state.subjects.find((s) => s.examDate === dStr)
   }
 
-  const handleCreateSession = (e) => {
-    e.preventDefault()
-    if (!newTitle.trim()) {
-      toast.error('Please enter a session title')
+  const completingRef = useRef(new Set())
+
+  const handleCompleteSession = async (id, title) => {
+    if (!id || completingRef.current.has(id)) return
+    completingRef.current.add(id)
+    try {
+      await completeSession(id)
+      notifySessionSuccess('completed', id, `Completed "${title}"!`)
+    } catch (error) {
+      toast.error(error.message || `Could not complete "${title}".`)
+    } finally {
+      completingRef.current.delete(id)
+    }
+  }
+
+  const handleFocus = async (id, title, status = 'upcoming') => {
+    if (status === 'in-progress' && activeFocusSession?.id === id) {
+      navigate(`/app/focus/${id}`)
       return
     }
-
-    addSession({
-      title: newTitle.trim(),
-      subjectId: newSubjectId,
-      date: selectedDateStr,
-      startTime: newStartTime,
-      endTime: newEndTime,
-      duration: Number(newDuration),
-      status: 'upcoming',
-    })
-
-    toast.success(`Session scheduled for ${formatDate(selectedDate, 'MMM d')}`)
-    setNewTitle('')
-    setAddDialogOpen(false)
+    try {
+      if (status === 'paused') {
+        await resumeFocusSession(id)
+      } else {
+        await startFocusSession(id)
+      }
+      navigate(`/app/focus/${id}`)
+    } catch (error) {
+      if (error?.status === 409 && activeFocusSession?.id) {
+        toast.error('Another session is active. Opening it instead.')
+        navigate(`/app/focus/${activeFocusSession.id}`)
+      } else {
+        toast.error(error.message || `Could not start "${title}".`)
+      }
+    }
   }
 
   return (
     <div className="space-y-6 pb-12">
+      {state.sessionsError && (
+        <div role="alert" className="rounded-xl border border-[var(--color-error-border)] bg-[var(--color-error-light)] px-4 py-3 text-sm text-[var(--color-error-text)]">
+          We couldn’t load your planner sessions. Refresh the page to try again.
+        </div>
+      )}
       {/* Top Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs">
         <div className="flex items-center gap-3">
@@ -196,7 +223,7 @@ export default function Planner() {
           {/* Add Session CTA */}
           <Button
             size="sm"
-            onClick={() => setAddDialogOpen(true)}
+            onClick={handleOpenAddDialog}
             className="text-xs font-semibold gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" /> Add Session
@@ -222,7 +249,7 @@ export default function Planner() {
             {viewMode === 'month' && (
               <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
                 {monthDays.map((day, idx) => {
-                  const dayStr = day.toISOString().split('T')[0]
+                  const dayStr = getCalendarDateKey(day)
                   const daySessions = filteredSessions.filter((s) => s.date === dayStr)
                   const isCurrentMonth = isSameMonth(day, currentDate)
                   const isDayToday = isToday(day)
@@ -296,7 +323,7 @@ export default function Planner() {
             {viewMode === 'week' && (
               <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
                 {weekDays.map((day, idx) => {
-                  const dayStr = day.toISOString().split('T')[0]
+                  const dayStr = getCalendarDateKey(day)
                   const daySessions = filteredSessions.filter((s) => s.date === dayStr)
                   const isDayToday = isToday(day)
                   const isSelected = isSameDay(day, selectedDate)
@@ -339,7 +366,6 @@ export default function Planner() {
 
                         <div className="space-y-1.5">
                           {daySessions.map((ses) => {
-                            const sub = state.subjects.find((s) => s.id === ses.subjectId)
                             return (
                               <div
                                 key={ses.id}
@@ -365,7 +391,7 @@ export default function Planner() {
                         onClick={(e) => {
                           e.stopPropagation()
                           setSelectedDate(day)
-                          setAddDialogOpen(true)
+                          handleOpenAddDialog()
                         }}
                         className="mt-3 w-full py-1 text-[11px] font-semibold text-[var(--color-brand)] hover:bg-[var(--color-brand-50)] rounded transition-colors text-center cursor-pointer"
                       >
@@ -393,7 +419,7 @@ export default function Planner() {
               </div>
               <Button
                 size="sm"
-                onClick={() => setAddDialogOpen(true)}
+                onClick={handleOpenAddDialog}
                 className="text-xs font-semibold gap-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Add
@@ -421,7 +447,7 @@ export default function Planner() {
                 description={`No study blocks scheduled for ${formatDate(selectedDate, 'MMM d')}.`}
                 action={
                   <Button
-                    onClick={() => setAddDialogOpen(true)}
+                    onClick={handleOpenAddDialog}
                     size="sm"
                     className="text-xs font-semibold gap-1"
                   >
@@ -438,10 +464,13 @@ export default function Planner() {
                       key={session.id}
                       session={session}
                       subject={subject}
-                      onComplete={(id) => {
-                        completeSession(id)
-                        toast.success('Marked session completed!')
+                      onComplete={handleCompleteSession}
+                      onEdit={(sess) => {
+                        setEditingSession(sess)
+                        setAddDialogOpen(true)
                       }}
+                      onStartFocus={(id, title) => handleFocus(id, title)}
+                      onResumeFocus={(id, title, status) => handleFocus(id, title, status)}
                       showActions={true}
                     />
                   )
@@ -452,96 +481,20 @@ export default function Planner() {
         </div>
       </div>
 
-      {/* Add Study Session Modal Dialog */}
-      <Dialog
+      {/* Add / Edit Study Session Modal Dialog */}
+      <ScheduleSessionDialog
         open={addDialogOpen}
-        onClose={() => setAddDialogOpen(false)}
-        title="Schedule Study Session"
+        onClose={() => {
+          setAddDialogOpen(false)
+          setEditingSession(null)
+        }}
+        initialSession={editingSession}
+        defaultDate={selectedDateStr}
+        defaultStartTime="09:00"
+        defaultEndTime="10:30"
         description={`Set up a session for ${formatDate(selectedDate, 'MMMM d, yyyy')}.`}
-      >
-        <form onSubmit={handleCreateSession} className="space-y-4 mt-2">
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Topic or Focus Area
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Dynamic Programming Knapsack Problem"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-              Course / Subject
-            </label>
-            <select
-              value={newSubjectId}
-              onChange={(e) => setNewSubjectId(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-            >
-              {state.subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.code ? `(${s.code})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-                Start Time
-              </label>
-              <input
-                type="time"
-                value={newStartTime}
-                onChange={(e) => setNewStartTime(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-                End Time
-              </label>
-              <input
-                type="time"
-                value={newEndTime}
-                onChange={(e) => setNewEndTime(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-[var(--color-text)] uppercase tracking-wider mb-1.5">
-                Duration (min)
-              </label>
-              <input
-                type="number"
-                value={newDuration}
-                onChange={(e) => setNewDuration(e.target.value)}
-                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-              />
-            </div>
-          </div>
-
-          <div className="pt-3 border-t border-[var(--color-border-light)] flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setAddDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" size="sm" className="font-semibold">
-              Save to Calendar
-            </Button>
-          </div>
-        </form>
-      </Dialog>
+        submitLabel="Save to Calendar"
+      />
     </div>
   )
 }

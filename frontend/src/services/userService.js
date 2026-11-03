@@ -1,40 +1,11 @@
+import { request } from './apiClient'
+
 /**
  * User API Service
  * Handles fetching user profile, updating user profile / preferences, and updating password
  */
 
 const API_BASE = '/api/user'
-
-async function request(url, options = {}) {
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-  }
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-    credentials: 'include', // Ensure cookies are sent and received
-  })
-
-  let data
-  try {
-    data = await response.json()
-  } catch (err) {
-    data = { message: 'Unexpected server response' }
-  }
-
-  if (!response.ok) {
-    const error = new Error(data.message || `Request failed with status ${response.status}`)
-    error.status = response.status
-    error.errors = data.errors || []
-    throw error
-  }
-
-  return data
-}
 
 export const userService = {
   /**

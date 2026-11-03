@@ -1,40 +1,12 @@
+import { request } from './apiClient'
+
 /**
  * Authentication API Service
  * Handles login, signup, logout, session verification, and Google OAuth
  */
 
 const API_BASE = '/api/auth'
-
-async function request(url, options = {}) {
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-  }
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...defaultHeaders,
-      ...options.headers,
-    },
-    credentials: 'include', // Ensure cookies are sent and received
-  })
-
-  let data
-  try {
-    data = await response.json()
-  } catch (err) {
-    data = { message: 'Unexpected server response' }
-  }
-
-  if (!response.ok) {
-    const error = new Error(data.message || `Request failed with status ${response.status}`)
-    error.status = response.status
-    error.errors = data.errors || []
-    throw error
-  }
-
-  return data
-}
+let sessionRequest = null
 
 export const authService = {
   async signup({ name, email, password }) {
@@ -58,9 +30,14 @@ export const authService = {
   },
 
   async getMe() {
-    return request(`${API_BASE}/me`, {
-      method: 'GET',
-    })
+    if (!sessionRequest) {
+      sessionRequest = request(`${API_BASE}/me`, {
+        method: 'GET',
+      }).finally(() => {
+        sessionRequest = null
+      })
+    }
+    return sessionRequest
   },
 
   getGoogleAuthUrl() {

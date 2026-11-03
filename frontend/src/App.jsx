@@ -19,6 +19,7 @@ const SubjectDetail = lazy(() => import('@/pages/app/SubjectDetail'))
 const Revision = lazy(() => import('@/pages/app/Revision'))
 const ProgressPage = lazy(() => import('@/pages/app/ProgressPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
+const FocusModePage = lazy(() => import('@/pages/app/FocusModePage'))
 
 function LoadingFallback() {
   return (
@@ -47,6 +48,8 @@ export default function App() {
         {/* Protected routes: User CANNOT access anything here without logging in or signing up */}
         <Route element={<ProtectedRoute />}>
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/app/focus" element={<FocusModePage />} />
+          <Route path="/app/focus/:sessionId" element={<FocusModePage />} />
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />

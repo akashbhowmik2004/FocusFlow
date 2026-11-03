@@ -16,8 +16,7 @@ import {
   Award
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
-import { useApp } from '@/context/AppContext'
+import { useApp, useSubjects } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
 import { subjectColors, generateId } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -25,6 +24,7 @@ import { toast } from 'sonner'
 export default function Onboarding() {
   const navigate = useNavigate()
   const { state, dispatch } = useApp()
+  const { addSubject } = useSubjects()
   const { updateUser } = useAuth()
 
   const [step, setStep] = useState(1)
@@ -33,15 +33,12 @@ export default function Onboarding() {
   // Form states across steps
   const [goal, setGoal] = useState(state.user?.studyGoal || '')
   const [context, setContext] = useState('University / College')
-  const [subjectsList, setSubjectsList] = useState([
-    { id: 'onb-1', name: 'Data Structures & Algorithms', code: 'CS201', color: '#3b82f6' },
-    { id: 'onb-2', name: 'Linear Algebra', code: 'MATH202', color: '#22c55e' },
-  ])
+  const [subjectsList, setSubjectsList] = useState([])
   const [newSubName, setNewSubName] = useState('')
   const [newSubCode, setNewSubCode] = useState('')
   const [newSubColor, setNewSubColor] = useState(subjectColors[1].value)
-  const [examSubject, setExamSubject] = useState('Linear Algebra')
-  const [examDate, setExamDate] = useState('2026-11-20')
+  const [examSubject, setExamSubject] = useState('')
+  const [examDate, setExamDate] = useState('')
   const [dailyHours, setDailyHours] = useState(5)
   const [preferredTime, setPreferredTime] = useState('Morning (09:00 - 13:00)')
 
@@ -76,10 +73,30 @@ export default function Onboarding() {
         await updateUser({
           studyGoal: goal,
           dailyStudyHours: dailyHours,
+          preferredStartTime: preferredTime.startsWith('Morning')
+            ? '09:00'
+            : preferredTime.startsWith('Afternoon')
+              ? '13:00'
+              : '18:00',
+          preferredEndTime: preferredTime.startsWith('Morning')
+            ? '13:00'
+            : preferredTime.startsWith('Afternoon')
+              ? '17:00'
+              : '22:00',
+        })
+      }
+
+      for (const subject of subjectsList) {
+        await addSubject({
+          name: subject.name,
+          code: subject.code || null,
+          color: subject.color,
+          examDate: subject.name === examSubject && examDate ? examDate : null,
         })
       }
     } catch (err) {
-      console.warn('Failed to save onboarding preferences to server:', err)
+      toast.error(err.message || 'Could not save your onboarding setup')
+      return
     }
 
     // Save onboarding preferences into global context

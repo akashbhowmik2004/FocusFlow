@@ -4,18 +4,18 @@ import {
   Clock,
   CheckCircle2,
   Calendar,
-  AlertTriangle,
   RotateCcw,
-  ArrowRight,
   TrendingUp,
   TrendingDown,
   Timer,
-  BookOpen,
-  ChevronRight
+  Play,
+  ChevronRight,
+  Plus,
+  Pencil
 } from 'lucide-react'
-import { cn, formatDuration } from '@/lib/utils'
-import { formatDate } from '@/lib/dates'
-import Badge from '@/components/ui/Badge'
+import { cn } from '@/lib/utils'
+import { getPlannedDurationMinutes } from '@/lib/sessionPresentation'
+import { formatDate, useExamCountdown } from '@/lib/dates'
 import Progress from '@/components/ui/Progress'
 import Button from '@/components/ui/Button'
 
@@ -274,19 +274,79 @@ export function StatCard({
  * SubjectCard represents an active course/subject.
  * Replaces the generic card + 2px top stripe + colored square icon pattern.
  * Features an academic index-dossier layout with course code badge, exam countdown pill,
- * topic mastery ratio, and clean curriculum explorer link.
+ * topic mastery ratio, empty syllabus callout, and clean curriculum explorer link.
  */
 export function SubjectCard({
   subject,
-  totalTopics,
-  completedTopics,
-  daysLeft,
+  totalTopics: propTotalTopics,
+  completedTopics: propCompletedTopics,
+  daysLeft: propDaysLeft,
   onExplore,
+  onAddSyllabus,
   className,
   ...props
 }) {
-  const percentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0
-  const isUrgentExam = daysLeft !== null && daysLeft <= 21
+  const liveCountdown = useExamCountdown(subject?.examDate)
+
+  // Use liveCountdown; if examDate was not provided but legacy propDaysLeft was passed, fallback safely
+  const countdown = subject?.examDate
+    ? liveCountdown
+    : propDaysLeft !== undefined && propDaysLeft !== null
+    ? {
+        status:
+          propDaysLeft < 0
+            ? 'completed'
+            : propDaysLeft === 0
+            ? 'today'
+            : propDaysLeft === 1
+            ? 'tomorrow'
+            : 'upcoming',
+        label:
+          propDaysLeft < 0
+            ? 'Exam completed'
+            : propDaysLeft === 0
+            ? 'Exam today'
+            : propDaysLeft === 1
+            ? '1 day left'
+            : `${propDaysLeft} days left`,
+        daysLeft: Math.max(0, propDaysLeft),
+        isCompleted: propDaysLeft < 0,
+        isToday: propDaysLeft === 0,
+        isTomorrow: propDaysLeft === 1,
+        isUrgent: propDaysLeft <= 21,
+        isValid: true,
+      }
+    : liveCountdown
+
+  const totalTopics =
+    propTotalTopics !== undefined
+      ? propTotalTopics
+      : (subject?.topics?.length ?? 0)
+
+  const completedTopics =
+    propCompletedTopics !== undefined
+      ? propCompletedTopics
+      : (subject?.topics?.filter((t) => t.status === 'completed').length ?? 0)
+
+  const hasSyllabus = totalTopics > 0
+  const percentage = hasSyllabus
+    ? Math.min(100, Math.max(0, Math.round((completedTopics / totalTopics) * 100)))
+    : 0
+  const remainingTopics = Math.max(0, totalTopics - completedTopics)
+
+  const handleAddSyllabusClick = (e) => {
+    if (onAddSyllabus) {
+      e.preventDefault()
+      onAddSyllabus(subject)
+    }
+  }
+
+  const handleExploreClick = (e) => {
+    if (onExplore) {
+      e.preventDefault()
+      onExplore(subject)
+    }
+  }
 
   return (
     <Card
@@ -302,10 +362,10 @@ export function SubjectCard({
             {/* Subject Color Pill Pip */}
             <span
               className="w-2.5 h-2.5 rounded-full shrink-0 ring-2 ring-white dark:ring-slate-900"
-              style={{ backgroundColor: subject.color }}
+              style={{ backgroundColor: subject?.color || 'var(--color-brand)' }}
               aria-hidden="true"
             />
-            {subject.code ? (
+            {subject?.code ? (
               <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[var(--card-bg)] text-[var(--color-text)] border border-[var(--card-border)] tracking-wide">
                 {subject.code}
               </span>
@@ -317,20 +377,37 @@ export function SubjectCard({
           </div>
 
           {/* Exam Countdown Tag */}
-          {subject.examDate && daysLeft !== null ? (
+          {countdown.status === 'missing' ? (
+            <span className="text-[11px] font-medium text-[var(--color-text-muted)]">
+              No exam date set
+            </span>
+          ) : countdown.status === 'completed' ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold shrink-0 bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+              <CheckCircle2 className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+              <span>Exam completed</span>
+            </span>
+          ) : countdown.status === 'today' ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold shrink-0 bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]">
+              <Timer className="w-3 h-3" />
+              <span>Exam today</span>
+            </span>
+          ) : countdown.status === 'tomorrow' ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold shrink-0 bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]">
+              <Timer className="w-3 h-3" />
+              <span>1 day left</span>
+            </span>
+          ) : (
             <span
               className={cn(
                 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold shrink-0',
-                isUrgentExam
+                countdown.isUrgent
                   ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
                   : 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
               )}
             >
               <Timer className="w-3 h-3" />
-              <span>{daysLeft}d left</span>
+              <span>{countdown.label}</span>
             </span>
-          ) : (
-            <span className="text-[11px] text-[var(--color-text-muted)]">No exam set</span>
           )}
         </div>
 
@@ -338,38 +415,70 @@ export function SubjectCard({
         <div className="p-4 sm:p-5 space-y-4">
           <div>
             <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight line-clamp-1 group-hover:text-[var(--color-brand)] transition-colors">
-              {subject.name}
+              {subject?.name}
             </h3>
-            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-              {totalTopics} syllabus {totalTopics === 1 ? 'module' : 'modules'}
-            </p>
+            {hasSyllabus && (
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5 font-medium">
+                {totalTopics} syllabus {totalTopics === 1 ? 'module' : 'modules'}
+              </p>
+            )}
           </div>
 
-          {/* Syllabus Completion Metric */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-[var(--color-text-secondary)] font-medium">Syllabus Mastery</span>
-              <span className="font-bold text-[var(--color-text)] tabular-nums">{percentage}%</span>
+          {hasSyllabus ? (
+            /* Syllabus Completion Metric */
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--color-text-secondary)] font-medium">Syllabus Mastery</span>
+                <span className="font-bold text-[var(--color-text)] font-mono tabular-nums">{percentage}%</span>
+              </div>
+              <Progress
+                value={completedTopics}
+                max={totalTopics}
+                color={subject?.color}
+                size="sm"
+              />
+              <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)] font-medium">
+                <span>{completedTopics} mastered</span>
+                <span>{remainingTopics} remaining</span>
+              </div>
             </div>
-            <Progress
-              value={completedTopics}
-              max={Math.max(totalTopics, 1)}
-              color={subject.color}
-              size="sm"
-            />
-            <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
-              <span>{completedTopics} mastered</span>
-              <span>{totalTopics - completedTopics} remaining</span>
+          ) : (
+            /* Meaningful Empty Syllabus State */
+            <div className="rounded-lg border border-dashed border-[var(--card-border)] bg-[var(--card-bg-subtle)]/50 p-4 text-center space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs sm:text-sm font-semibold text-[var(--color-text)]">
+                  No syllabus added yet
+                </p>
+                <p className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed max-w-xs mx-auto">
+                  Add your syllabus chapters to track your preparation and revision progress.
+                </p>
+              </div>
+
+              <div>
+                <Link
+                  to={`/app/subjects/${subject?.id}?addTopic=true`}
+                  onClick={handleAddSyllabusClick}
+                  className="inline-flex items-center justify-center font-semibold text-xs h-8 px-3.5 rounded-lg border border-[var(--color-border)] bg-[var(--card-bg)] text-[var(--color-text)] hover:bg-[var(--card-bg-subtle)] hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] transition-colors gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add syllabus chapters</span>
+                </Link>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Exam Date Footnote */}
-          {subject.examDate && (
-            <div className="pt-2.5 border-t border-[var(--card-border-subtle)] flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
+          {subject?.examDate && countdown.isValid && (
+            <div className="pt-2.5 border-t border-[var(--card-border-subtle)] flex items-center justify-between text-[11px] text-[var(--color-text-muted)] font-medium">
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
                 <span>Exam: {formatDate(subject.examDate, 'MMM d, yyyy')}</span>
               </span>
+              {countdown.isCompleted && (
+                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Completed
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -377,15 +486,18 @@ export function SubjectCard({
 
       {/* Card Action Link Bar */}
       <Link
-        to={`/app/subjects/${subject.id}`}
+        to={`/app/subjects/${subject?.id}`}
+        onClick={handleExploreClick}
         className="px-4 sm:px-5 py-2.5 bg-[var(--card-bg-subtle)] border-t border-[var(--card-border-subtle)] flex items-center justify-between text-xs font-semibold text-[var(--color-text-secondary)] hover:text-[var(--color-brand)] hover:bg-[var(--card-bg-muted)] transition-colors"
       >
-        <span>Explore Syllabus Chapters</span>
+        <span>{hasSyllabus ? 'Explore Syllabus Chapters' : 'Manage Course & Syllabus'}</span>
         <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
       </Link>
     </Card>
   )
 }
+
+export { SubjectCard as CourseCard }
 
 /* ── 3. SessionCard: Schedule-Oriented Study Block ────────── */
 /**
@@ -398,7 +510,10 @@ export function SessionCard({
   subject,
   onComplete,
   onPostpone,
+  onEdit,
   onDelete,
+  onStartFocus,
+  onResumeFocus,
   isLive,
   isDone,
   showActions = true,
@@ -406,6 +521,7 @@ export function SessionCard({
   ...props
 }) {
   const isCompleted = isDone ?? session.status === 'completed'
+  const isCancelled = session.status === 'cancelled'
   const isCurrentLive = isLive ?? session.status === 'in-progress'
 
   return (
@@ -414,6 +530,8 @@ export function SessionCard({
         'group relative p-3 sm:p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3',
         isCompleted
           ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
+          : isCancelled
+          ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]'
           : isCurrentLive
           ? 'bg-[var(--item-live-bg)] border-[var(--item-live-border)] shadow-xs ring-1 ring-[var(--color-brand-100)]'
           : 'bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border-hover)]',
@@ -425,12 +543,17 @@ export function SessionCard({
         {/* Completion Checkmark Button */}
         {onComplete ? (
           <button
-            onClick={() => onComplete(session.id, session.title)}
+            type="button"
+            onClick={() => {
+              if (isCompleted) return
+              onComplete(session.id, session.title)
+            }}
+            disabled={isCompleted}
             className={cn(
-              'mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:outline-none',
+              'mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:outline-none',
               isCompleted
-                ? 'bg-emerald-600 border-emerald-600 text-white'
-                : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-transparent'
+                ? 'bg-emerald-600 border-emerald-600 text-white cursor-default'
+                : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-transparent cursor-pointer'
             )}
             title={isCompleted ? 'Marked complete' : 'Click to complete'}
             aria-label={isCompleted ? `Completed: ${session.title}` : `Complete: ${session.title}`}
@@ -454,6 +577,8 @@ export function SessionCard({
                 'text-sm font-semibold tracking-tight transition-colors',
                 isCompleted
                   ? 'line-through text-[var(--color-text-muted)]'
+                  : isCancelled
+                  ? 'text-[var(--color-text-muted)]'
                   : 'text-[var(--color-text)]'
               )}
             >
@@ -480,13 +605,21 @@ export function SessionCard({
           </div>
 
           {/* Time & Duration Meta */}
-          <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] mt-1 font-mono">
+          <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] mt-1 font-mono flex-wrap">
             <span className="flex items-center gap-1 font-medium">
               <Clock className="w-3 h-3 text-[var(--color-text-secondary)]" />
               {session.startTime} – {session.endTime}
             </span>
             <span>•</span>
-            <span>{session.duration}m</span>
+            <span>{getPlannedDurationMinutes(session)}m planned</span>
+            {isCompleted && typeof session.actualDurationSeconds === 'number' && (
+              <>
+                <span>•</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                  {Math.round(session.actualDurationSeconds / 60)}m actual
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -494,8 +627,28 @@ export function SessionCard({
       {/* Action Controls */}
       {showActions && (
         <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-          {!isCompleted ? (
+          {!isCompleted && !isCancelled ? (
             <>
+              {(session.status === 'upcoming' && onStartFocus) && (
+                <Button
+                  size="sm"
+                  onClick={() => onStartFocus(session.id, session.title)}
+                  className="text-xs h-8"
+                >
+                  <Play className="w-3.5 h-3.5 mr-1" />
+                  Start Focus
+                </Button>
+              )}
+              {(session.status === 'in-progress' || session.status === 'paused') && onResumeFocus && (
+                <Button
+                  size="sm"
+                  onClick={() => onResumeFocus(session.id, session.title, session.status)}
+                  className="text-xs h-8"
+                >
+                  <Play className="w-3.5 h-3.5 mr-1" />
+                  {session.status === 'paused' ? 'Resume Focus' : 'Open Focus'}
+                </Button>
+              )}
               {onComplete && (
                 <Button
                   variant="outline"
@@ -505,6 +658,18 @@ export function SessionCard({
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                   Done
+                </Button>
+              )}
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(session)}
+                  className="text-xs h-8 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  title="Edit session"
+                >
+                  <Pencil className="w-3.5 h-3.5 mr-1" />
+                  Edit
                 </Button>
               )}
               {onPostpone && (
@@ -520,9 +685,14 @@ export function SessionCard({
               )}
             </>
           ) : (
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Completed
+            <span className={cn(
+              'text-xs font-semibold flex items-center gap-1',
+              isCompleted
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-[var(--color-text-muted)]',
+            )}>
+              {isCompleted ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span aria-hidden="true">×</span>}
+              {isCompleted ? 'Completed' : 'Cancelled'}
             </span>
           )}
 
