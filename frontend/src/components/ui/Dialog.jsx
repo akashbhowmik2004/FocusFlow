@@ -1,11 +1,13 @@
-import { useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
+import { useEffect, useRef, useCallback, useId } from 'react'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function Dialog({ open, onClose, title, description, children, className, size = 'default' }) {
   const overlayRef = useRef(null)
   const dialogRef = useRef(null)
+  const descriptionId = useId()
+  const shouldReduceMotion = useReducedMotion()
 
   const sizes = {
     sm: 'max-w-md',
@@ -38,11 +40,11 @@ export default function Dialog({ open, onClose, title, description, children, cl
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <motion.div
             ref={overlayRef}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
             onClick={onClose}
           />
           <motion.div
@@ -50,27 +52,30 @@ export default function Dialog({ open, onClose, title, description, children, cl
             role="dialog"
             aria-modal="true"
             aria-label={title}
+            aria-describedby={description ? descriptionId : undefined}
             className={cn(
               'relative w-full max-h-[calc(100vh-2rem)] overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-lg)]',
               sizes[size],
               className
             )}
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
           >
             {(title || description) && (
               <div className="px-6 pt-6 pb-2">
                 {title && <h2 className="text-lg font-semibold text-[var(--color-text)]">{title}</h2>}
                 {description && (
-                  <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{description}</p>
+                  <p id={descriptionId} className="mt-1 text-sm text-[var(--color-text-secondary)]">
+                    {description}
+                  </p>
                 )}
               </div>
             )}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 p-1 rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]"
               aria-label="Close dialog"
             >
               <X className="w-4 h-4" />

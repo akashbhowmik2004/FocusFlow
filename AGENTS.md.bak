@@ -1,0 +1,10 @@
+# Project UI Guidelines: Hallmark
+
+All UI development, page redesigns, and component styling in FocusFlow must follow the **Hallmark** design skill located at `.agents/skills/hallmark/SKILL.md`.
+
+## Quality Floor Checklist
+- Enforce tokens for colors and fonts (declared at `:root` / Tailwind theme tokens).
+- No `transition: all`. Motion limited to `transform` and `opacity`.
+- Clean hierarchy: no eyebrows, no small caps/tracked caps on labels, no generic purple-blue gradients, no card-in-card nesting.
+- Ensure all interactive elements have immediate `:focus-visible` styling.
+- Follow Hallmark's layout standards and slop-prevention guidelines for responsive, intentional interfaces.

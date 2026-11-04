@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "hallmark:floor": "node ../.agents/skills/hallmark/scripts/sloplint.mjs src/components/ui src/pages/app --scope app --tier floor",
+    "hallmark:check": "node ../.agents/skills/hallmark/scripts/sloplint.mjs src/components/ui src/pages/app --scope app"
   },
   "dependencies": {
     "@hookform/resolvers": "^6.0.0",

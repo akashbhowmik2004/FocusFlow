@@ -44,16 +44,16 @@ export default function GoogleButton({
       disabled={disabled || isLoading}
       aria-busy={isLoading}
       className={cn(
-        'relative w-full h-11 px-4 flex items-center justify-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-semibold text-[var(--color-text)] shadow-xs transition-all duration-150',
-        'hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-border)] hover:shadow-sm active:scale-[0.99]',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]',
+        'relative w-full h-11 px-4 flex items-center justify-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm font-semibold text-[var(--color-text)] shadow-xs transition-colors transition-shadow duration-150 motion-reduce:transition-none',
+        'hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-border)] hover:shadow-sm active:scale-[0.99] motion-reduce:active:scale-100',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
         'disabled:opacity-60 disabled:pointer-events-none disabled:active:scale-100 cursor-pointer',
         className
       )}
     >
       {isLoading ? (
         <>
-          <Loader2 className="w-4 h-4 animate-spin text-[var(--color-brand)]" />
+          <Loader2 className="w-4 h-4 motion-safe:animate-spin text-[var(--color-brand)]" />
           <span>{loadingText}</span>
         </>
       ) : (

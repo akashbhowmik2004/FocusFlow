@@ -11,7 +11,7 @@ export default function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center py-10 px-6 text-center transition-all',
+        'flex flex-col items-center justify-center py-10 px-6 text-center transition-colors motion-reduce:transition-none',
         bordered &&
           'rounded-xl border border-dashed border-[var(--card-border)] bg-[var(--card-bg-subtle)]/40',
         className

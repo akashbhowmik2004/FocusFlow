@@ -13,9 +13,9 @@ const Input = forwardRef(({ className, type = 'text', label, error, ...props }, 
         type={type}
         ref={ref}
         className={cn(
-          'flex h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1 text-sm text-[var(--color-text)] shadow-[var(--shadow-xs)] transition-colors duration-[var(--transition-fast)]',
+          'flex h-9 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-1 text-sm text-[var(--color-text)] shadow-[var(--shadow-xs)] transition-colors duration-[var(--transition-fast)] motion-reduce:transition-none',
           'placeholder:text-[var(--color-text-muted)]',
-          'focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:ring-offset-1 focus:border-transparent',
+          'focus:outline-none focus:ring-2 focus:ring-[var(--color-text)] dark:focus:ring-slate-400 focus:ring-offset-1 focus:border-transparent',
           'disabled:cursor-not-allowed disabled:opacity-50',
           error && 'border-[var(--color-error)] focus:ring-[var(--color-error)]',
           className

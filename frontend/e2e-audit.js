@@ -13,7 +13,7 @@ const routes = [
   { name: '02_login', path: '/login', viewport: { width: 1280, height: 800 } },
   { name: '03_signup', path: '/signup', viewport: { width: 1280, height: 800 } },
   { name: '04_onboarding', path: '/onboarding', viewport: { width: 1280, height: 800 } },
-  { name: '05_dashboard_desktop', path: '/app/dashboard', viewport: { width: 1440, height: 900 } },
+  { name: '05_dashboard_desktop', path: '/app/dashboard', viewport: { width: 1440, height: 1024 } },
   { name: '05_dashboard_tablet', path: '/app/dashboard', viewport: { width: 768, height: 1024 } },
   { name: '05_dashboard_mobile', path: '/app/dashboard', viewport: { width: 390, height: 844 } },
   { name: '06_my_day', path: '/app/day', viewport: { width: 1280, height: 800 } },
@@ -46,7 +46,7 @@ async function runAudit() {
     })
 
     try {
-      const url = `http://127.0.0.1:5173${r.path}`
+      const url = `http://localhost:5173${r.path}`
       await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 })
       await page.waitForTimeout(500) // allow motion animations to settle
 
@@ -75,7 +75,7 @@ async function runAudit() {
   const testPage = await browser.newPage({ viewport: { width: 1280, height: 800 } })
   try {
     // 1. Visit Login and Sign In
-    await testPage.goto('http://127.0.0.1:5173/login', { waitUntil: 'networkidle' })
+    await testPage.goto('http://localhost:5173/login', { waitUntil: 'networkidle' })
     console.log('  Testing Login submit...')
     const submitBtn = testPage.locator('button[type="submit"]')
     await submitBtn.click()
@@ -95,7 +95,7 @@ async function runAudit() {
 
     // 3. Navigate to Planner & toggle to Week view
     console.log('  Testing Planner View switching...')
-    await testPage.goto('http://127.0.0.1:5173/app/planner', { waitUntil: 'networkidle' })
+    await testPage.goto('http://localhost:5173/app/planner', { waitUntil: 'networkidle' })
     const weekBtn = testPage.locator('button:has-text("Week")')
     await weekBtn.click()
     await testPage.waitForTimeout(400)
@@ -104,7 +104,7 @@ async function runAudit() {
 
     // 4. Navigate to Subjects and open CS201 details
     console.log('  Testing Subjects drill-down...')
-    await testPage.goto('http://127.0.0.1:5173/app/subjects', { waitUntil: 'networkidle' })
+    await testPage.goto('http://localhost:5173/app/subjects', { waitUntil: 'networkidle' })
     const subjectCard = testPage.locator('text=Data Structures & Algorithms').first()
     await subjectCard.click()
     await testPage.waitForURL('**/app/subjects/**', { timeout: 5000 })
@@ -113,7 +113,7 @@ async function runAudit() {
 
     // 5. Test Revision Queue action
     console.log('  Testing Revision action...')
-    await testPage.goto('http://127.0.0.1:5173/app/revision', { waitUntil: 'networkidle' })
+    await testPage.goto('http://localhost:5173/app/revision', { waitUntil: 'networkidle' })
     const reviseBtn = testPage.locator('button:has-text("Revise & Reset"), button:has-text("Mark Reviewed")').first()
     if (await reviseBtn.isVisible()) {
       await reviseBtn.click()
@@ -124,7 +124,7 @@ async function runAudit() {
 
     // 6. Test Settings Theme Toggle
     console.log('  Testing Theme toggle in Settings...')
-    await testPage.goto('http://127.0.0.1:5173/app/settings', { waitUntil: 'networkidle' })
+    await testPage.goto('http://localhost:5173/app/settings', { waitUntil: 'networkidle' })
     const appearanceTab = testPage.locator('button:has-text("Theme & Appearance")')
     await appearanceTab.click()
     const darkBtn = testPage.locator('button:has-text("Midnight Dark")')

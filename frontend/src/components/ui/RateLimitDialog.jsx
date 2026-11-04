@@ -151,10 +151,10 @@ export default function RateLimitDialog() {
               <div className="h-2 w-full rounded-full bg-[var(--color-border)] overflow-hidden">
                 <div
                   className={cn(
-                    'h-full transition-all duration-500 ease-out rounded-full',
+                    'h-full w-full origin-left transition-transform duration-500 ease-out motion-reduce:transition-none rounded-full',
                     isCooldownActive ? 'bg-amber-500' : 'bg-emerald-500'
                   )}
-                  style={{ width: `${progressPercent}%` }}
+                  style={{ transform: `scaleX(${progressPercent / 100})` }}
                 />
               </div>
 

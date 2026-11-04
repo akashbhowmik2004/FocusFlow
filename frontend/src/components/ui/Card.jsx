@@ -52,7 +52,7 @@ export const Card = forwardRef(function Card(
     panel:
       'rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--card-shadow)] overflow-hidden',
     interactive:
-      'rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--card-shadow)] transition-all duration-200 hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-shadow-hover)] cursor-pointer',
+      'rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--card-shadow)] transition-colors transition-shadow duration-200 motion-reduce:transition-none hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-shadow-hover)] cursor-pointer',
     elevated:
       'rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--card-shadow-elevated)]',
     outline:
@@ -61,7 +61,7 @@ export const Card = forwardRef(function Card(
 
   const hoverStyle =
     hover && variant !== 'interactive'
-      ? 'transition-all duration-200 hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-shadow-hover)]'
+      ? 'transition-colors transition-shadow duration-200 motion-reduce:transition-none hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-shadow-hover)]'
       : ''
 
   return (
@@ -176,7 +176,7 @@ export function StatCard({
     <Card
       variant="default"
       className={cn(
-        'p-4 sm:p-5 flex flex-col justify-between transition-all duration-200',
+        'p-4 sm:p-5 flex flex-col justify-between transition-colors transition-shadow duration-200 motion-reduce:transition-none',
         onClick && 'cursor-pointer hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-shadow-hover)]',
         className
       )}
@@ -193,7 +193,7 @@ export function StatCard({
               aria-hidden="true"
             />
           )}
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-secondary)] truncate">
+          <span className="text-xs font-semibold text-[var(--color-text-secondary)] truncate">
             {label}
           </span>
         </div>
@@ -475,7 +475,7 @@ export function SubjectCard({
                 <span>Exam: {formatDate(subject.examDate, 'MMM d, yyyy')}</span>
               </span>
               {countdown.isCompleted && (
-                <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   Completed
                 </span>
               )}
@@ -527,7 +527,7 @@ export function SessionCard({
   return (
     <div
       className={cn(
-        'group relative p-3 sm:p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3',
+        'group relative p-3 sm:p-4 rounded-xl border transition-colors duration-200 motion-reduce:transition-none flex flex-col sm:flex-row sm:items-center justify-between gap-3',
         isCompleted
           ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
           : isCancelled
@@ -550,7 +550,7 @@ export function SessionCard({
             }}
             disabled={isCompleted}
             className={cn(
-              'mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:outline-none',
+              'mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-colors motion-reduce:transition-none shrink-0 focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:outline-none',
               isCompleted
                 ? 'bg-emerald-600 border-emerald-600 text-white cursor-default'
                 : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-transparent cursor-pointer'
@@ -564,7 +564,7 @@ export function SessionCard({
           <span
             className={cn(
               'mt-0.5 w-2 h-2 rounded-full shrink-0',
-              isCompleted ? 'bg-emerald-500' : isCurrentLive ? 'bg-[var(--color-brand)] animate-ping' : 'bg-slate-400'
+              isCompleted ? 'bg-emerald-500' : isCurrentLive ? 'bg-[var(--color-brand)] motion-safe:animate-ping' : 'bg-slate-400'
             )}
           />
         )}
@@ -608,13 +608,15 @@ export function SessionCard({
           <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] mt-1 font-mono flex-wrap">
             <span className="flex items-center gap-1 font-medium">
               <Clock className="w-3 h-3 text-[var(--color-text-secondary)]" />
-              {session.startTime} – {session.endTime}
+              <span>{session.startTime}</span>
+              <span className="text-[var(--color-text-muted)] font-sans">to</span>
+              <span>{session.endTime}</span>
             </span>
-            <span>•</span>
+            <span className="inline-block w-1 h-1 rounded-full bg-[var(--color-border-hover)]" aria-hidden="true" />
             <span>{getPlannedDurationMinutes(session)}m planned</span>
             {isCompleted && typeof session.actualDurationSeconds === 'number' && (
               <>
-                <span>•</span>
+                <span className="inline-block w-1 h-1 rounded-full bg-[var(--color-border-hover)]" aria-hidden="true" />
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
                   {Math.round(session.actualDurationSeconds / 60)}m actual
                 </span>
@@ -730,7 +732,7 @@ export function RevisionCard({
   return (
     <div
       className={cn(
-        'p-3.5 sm:p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3',
+        'p-3.5 sm:p-4 rounded-xl border transition-colors duration-200 motion-reduce:transition-none flex flex-col sm:flex-row sm:items-center justify-between gap-3',
         isOverdue
           ? 'bg-[var(--color-error-light)] border-[var(--color-error-border)]'
           : isDueToday

@@ -3,12 +3,22 @@ import { forwardRef } from 'react'
 
 const Button = forwardRef(({ className, variant = 'default', size = 'default', children, ...props }, ref) => {
   const variants = {
-    default: 'bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-dark)] shadow-sm',
-    secondary: 'bg-[var(--color-bg-muted)] text-[var(--color-text)] hover:bg-[var(--color-border)]',
-    outline: 'border border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]',
-    ghost: 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
-    destructive: 'bg-[var(--color-error)] text-white hover:bg-red-600',
-    link: 'text-[var(--color-brand)] underline-offset-4 hover:underline p-0 h-auto',
+    default:
+      'bg-[var(--color-ink-slate)] text-white hover:bg-slate-800 active:bg-[var(--color-ink-slate)] shadow-sm dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200',
+    scholar:
+      'bg-[var(--color-scholar-emerald)] text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm',
+    focus:
+      'bg-[var(--color-scholar-emerald)] text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm',
+    secondary:
+      'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-hover)] shadow-xs',
+    outline:
+      'border border-[var(--color-border)] bg-transparent text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]',
+    ghost:
+      'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
+    destructive:
+      'bg-[var(--color-error)] text-white hover:bg-red-600 active:bg-red-700 shadow-sm',
+    link:
+      'text-[var(--color-brand)] underline-offset-4 hover:underline p-0 h-auto',
   }
 
   const sizes = {
@@ -23,7 +33,7 @@ const Button = forwardRef(({ className, variant = 'default', size = 'default', c
     <button
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors duration-[var(--transition-fast)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)] disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none',
+        'inline-flex items-center justify-center font-medium transition-colors duration-[var(--transition-fast)] motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] dark:focus-visible:outline-slate-200 active:scale-[0.98] motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none',
         variants[variant],
         sizes[size],
         className
