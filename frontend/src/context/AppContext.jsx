@@ -236,7 +236,13 @@ function appReducer(state, action) {
       return {
         ...state,
         sessions: state.sessions.map((s) =>
-          s.id === action.payload ? { ...s, status: "completed" } : s,
+          s.id === action.payload
+            ? {
+                ...s,
+                status: "completed",
+                completedAt: s.completedAt || new Date().toISOString(),
+              }
+            : s,
         ),
       };
     }
@@ -698,16 +704,32 @@ export function useSessions() {
     focusClock: state.focusClock,
     refreshActiveFocusSession,
     startFocusSession: useCallback(
-      (sessionId) => runFocusCommand(sessionService.startFocusSession, sessionId),
-      [runFocusCommand],
+      (sessionId) => {
+        const target = state.sessions.find((s) => s.id === sessionId);
+        if (target && ['completed', 'cancelled', 'missed'].includes(target.status)) {
+          const err = new Error(`Session cannot start from ${target.status} status`);
+          err.status = 409;
+          throw err;
+        }
+        return runFocusCommand(sessionService.startFocusSession, sessionId);
+      },
+      [runFocusCommand, state.sessions],
     ),
     pauseFocusSession: useCallback(
       (sessionId) => runFocusCommand(sessionService.pauseFocusSession, sessionId),
       [runFocusCommand],
     ),
     resumeFocusSession: useCallback(
-      (sessionId) => runFocusCommand(sessionService.resumeFocusSession, sessionId),
-      [runFocusCommand],
+      (sessionId) => {
+        const target = state.sessions.find((s) => s.id === sessionId);
+        if (target && ['completed', 'cancelled', 'missed'].includes(target.status)) {
+          const err = new Error(`Session cannot resume from ${target.status} status`);
+          err.status = 409;
+          throw err;
+        }
+        return runFocusCommand(sessionService.resumeFocusSession, sessionId);
+      },
+      [runFocusCommand, state.sessions],
     ),
     completeFocusSession: useCallback(
       (sessionId) =>

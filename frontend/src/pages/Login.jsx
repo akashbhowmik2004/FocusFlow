@@ -14,7 +14,6 @@ import {
   Lock,
   Flame,
   Clock,
-  ShieldCheck,
   AlertCircle,
   Repeat
 } from 'lucide-react'
@@ -147,12 +146,8 @@ export default function Login() {
               <div className="flex items-center gap-2.5 flex-wrap">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
                   <GraduationCap className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
-                  <span className="text-xs font-semibold">Academic Core v2.4</span>
+                  <span className="text-xs font-semibold">Academic Productivity Workspace</span>
                 </div>
-                <span className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)] inline-block" />
-                  FERPA Compliant Tier-1
-                </span>
               </div>
 
               {/* Headline & Thesis */}
@@ -167,20 +162,20 @@ export default function Login() {
 
               {/* Micro In-App Product Showcase Card */}
               <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm p-6 space-y-5">
-                {/* Scholar Profile Row */}
+                {/* Illustrative Workspace Header Row */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center font-bold text-sm text-[var(--color-text)]">
-                      JV
+                    <div className="w-10 h-10 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center font-bold text-xs text-[var(--color-text)]">
+                      FF
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-[var(--color-text)]">Julian Vance</div>
-                      <div className="text-xs text-[var(--color-text-secondary)]">Columbia CCAS • Cognitive Neurobiology</div>
+                      <div className="text-sm font-semibold text-[var(--color-text)]">Study Routine Overview</div>
+                      <div className="text-xs text-[var(--color-text-secondary)]">Sample Academic Workspace (Illustrative Preview)</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 shadow-xs">
                     <Flame className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                    <span className="text-xs font-bold font-tabular">14d Streak</span>
+                    <span className="text-xs font-bold">Study Consistency</span>
                   </div>
                 </div>
 
@@ -188,21 +183,21 @@ export default function Login() {
                 <div className="bg-[var(--color-bg-subtle)] rounded-lg p-4 space-y-2 border border-[var(--color-border)]">
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] text-[var(--color-text)] font-semibold font-tabular">
-                      PSYC 310: Advanced neuroscience
+                      PSYC 310: Sample Subject Unit
                     </span>
                     <span className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1 font-tabular">
-                      <Clock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" /> 45m block
+                      <Clock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" /> 45m Block Preview
                     </span>
                   </div>
                   <div className="text-sm font-bold text-[var(--color-text)]">
-                    Synaptic Plasticity & Long-Term Potentiation Pathways
+                    Synaptic Plasticity: Long-Term Potentiation Pathways
                   </div>
                   <div className="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden">
                     <div className="bg-[var(--color-scholar-emerald)] h-1.5 rounded-full w-3/4" />
                   </div>
                   <div className="flex justify-between items-center text-[var(--color-text-secondary)] text-xs pt-0.5">
-                    <span>Phase: Deep Synthesis Session</span>
-                    <span className="font-semibold text-[var(--color-scholar-emerald)] font-tabular">75% Target Achieved</span>
+                    <span>Phase: Active Study Block</span>
+                    <span className="font-semibold text-[var(--color-scholar-emerald)]">In Progress</span>
                   </div>
                 </div>
 
@@ -210,11 +205,11 @@ export default function Login() {
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex items-center gap-2">
                     <Repeat className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
-                    <span className="text-xs text-[var(--color-text)] font-medium">3 Revision Cards Due Today</span>
+                    <span className="text-xs text-[var(--color-text)] font-medium">Scheduled Topic Reviews</span>
                   </div>
                   <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] text-xs border border-[var(--color-border)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-scholar-emerald)]" />
-                    <span>Leitner SM-2 Sync</span>
+                    <span>SM-2 Spaced Retrieval</span>
                   </div>
                 </div>
               </div>
@@ -227,9 +222,7 @@ export default function Login() {
               </blockquote>
               <div className="flex items-center justify-between text-[var(--color-text-secondary)] text-xs">
                 <span>Cal Newport: Academic Cognition Series</span>
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" /> Institutional SSO Integrated
-                </span>
+                <span>Deep Work Methodology</span>
               </div>
             </div>
           </div>
@@ -411,7 +404,7 @@ export default function Login() {
               <div className="bg-[var(--color-bg-subtle)] rounded-lg p-3 flex items-center gap-2.5 text-[var(--color-text-secondary)] border border-[var(--color-border)]">
                 <Lock className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0" />
                 <span className="text-[11px] leading-tight">
-                  Protected by 256-bit TLS encryption. Academic identity verification enabled.
+                  Encrypted connection. Institutional email and Google sign-in supported.
                 </span>
               </div>
             </motion.div>
@@ -439,7 +432,7 @@ export default function Login() {
               Institutional Terms
             </Link>
             <Link to="/#faq" className="hover:text-[var(--color-text)] transition-colors">
-              Privacy & FERPA
+              Privacy Policy
             </Link>
             <span className="flex items-center gap-1.5 text-[var(--color-scholar-emerald)] font-medium">
               <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)]" />

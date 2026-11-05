@@ -411,3 +411,184 @@ export function getStudyPeriodComparison(
     hasTrackedData: current.hasTrackedData || previous.hasTrackedData,
   }
 }
+
+/**
+ * Calculates the longest consecutive unbroken study streak in days across the student's entire history.
+ *
+ * Rules:
+ * - A study day qualifies when the user has at least one completed session with positive measured actual duration (> 0).
+ * - Respects calendar date boundaries without timezone drift.
+ * - Returns 0 if no qualifying study sessions exist.
+ *
+ * @param {Array} sessions
+ * @returns {number} Longest unbroken study streak in days
+ */
+export function getLongestStudyStreak(sessions = []) {
+  const qualifyingDays = new Set()
+
+  for (const session of sessions) {
+    if (session.status === 'completed') {
+      const seconds = getActualStudySeconds(session)
+      if (typeof seconds === 'number' && seconds > 0) {
+        const key = getCalendarDateKey(session.date)
+        if (key) qualifyingDays.add(key)
+      }
+    }
+  }
+
+  if (qualifyingDays.size === 0) return 0
+
+  const sortedKeys = Array.from(qualifyingDays).sort()
+  let longest = 1
+  let currentRun = 1
+
+  for (let i = 1; i < sortedKeys.length; i++) {
+    const prevDate = parseCalendarDate(sortedKeys[i - 1])
+    const currDate = parseCalendarDate(sortedKeys[i])
+    if (!prevDate || !currDate) continue
+
+    const diffDays = Math.round((currDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000))
+    if (diffDays === 1) {
+      currentRun += 1
+      if (currentRun > longest) longest = currentRun
+    } else {
+      currentRun = 1
+    }
+  }
+
+  return longest
+}
+
+/**
+ * Computes a detailed telemetry integrity audit breakdown for a set of sessions.
+ *
+ * @param {Array} sessions
+ * @param {Function} [filterFn] Optional predicate to filter sessions (e.g. by date range)
+ * @returns {{
+ *   totalSessions: number,
+ *   completedSessions: number,
+ *   measuredSessions: number,
+ *   overtimeSessions: number,
+ *   cancelledSessions: number,
+ *   untrackedSessions: number,
+ *   totalActualSeconds: number,
+ *   totalActualMinutes: number,
+ *   totalPlannedMinutes: number,
+ *   averageActualMinutes: number
+ * }}
+ */
+export function getSessionIntegrityAudit(sessions = [], filterFn = null) {
+  const targetSessions = filterFn ? sessions.filter(filterFn) : sessions
+
+  const totalSessions = targetSessions.length
+  let completedSessions = 0
+  let measuredSessions = 0
+  let overtimeSessions = 0
+  let cancelledSessions = 0
+  let untrackedSessions = 0
+  let totalActualSeconds = 0
+  let totalPlannedMinutes = 0
+
+  for (const session of targetSessions) {
+    const plannedMins = getPlannedDurationMinutes(session)
+    totalPlannedMinutes += plannedMins
+
+    if (session.status === 'completed') {
+      completedSessions += 1
+      const seconds = getActualStudySeconds(session)
+      if (typeof seconds === 'number') {
+        measuredSessions += 1
+        totalActualSeconds += seconds
+        if (seconds > plannedMins * 60) {
+          overtimeSessions += 1
+        }
+      } else {
+        untrackedSessions += 1
+      }
+    } else if (session.status === 'cancelled') {
+      cancelledSessions += 1
+    }
+  }
+
+  const totalActualMinutes = Math.round(totalActualSeconds / 60)
+  const averageActualMinutes = measuredSessions > 0 ? Math.round(totalActualMinutes / measuredSessions) : 0
+
+  return {
+    totalSessions,
+    completedSessions,
+    measuredSessions,
+    overtimeSessions,
+    cancelledSessions,
+    untrackedSessions,
+    totalActualSeconds,
+    totalActualMinutes,
+    totalPlannedMinutes,
+    averageActualMinutes,
+  }
+}
+
+/**
+ * Aggregates authentic spaced repetition assessment diagnostics from topic revisions.
+ *
+ * @param {Array} subjects
+ * @returns {{
+ *   totalDrills: number,
+ *   ratingCounts: { AGAIN: number, HARD: number, GOOD: number, EASY: number },
+ *   ratingShares: { AGAIN: number, HARD: number, GOOD: number, EASY: number },
+ *   revisionsBySubject: Array<{ subjectId: string, subjectName: string, subjectCode: string|null, color: string, count: number }>,
+ *   historyRecords: Array<object>
+ * }}
+ */
+export function getRevisionDiagnostics(subjects = []) {
+  const counts = { AGAIN: 0, HARD: 0, GOOD: 0, EASY: 0 }
+  const subjectMap = new Map()
+  const history = []
+
+  for (const subject of subjects) {
+    let subCount = 0
+    for (const topic of subject.topics || []) {
+      for (const rev of topic.revisions || []) {
+        const rating = (rev.rating || 'GOOD').toUpperCase()
+        if (Object.hasOwn(counts, rating)) {
+          counts[rating] += 1
+        }
+        subCount += 1
+        history.push({
+          ...rev,
+          topicId: topic.id,
+          topicName: topic.name,
+          subjectId: subject.id,
+          subjectName: subject.name,
+          subjectCode: subject.code,
+          subjectColor: subject.color,
+        })
+      }
+    }
+
+    if (subCount > 0) {
+      subjectMap.set(subject.id, {
+        subjectId: subject.id,
+        subjectName: subject.name,
+        subjectCode: subject.code || null,
+        color: subject.color || '#0F172A',
+        count: subCount,
+      })
+    }
+  }
+
+  const totalDrills = counts.AGAIN + counts.HARD + counts.GOOD + counts.EASY
+  const ratingShares = {
+    AGAIN: totalDrills > 0 ? Math.round((counts.AGAIN / totalDrills) * 100) : 0,
+    HARD: totalDrills > 0 ? Math.round((counts.HARD / totalDrills) * 100) : 0,
+    GOOD: totalDrills > 0 ? Math.round((counts.GOOD / totalDrills) * 100) : 0,
+    EASY: totalDrills > 0 ? Math.round((counts.EASY / totalDrills) * 100) : 0,
+  }
+
+  return {
+    totalDrills,
+    ratingCounts: counts,
+    ratingShares,
+    revisionsBySubject: Array.from(subjectMap.values()).sort((a, b) => b.count - a.count),
+    historyRecords: history.sort((a, b) => new Date(b.reviewedAt || b.createdAt) - new Date(a.reviewedAt || a.createdAt)),
+  }
+}

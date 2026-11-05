@@ -9,6 +9,9 @@ import {
   getSubjectStudyTotals,
   getActiveStudyStreak,
   getStudyPeriodComparison,
+  getLongestStudyStreak,
+  getSessionIntegrityAudit,
+  getRevisionDiagnostics,
 } from './analytics'
 
 describe('study analytics', () => {
@@ -484,6 +487,100 @@ describe('study analytics', () => {
       expect(matchingDay.actual).toBe(daily.actualMinutes)
       expect(matchingDay.planned).toBe(daily.plannedMinutes)
       expect(matchingDay.actualSeconds).toBe(daily.actualSeconds)
+    })
+  })
+
+  describe('longest study streak (getLongestStudyStreak)', () => {
+    it('returns 0 when no qualifying sessions exist', () => {
+      expect(getLongestStudyStreak([])).toBe(0)
+      expect(getLongestStudyStreak([{ status: 'upcoming', date: '2026-11-01' }])).toBe(0)
+      expect(getLongestStudyStreak([{ status: 'completed', actualDurationSeconds: 0, date: '2026-11-01' }])).toBe(0)
+    })
+
+    it('calculates longest unbroken streak across discontinuous historical dates', () => {
+      const sessions = [
+        // Run 1: 2 days (Oct 10, Oct 11)
+        { date: '2026-10-10', status: 'completed', actualDurationSeconds: 1800 },
+        { date: '2026-10-11', status: 'completed', actualDurationSeconds: 2400 },
+        // Gap
+        // Run 2: 4 days (Oct 15, Oct 16, Oct 17, Oct 18)
+        { date: '2026-10-15', status: 'completed', actualDurationSeconds: 3600 },
+        { date: '2026-10-16', status: 'completed', actualDurationSeconds: 1800 },
+        { date: '2026-10-17', status: 'completed', actualDurationSeconds: 1800 },
+        { date: '2026-10-18', status: 'completed', actualDurationSeconds: 3600 },
+        // Gap
+        // Run 3: 3 days (Oct 22, Oct 23, Oct 24)
+        { date: '2026-10-22', status: 'completed', actualDurationSeconds: 3600 },
+        { date: '2026-10-23', status: 'completed', actualDurationSeconds: 1800 },
+        { date: '2026-10-24', status: 'completed', actualDurationSeconds: 1800 },
+      ]
+
+      expect(getLongestStudyStreak(sessions)).toBe(4)
+    })
+  })
+
+  describe('session integrity audit (getSessionIntegrityAudit)', () => {
+    it('accurately classifies completed, overtime, cancelled, and unmeasured sessions', () => {
+      const sessions = [
+        { duration: 45, actualDurationSeconds: 3600, status: 'completed' }, // overtime (60m > 45m)
+        { duration: 60, actualDurationSeconds: 3600, status: 'completed' }, // exact on-time
+        { duration: 30, actualDurationSeconds: 900, status: 'completed' }, // shorter (15m < 30m)
+        { duration: 45, actualDurationSeconds: null, status: 'completed' }, // legacy untracked
+        { duration: 60, actualDurationSeconds: 1200, status: 'cancelled' }, // cancelled
+        { duration: 60, actualDurationSeconds: null, status: 'upcoming' }, // upcoming
+      ]
+
+      const audit = getSessionIntegrityAudit(sessions)
+      expect(audit.totalSessions).toBe(6)
+      expect(audit.completedSessions).toBe(4)
+      expect(audit.measuredSessions).toBe(3)
+      expect(audit.overtimeSessions).toBe(1)
+      expect(audit.cancelledSessions).toBe(1)
+      expect(audit.untrackedSessions).toBe(1)
+      expect(audit.totalActualMinutes).toBe(135) // 60 + 60 + 15
+      expect(audit.averageActualMinutes).toBe(45) // 135 / 3
+    })
+  })
+
+  describe('revision diagnostics (getRevisionDiagnostics)', () => {
+    it('aggregates authentic recall ratings and subject distribution from topic revisions', () => {
+      const subjects = [
+        {
+          id: 'sub-1',
+          name: 'Computer Science',
+          code: 'CS101',
+          color: '#2563EB',
+          topics: [
+            {
+              id: 'top-1',
+              name: 'Cache Memory',
+              revisions: [
+                { id: 'rev-1', rating: 'GOOD', reviewedAt: '2026-11-01T10:00:00Z' },
+                { id: 'rev-2', rating: 'EASY', reviewedAt: '2026-11-03T10:00:00Z' },
+              ],
+            },
+            {
+              id: 'top-2',
+              name: 'TLB',
+              revisions: [
+                { id: 'rev-3', rating: 'HARD', reviewedAt: '2026-11-02T10:00:00Z' },
+                { id: 'rev-4', rating: 'AGAIN', reviewedAt: '2026-11-04T10:00:00Z' },
+              ],
+            },
+          ],
+        },
+      ]
+
+      const diag = getRevisionDiagnostics(subjects)
+      expect(diag.totalDrills).toBe(4)
+      expect(diag.ratingCounts.AGAIN).toBe(1)
+      expect(diag.ratingCounts.HARD).toBe(1)
+      expect(diag.ratingCounts.GOOD).toBe(1)
+      expect(diag.ratingCounts.EASY).toBe(1)
+      expect(diag.ratingShares.EASY).toBe(25)
+      expect(diag.revisionsBySubject).toHaveLength(1)
+      expect(diag.revisionsBySubject[0].count).toBe(4)
+      expect(diag.historyRecords).toHaveLength(4)
     })
   })
 })

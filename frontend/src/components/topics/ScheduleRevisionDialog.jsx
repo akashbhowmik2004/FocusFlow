@@ -24,6 +24,7 @@ export default function ScheduleRevisionDialog({
   topic,
   subject,
   onSaveSchedule,
+  onSchedule,
 }) {
   const todayStr = getCalendarDateKey(new Date())
   const [selectedDate, setSelectedDate] = useState(todayStr)
@@ -72,8 +73,9 @@ export default function ScheduleRevisionDialog({
     if (isSubmitting) return
     setIsSubmitting(true)
     try {
-      if (onSaveSchedule) {
-        const result = onSaveSchedule({
+      const saveCallback = onSaveSchedule || onSchedule
+      if (saveCallback) {
+        const result = saveCallback({
           topicId: topic.id,
           nextRevision: selectedDate,
           schedulingType: 'manual',

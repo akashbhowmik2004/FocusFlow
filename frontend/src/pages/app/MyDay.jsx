@@ -28,7 +28,6 @@ export default function MyDay() {
     sessions,
     completeSession,
     postponeSession,
-    addSession,
     deleteSession,
     activeFocusSession,
     startFocusSession,
@@ -89,6 +88,10 @@ export default function MyDay() {
   }
 
   const handleFocus = async (id, title, status = 'upcoming') => {
+    if (['completed', 'cancelled', 'missed'].includes(status)) {
+      toast.error('Completed or cancelled sessions cannot be started.')
+      return
+    }
     if (status === 'in-progress' && activeFocusSession?.id === id) {
       navigate(`/app/focus/${id}`)
       return
@@ -216,7 +219,7 @@ export default function MyDay() {
             </div>
             <div>
               <p className="text-sm font-bold tracking-tight">Incredible job! All sessions completed for today 🎯</p>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400">You've hit 100% of your targeted learning time for this date.</p>
+              <p className="text-xs text-emerald-700 dark:text-emerald-400">You’ve hit 100% of your targeted learning time for this date.</p>
             </div>
           </div>
         </motion.div>
@@ -226,7 +229,7 @@ export default function MyDay() {
       <Card variant="panel" className="p-5 sm:p-6">
         <div className="flex items-center justify-between pb-4 mb-4 border-b border-[var(--card-border-subtle)]">
           <h2 className="text-base font-bold text-[var(--color-text)] tracking-tight">Chronological Timeline</h2>
-          <span className="text-xs font-mono text-[var(--color-text-muted)]">{daySessions.length} entries</span>
+          <span className="text-xs text-[var(--color-text-muted)]"><span className="font-mono tabular-nums">{daySessions.length}</span> entries</span>
         </div>
 
         {daySessions.length === 0 ? (

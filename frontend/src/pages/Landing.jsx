@@ -302,7 +302,7 @@ export default function Landing() {
               </a>
             </div>
 
-            {/* Real Desktop Mockup Preview (FocusFlow Academic Client • v2.4) */}
+            {/* Illustrative Preview (FocusFlow Academic Client Workspace) */}
             <div className="w-full max-w-5xl rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xl p-4 sm:p-6 text-left">
               {/* Mockup Window Shell Bar */}
               <div className="flex flex-wrap items-center justify-between pb-4 mb-5 border-b border-[var(--color-border)] gap-3">
@@ -313,21 +313,26 @@ export default function Landing() {
                     <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
                   </div>
                   <div className="h-4 w-px bg-[var(--color-border)] mx-1" />
-                  <span className="text-xs text-[var(--color-text-secondary)] font-medium">
-                    FocusFlow Academic Client: v2.4
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[var(--color-scholar-emerald)] text-[10px] font-semibold">
+                      Illustrative Preview
+                    </span>
+                    <span className="text-xs text-[var(--color-text-secondary)] font-medium">
+                      FocusFlow Academic Client Workspace
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-[var(--color-text-secondary)] font-medium">
                   <span className="flex items-center gap-1.5 bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2.5 py-1 rounded-md text-[var(--color-text)]">
                     <Calendar className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
-                    Semester II: Week 8
+                    Course Schedule View
                   </span>
                   <span className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 px-2.5 py-1 rounded-md font-semibold">
                     <Flame className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                    <span className="font-tabular">14d Streak</span>
+                    <span>Study Consistency</span>
                   </span>
-                  <span className="font-semibold text-[var(--color-scholar-emerald)] font-tabular hidden sm:inline">
-                    3h 45m / 5h Daily Goal
+                  <span className="font-semibold text-[var(--color-scholar-emerald)] hidden sm:inline">
+                    Daily Study Target
                   </span>
                 </div>
               </div>
@@ -358,8 +363,8 @@ export default function Landing() {
                         <Repeat className="w-4 h-4 text-[var(--color-text-muted)]" />
                         Revision Center
                       </div>
-                      <span className="bg-emerald-100 dark:bg-emerald-950 text-[var(--color-scholar-emerald)] px-1.5 py-0.5 rounded text-[10px] font-bold font-tabular">
-                        7 DUE
+                      <span className="bg-emerald-100 dark:bg-emerald-950 text-[var(--color-scholar-emerald)] px-1.5 py-0.5 rounded text-[10px] font-bold">
+                        Due Today
                       </span>
                     </div>
                     <div className="px-3 py-2 rounded-lg text-xs text-[var(--color-text-secondary)] flex items-center gap-2">
@@ -371,8 +376,8 @@ export default function Landing() {
                   {/* Mini Telemetry Strip */}
                   <div className="p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg mt-5 shadow-xs">
                     <div className="flex items-center justify-between text-xs mb-1.5">
-                      <span className="text-[var(--color-text-secondary)]">Retention Velocity</span>
-                      <span className="font-bold text-[var(--color-scholar-emerald)] font-tabular">+18.4%</span>
+                      <span className="text-[var(--color-text-secondary)]">Retention Schedule</span>
+                      <span className="font-bold text-[var(--color-scholar-emerald)]">Active</span>
                     </div>
                     <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
                       <div className="bg-[var(--color-scholar-emerald)] h-full rounded-full" style={{ width: '78%' }} />
@@ -389,19 +394,19 @@ export default function Landing() {
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-[var(--color-text)] font-tabular">PSYC 310</span>
-                          <span className="px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] font-medium text-[var(--color-text-secondary)] font-tabular">
-                            Midterm in 5d
+                          <span className="px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] font-medium text-[var(--color-text-secondary)]">
+                            Syllabus Units
                           </span>
                         </div>
                         <h4 className="text-xs font-semibold text-[var(--color-text)] truncate">Cognitive Neuroscience</h4>
                       </div>
                       <div className="mt-3">
                         <div className="flex justify-between text-[11px] text-[var(--color-text-secondary)] mb-1">
-                          <span>Syllabus Mastery</span>
-                          <span className="font-semibold text-[var(--color-text)] font-tabular">82.4%</span>
+                          <span>Syllabus Progress</span>
+                          <span className="font-semibold text-[var(--color-text)]">Advanced</span>
                         </div>
                         <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-[var(--color-scholar-emerald)] h-full rounded-full" style={{ width: '82.4%' }} />
+                          <div className="bg-[var(--color-scholar-emerald)] h-full rounded-full" style={{ width: '80%' }} />
                         </div>
                       </div>
                     </div>
@@ -411,19 +416,19 @@ export default function Landing() {
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-[var(--color-text)] font-tabular">CHEM 204</span>
-                          <span className="px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-[10px] font-medium font-tabular">
-                            Exam in 3d
+                          <span className="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[var(--color-scholar-emerald)] text-[10px] font-medium">
+                            Revision Queue
                           </span>
                         </div>
                         <h4 className="text-xs font-semibold text-[var(--color-text)] truncate">Organic Chemistry II</h4>
                       </div>
                       <div className="mt-3">
                         <div className="flex justify-between text-[11px] text-[var(--color-text-secondary)] mb-1">
-                          <span>Syllabus Mastery</span>
-                          <span className="font-semibold text-[var(--color-text)] font-tabular">75.0%</span>
+                          <span>Syllabus Progress</span>
+                          <span className="font-semibold text-[var(--color-text)]">On Track</span>
                         </div>
                         <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-[var(--color-scholar-emerald)] h-full rounded-full" style={{ width: '75%' }} />
+                          <div className="bg-[var(--color-scholar-emerald)] h-full rounded-full" style={{ width: '65%' }} />
                         </div>
                       </div>
                     </div>
@@ -433,19 +438,19 @@ export default function Landing() {
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-bold text-[var(--color-text)] font-tabular">MATH 215</span>
-                          <span className="px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] font-medium text-[var(--color-text-secondary)] font-tabular">
-                            Quiz in 9d
+                          <span className="px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[10px] font-medium text-[var(--color-text-secondary)]">
+                            Next Unit
                           </span>
                         </div>
                         <h4 className="text-xs font-semibold text-[var(--color-text)] truncate">Linear Algebra</h4>
                       </div>
                       <div className="mt-3">
                         <div className="flex justify-between text-[11px] text-[var(--color-text-secondary)] mb-1">
-                          <span>Syllabus Mastery</span>
-                          <span className="font-semibold text-[var(--color-text)] font-tabular">54.5%</span>
+                          <span>Syllabus Progress</span>
+                          <span className="font-semibold text-[var(--color-text)]">In Progress</span>
                         </div>
                         <div className="w-full bg-[var(--color-border)] h-1.5 rounded-full overflow-hidden">
-                          <div className="bg-indigo-600 h-full rounded-full" style={{ width: '54.5%' }} />
+                          <div className="bg-indigo-600 h-full rounded-full" style={{ width: '50%' }} />
                         </div>
                       </div>
                     </div>
@@ -459,23 +464,23 @@ export default function Landing() {
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-scholar-emerald)] animate-pulse" />
                           <span className="text-xs font-bold text-[var(--color-scholar-emerald)]">
-                            Active Focus Block
+                            Focus Session Preview
                           </span>
                         </div>
-                        <span className="text-[11px] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded text-[var(--color-text-secondary)] font-tabular">
-                          Pomodoro 3
+                        <span className="text-[11px] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded text-[var(--color-text-secondary)]">
+                          Interval Timer
                         </span>
                       </div>
                       <h5 className="text-sm font-semibold text-[var(--color-text)] mb-0.5">
                         Hippocampal Memory Consolidation
                       </h5>
                       <p className="text-xs text-[var(--color-text-secondary)] mb-3">
-                        PSYC 310: Synaptic Plasticity & LTP Pathways
+                        Sample Subject: PSYC 310 (Synaptic Plasticity)
                       </p>
                       <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl font-bold text-[var(--color-text)] font-tabular">32:14</span>
-                          <span className="text-xs text-[var(--color-text-secondary)] font-tabular">/ 45:00</span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-sm font-semibold text-[var(--color-text)] font-tabular">45m Focus Block</span>
+                          <span className="text-[11px] text-[var(--color-text-muted)]">(Simulated Preview)</span>
                         </div>
                         <button
                           type="button"
@@ -490,10 +495,10 @@ export default function Landing() {
                     <div className="p-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl shadow-xs">
                       <div className="flex items-center justify-between mb-2.5">
                         <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[var(--color-scholar-emerald)] font-semibold">
-                          Leitner Stage 4: Scheduled Drill
+                          Sample Active Recall Drill
                         </span>
-                        <span className="text-[11px] text-[var(--color-text-secondary)] font-tabular">
-                          Queue: 1 of 7
+                        <span className="text-[11px] text-[var(--color-text-secondary)]">
+                          Illustrative Item
                         </span>
                       </div>
                       <p className="text-xs font-medium text-[var(--color-text)] mb-3 leading-relaxed">
@@ -794,42 +799,42 @@ export default function Landing() {
                   <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-[var(--color-text)]" />
                     <span className="text-xs font-semibold text-[var(--color-text)]">
-                      Verified Study Telemetry Audit
+                      Sample Telemetry Log
                     </span>
                   </div>
-                  <span className="text-xs text-[var(--color-scholar-emerald)] font-bold font-tabular">
-                    100% Calibrated
+                  <span className="text-xs text-[var(--color-scholar-emerald)] font-semibold">
+                    Illustrative Log
                   </span>
                 </div>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)]">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
-                      <span className="text-[var(--color-text)] font-medium">PSYC 310 Deep Sprint</span>
+                      <span className="text-[var(--color-text)] font-medium">Sample PSYC 310 Session</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-[var(--color-text-secondary)] font-tabular">45m 00s</span>
-                      <span className="text-[var(--color-scholar-emerald)] font-semibold">Passed</span>
+                      <span className="text-[var(--color-scholar-emerald)] font-semibold">Completed</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)]">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
-                      <span className="text-[var(--color-text)] font-medium">CHEM 204 Mechanism Drills</span>
+                      <span className="text-[var(--color-text)] font-medium">Sample CHEM 204 Session</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-[var(--color-text-secondary)] font-tabular">60m 00s</span>
-                      <span className="text-[var(--color-scholar-emerald)] font-semibold">Passed</span>
+                      <span className="text-[var(--color-scholar-emerald)] font-semibold">Completed</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] opacity-70">
                     <div className="flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
-                      <span className="text-[var(--color-text)] font-medium">MATH 215 Eigenvector Proofs</span>
+                      <span className="text-[var(--color-text)] font-medium">Sample MATH 215 Session</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-[var(--color-text-secondary)] font-tabular">30m (Scheduled)</span>
-                      <span className="text-[var(--color-text-muted)]">17:00 Today</span>
+                      <span className="text-[var(--color-text-muted)]">Upcoming</span>
                     </div>
                   </div>
                 </div>
@@ -847,7 +852,7 @@ export default function Landing() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 mb-5">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span className="text-xs font-semibold text-emerald-300">
-                Immediate Academic Deployment
+                Structured Academic Workflow
               </span>
             </div>
 

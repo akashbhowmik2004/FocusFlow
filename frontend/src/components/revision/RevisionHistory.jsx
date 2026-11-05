@@ -2,13 +2,10 @@ import { useState, useMemo } from 'react'
 import {
   History,
   Search,
-  Filter,
   RotateCcw,
   AlertCircle,
   CheckCircle2,
   Sparkles,
-  Calendar,
-  BookOpen,
   ArrowRight,
   Info,
 } from 'lucide-react'
@@ -45,7 +42,8 @@ const RATING_CONFIG = {
 
 /**
  * RevisionHistory
- * Comprehensive audit ledger of completed spaced repetition recall assessments.
+ * Comprehensive audit ledger of verified spaced repetition recall assessments.
+ * Shows only genuine TopicRevision records without fabricated dummy entries.
  */
 export default function RevisionHistory({
   subjects = [],
@@ -55,7 +53,7 @@ export default function RevisionHistory({
   const [selectedSubjectId, setSelectedSubjectId] = useState('all')
   const [selectedRating, setSelectedRating] = useState('all')
 
-  // Flatten and aggregate all TopicRevision records
+  // Flatten and aggregate authentic TopicRevision records ONLY
   const allRevisions = useMemo(() => {
     const list = []
 
@@ -77,23 +75,6 @@ export default function RevisionHistory({
             nextRevisionAt: rev.nextRevisionAt || t.nextRevision,
             topicStatus: t.status,
           })
-        })
-      } else if (t.lastRevised) {
-        // Fallback for topics revised before revision history tracking
-        list.push({
-          id: `legacy-${t.id}`,
-          topicId: t.id,
-          topicName: t.name,
-          subjectId: t.subjectId,
-          subjectName: t.subjectName,
-          subjectCode: t.subjectCode,
-          subjectColor: t.subjectColor,
-          reviewedAt: t.lastRevised,
-          rating: 'GOOD',
-          previousInterval: Math.max(0, (t.intervalDays || 1) - 3),
-          intervalAfter: t.intervalDays ?? 1,
-          nextRevisionAt: t.nextRevision,
-          topicStatus: t.status,
         })
       }
     })
@@ -128,7 +109,7 @@ export default function RevisionHistory({
   return (
     <div className="space-y-5">
       {/* Entity Separation Notice */}
-      <div className="p-3.5 rounded-xl border border-indigo-200/80 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 flex items-start gap-2.5 text-xs text-[var(--color-text-secondary)]">
+      <div className="p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 flex items-start gap-2.5 text-xs text-[var(--color-text-secondary)]">
         <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
         <div className="space-y-0.5">
           <p className="font-semibold text-[var(--color-text)]">
@@ -137,23 +118,23 @@ export default function RevisionHistory({
           <p className="text-[11px] text-[var(--color-text-muted)] leading-relaxed">
             A topic can have a completed revision event and a future pending revision simultaneously.
             Entries in this ledger represent verified recall assessments recorded by the backend.
-            Pending revision tasks are managed in Today's Revision Queue.
+            Pending revision tasks are scheduled and reviewed in the active revision queue.
           </p>
         </div>
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--shadow-xs)]">
-        <div className="flex items-center gap-2 flex-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs">
+        <div className="flex items-center gap-2 flex-1 flex-wrap">
           {/* Search */}
           <div className="relative w-full sm:w-64">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search history by topic or subject..."
-              className="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--card-bg)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
+              className="w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
             />
           </div>
 
@@ -161,7 +142,7 @@ export default function RevisionHistory({
           <select
             value={selectedSubjectId}
             onChange={(e) => setSelectedSubjectId(e.target.value)}
-            className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--card-bg)] text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)] cursor-pointer"
+            className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] cursor-pointer"
           >
             <option value="all">All Subjects</option>
             {subjects.map((s) => (
@@ -175,7 +156,7 @@ export default function RevisionHistory({
           <select
             value={selectedRating}
             onChange={(e) => setSelectedRating(e.target.value)}
-            className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--card-bg)] text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)] cursor-pointer"
+            className="text-xs px-2.5 py-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] cursor-pointer"
           >
             <option value="all">All Ratings</option>
             <option value="AGAIN">Again</option>
@@ -185,7 +166,7 @@ export default function RevisionHistory({
           </select>
         </div>
 
-        <div className="text-xs font-mono font-bold text-[var(--color-text-muted)] self-end sm:self-auto shrink-0">
+        <div className="text-xs font-mono tabular-nums font-bold text-[var(--color-text-muted)] self-end sm:self-auto shrink-0">
           {filteredRevisions.length} {filteredRevisions.length === 1 ? 'record' : 'records'}
         </div>
       </div>
@@ -207,16 +188,16 @@ export default function RevisionHistory({
           }
         />
       ) : (
-        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--shadow-xs)] overflow-hidden">
+        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] font-bold uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4">Topic & Subject</th>
-                  <th className="py-3 px-4">Review Date</th>
-                  <th className="py-3 px-4">Recall Rating</th>
-                  <th className="py-3 px-4 text-center">Interval Shift</th>
-                  <th className="py-3 px-4 text-right">Next Checkpoint</th>
+                <tr className="border-b border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] font-semibold text-xs">
+                  <th className="py-2.5 px-4">Topic and Subject</th>
+                  <th className="py-2.5 px-4">Review Date</th>
+                  <th className="py-2.5 px-4">Recall Rating</th>
+                  <th className="py-2.5 px-4 text-center">Interval Shift</th>
+                  <th className="py-2.5 px-4 text-right">Next Checkpoint</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border-light)]">
@@ -234,10 +215,10 @@ export default function RevisionHistory({
                         <div className="flex items-center gap-2">
                           <span
                             className="w-2 h-2 rounded-full shrink-0"
-                            style={{ backgroundColor: rev.subjectColor || '#3b82f6' }}
+                            style={{ backgroundColor: rev.subjectColor || 'var(--color-ink-slate)' }}
                           />
                           <div className="min-w-0">
-                            <p className="font-bold text-[var(--color-text)] truncate">
+                            <p className="font-semibold text-[var(--color-text)] truncate">
                               {rev.topicName}
                             </p>
                             <p className="text-[11px] text-[var(--color-text-muted)] truncate">
@@ -248,15 +229,15 @@ export default function RevisionHistory({
                       </td>
 
                       {/* Review Date */}
-                      <td className="py-3 px-4 whitespace-nowrap text-[var(--color-text-secondary)] font-mono">
-                        {rev.reviewedAt ? formatDate(rev.reviewedAt, 'MMM d, yyyy') : 'Recently'}
+                      <td className="py-3 px-4 whitespace-nowrap text-[var(--color-text-secondary)]">
+                        <span className="font-mono tabular-nums">{rev.reviewedAt ? formatDate(rev.reviewedAt, 'MMM d, yyyy') : 'Recently'}</span>
                       </td>
 
                       {/* Rating Badge */}
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span
                           className={cn(
-                            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border font-mono',
+                            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border',
                             ratingConfig.bg,
                             ratingConfig.color
                           )}
@@ -267,19 +248,21 @@ export default function RevisionHistory({
                       </td>
 
                       {/* Interval Shift: e.g. 3d -> 8d */}
-                      <td className="py-3 px-4 whitespace-nowrap text-center font-mono">
-                        <span className="text-[var(--color-text-muted)]">
-                          {rev.previousInterval}d
+                      <td className="py-3 px-4 whitespace-nowrap text-center text-xs">
+                        <span className="text-[var(--color-text-muted)] font-mono tabular-nums">
+                          {rev.previousInterval}
                         </span>
+                        <span className="text-[var(--color-text-muted)]">d</span>
                         <ArrowRight className="w-3 h-3 inline mx-1.5 text-[var(--color-text-muted)]" />
-                        <span className="font-bold text-[var(--color-text)]">
-                          {rev.intervalAfter}d
+                        <span className="font-semibold text-[var(--color-text)] font-mono tabular-nums">
+                          {rev.intervalAfter}
                         </span>
+                        <span className="font-semibold text-[var(--color-text)]">d</span>
                       </td>
 
                       {/* Next Scheduled Checkpoint */}
-                      <td className="py-3 px-4 text-right whitespace-nowrap font-mono text-[var(--color-brand)] font-semibold">
-                        {rev.nextRevisionAt ? formatDate(rev.nextRevisionAt, 'MMM d, yyyy') : '—'}
+                      <td className="py-3 px-4 text-right whitespace-nowrap text-[var(--color-brand)] font-semibold">
+                        <span className="font-mono tabular-nums">{rev.nextRevisionAt ? formatDate(rev.nextRevisionAt, 'MMM d, yyyy') : 'None'}</span>
                       </td>
                     </tr>
                   )

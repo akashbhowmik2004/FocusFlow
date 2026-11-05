@@ -44,6 +44,25 @@ describe('Centralized Exam Date Utilities', () => {
       expect(parsed.getDate()).toBe(15)
       expect(parsed.getHours()).toBe(0)
     })
+
+    it('handles Asia/Kolkata and non-UTC midnight boundaries deterministically', () => {
+      // String in YYYY-MM-DD pattern preserves calendar date regardless of local timezone
+      const parsed = parseCalendarDate('2026-11-05')
+      expect(parsed.getFullYear()).toBe(2026)
+      expect(parsed.getMonth()).toBe(10) // Nov
+      expect(parsed.getDate()).toBe(5)
+      expect(parsed.getHours()).toBe(0)
+
+      // Time right before midnight (23:59:59)
+      const justBeforeMidnight = new Date(2026, 10, 4, 23, 59, 59, 999)
+      const parsedBefore = parseCalendarDate(justBeforeMidnight)
+      expect(parsedBefore.getDate()).toBe(4)
+
+      // Time right after midnight (00:00:01)
+      const justAfterMidnight = new Date(2026, 10, 5, 0, 0, 1, 0)
+      const parsedAfter = parseCalendarDate(justAfterMidnight)
+      expect(parsedAfter.getDate()).toBe(5)
+    })
   })
 
   describe('getExamCountdown Status Conditions', () => {
@@ -164,6 +183,16 @@ describe('Centralized Exam Date Utilities', () => {
       expect(countdown.status).toBe('completed')
       expect(countdown.label).toBe('Exam completed')
       expect(countdown.daysLeft).toBe(0)
+    })
+
+    it('accurately parses UTC ISO string format from database without day drift', () => {
+      // Backend returns ISO string: 2026-11-04T00:00:00.000Z
+      const refDate = new Date(2026, 10, 4, 18, 30, 0) // Nov 4 in local time (e.g. Asia/Kolkata evening)
+      const countdown = getExamCountdown('2026-11-04T00:00:00.000Z', refDate)
+      expect(countdown.status).toBe('today')
+      expect(countdown.label).toBe('Exam today')
+      expect(countdown.daysLeft).toBe(0)
+      expect(countdown.isToday).toBe(true)
     })
   })
 

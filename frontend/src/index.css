@@ -120,6 +120,20 @@
   --color-slate-core: #64748b;
   --color-canvas-base: #f8fafc;
 
+  /* Heatmap Tokens */
+  --heatmap-level-0: var(--color-bg-subtle);
+  --heatmap-level-0-border: var(--color-border-light);
+  --heatmap-level-0-text: var(--color-text-muted);
+  --heatmap-level-1: #a7f3d0;
+  --heatmap-level-1-border: #6ee7b7;
+  --heatmap-level-1-text: #065f46;
+  --heatmap-level-2: #34d399;
+  --heatmap-level-2-border: #10b981;
+  --heatmap-level-2-text: #064e3b;
+  --heatmap-level-3: #059669;
+  --heatmap-level-3-border: #047857;
+  --heatmap-level-3-text: #ffffff;
+
   /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -227,6 +241,20 @@
   --chart-tooltip-bg: #151f32;
   --chart-tooltip-border: #233149;
   --chart-tooltip-text: #f1f5f9;
+
+  /* Heatmap Tokens */
+  --heatmap-level-0: var(--color-bg-subtle);
+  --heatmap-level-0-border: var(--color-border-light);
+  --heatmap-level-0-text: var(--color-text-muted);
+  --heatmap-level-1: rgba(167, 243, 208, 0.2);
+  --heatmap-level-1-border: rgba(110, 231, 183, 0.35);
+  --heatmap-level-1-text: #a7f3d0;
+  --heatmap-level-2: rgba(52, 211, 153, 0.4);
+  --heatmap-level-2-border: rgba(16, 185, 129, 0.5);
+  --heatmap-level-2-text: #d1fae5;
+  --heatmap-level-3: #059669;
+  --heatmap-level-3-border: #10b981;
+  --heatmap-level-3-text: #ffffff;
 
   /* Sidebar */
   --sidebar-bg: #151f32;

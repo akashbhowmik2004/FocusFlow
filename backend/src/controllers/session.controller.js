@@ -175,7 +175,7 @@ export const updateSession = async (req, res) => {
               actualDurationSeconds: null,
               activeStartedAt: null,
               pausedAt: null,
-              completedAt: null,
+              completedAt: existing.completedAt || new Date(),
               cancelledAt: null,
             }
           : {}),

@@ -6,6 +6,8 @@ import {
   ChevronRight,
   Trash2,
   AlertTriangle,
+  Pencil,
+  Play,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/dates'
@@ -18,12 +20,14 @@ import {
 
 export default function TopicRow({
   topic,
-  subject,
   onOpenDetails,
   onToggleComplete,
   onChangeStatus,
   onQuickReview,
   onDeleteTopic,
+  onEditTopic,
+  onFocusTopic,
+  isStudiedToday = false,
 }) {
   const isDone = topic.status === 'completed'
   const isInProgress = topic.status === 'in-progress'
@@ -36,7 +40,7 @@ export default function TopicRow({
     <div
       onClick={() => onOpenDetails(topic)}
       className={cn(
-        'group relative p-3 sm:p-4 rounded-xl border transition-all duration-200 cursor-pointer select-none',
+        'group relative p-3 sm:p-4 rounded-xl border transition-colors duration-200 cursor-pointer select-none',
         'flex flex-col sm:flex-row sm:items-center justify-between gap-3',
         'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand)]',
         isDone
@@ -65,7 +69,7 @@ export default function TopicRow({
             onToggleComplete(topic)
           }}
           className={cn(
-            'w-5 h-5 mt-0.5 sm:mt-0 rounded-md border flex items-center justify-center transition-all cursor-pointer shrink-0',
+            'w-5 h-5 mt-0.5 sm:mt-0 rounded-md border flex items-center justify-center transition-colors duration-150 cursor-pointer shrink-0',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
             isDone
               ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
@@ -101,7 +105,7 @@ export default function TopicRow({
           </div>
 
           {/* Dates & Revision Metadata */}
-          <div className="flex items-center gap-3 flex-wrap text-[11px] text-[var(--color-text-muted)] mt-1.5 font-mono">
+          <div className="flex items-center gap-3 flex-wrap text-[11px] text-[var(--color-text-muted)] mt-1.5">
             {/* Last Revised Date */}
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-[var(--color-text-muted)]" />
@@ -159,6 +163,35 @@ export default function TopicRow({
 
       {/* Right side: Action buttons */}
       <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
+        {/* Studied today indicator or Quick Focus action */}
+        {isStudiedToday ? (
+          <span
+            className="inline-flex items-center gap-1 text-xs h-8 px-2.5 font-medium rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 select-none"
+            title={`Completed study session for "${topic.name}" today`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span className="hidden sm:inline">Studied today</span>
+          </span>
+        ) : (
+          onFocusTopic && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                onFocusTopic(topic)
+              }}
+              className="text-xs h-8 px-2 font-medium gap-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 active:scale-95"
+              title={`Start focus session for "${topic.name}"`}
+              aria-label={`Start focus session for ${topic.name}`}
+            >
+              <Play className="w-3 h-3 fill-current" />
+              <span className="hidden xl:inline">Focus</span>
+            </Button>
+          )
+        )}
+
         {/* Quick Review action */}
         {onQuickReview && (
           <Button
@@ -169,12 +202,28 @@ export default function TopicRow({
               e.stopPropagation()
               onQuickReview(topic)
             }}
-            className="text-xs h-8 px-2.5 font-medium gap-1 text-[var(--color-brand)] hover:bg-[var(--color-brand-50)]"
+            className="text-xs h-8 px-2.5 font-medium gap-1 text-[var(--color-brand)] hover:bg-[var(--color-brand-50)] active:scale-95"
             title="Review Now"
           >
             <Sparkles className="w-3 h-3" />
             <span className="hidden md:inline">Review</span>
           </Button>
+        )}
+
+        {/* Modify Topic Action */}
+        {onEditTopic && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onEditTopic(topic)
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--color-text)] hover:bg-[var(--card-bg-subtle)] transition-colors cursor-pointer active:scale-95"
+            title="Modify topic"
+            aria-label={`Modify topic ${topic.name}`}
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
         )}
 
         {/* Topic Details Button */}
@@ -186,7 +235,7 @@ export default function TopicRow({
             e.stopPropagation()
             onOpenDetails(topic)
           }}
-          className="text-xs h-8 px-2.5 font-semibold gap-1 text-[var(--color-text)]"
+          className="text-xs h-8 px-2.5 font-semibold gap-1 text-[var(--color-text)] active:scale-95"
           title="Open Topic Details"
         >
           <span>Details</span>
@@ -201,7 +250,7 @@ export default function TopicRow({
               e.stopPropagation()
               onDeleteTopic(topic.id, topic.name)
             }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer active:scale-95"
             title="Delete topic"
             aria-label={`Delete topic ${topic.name}`}
           >

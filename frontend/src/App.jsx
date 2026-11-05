@@ -59,6 +59,7 @@ export default function App() {
             <Route path="subjects/:id" element={<SubjectDetail />} />
             <Route path="revision" element={<Revision />} />
             <Route path="progress" element={<ProgressPage />} />
+            <Route path="insights" element={<ProgressPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Route>

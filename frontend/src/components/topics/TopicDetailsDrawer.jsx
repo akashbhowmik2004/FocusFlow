@@ -10,7 +10,8 @@ import {
   CalendarRange,
   TrendingUp,
   History,
-  Check,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/dates'
@@ -32,6 +33,10 @@ export default function TopicDetailsDrawer({
   onReviewNow,
   onMarkRevisedToday,
   onOpenSchedule,
+  onEditTopic,
+  onDeleteTopic,
+  isStudiedToday = false,
+  onScheduleStudySession = null,
 }) {
   const handleKeyDown = useCallback(
     (e) => {
@@ -65,7 +70,7 @@ export default function TopicDetailsDrawer({
         <div className="fixed inset-0 z-50 flex justify-end">
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -109,6 +114,13 @@ export default function TopicDetailsDrawer({
                       onChangeStatus={onChangeStatus}
                       size="sm"
                     />
+
+                    {isStudiedToday && (
+                      <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 select-none">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <span>Studied today</span>
+                      </span>
+                    )}
                   </div>
 
                   {/* Topic Title */}
@@ -120,7 +132,7 @@ export default function TopicDetailsDrawer({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer shrink-0"
+                  className="p-2 rounded-lg text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-95 disabled:pointer-events-none disabled:opacity-50 transition-colors cursor-pointer shrink-0"
                   aria-label="Close topic details"
                 >
                   <X className="w-5 h-5" />
@@ -157,6 +169,19 @@ export default function TopicDetailsDrawer({
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Schedule</span>
                 </Button>
+
+                {onScheduleStudySession && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onScheduleStudySession}
+                    className="text-xs font-medium gap-1.5 text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
+                    title="Schedule a study block for this topic"
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Schedule Session</span>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -164,8 +189,8 @@ export default function TopicDetailsDrawer({
             <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
               {/* Revision Information Grid */}
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">
-                  Revision Information
+                <h3 className="text-xs font-bold text-[var(--color-text-muted)] mb-3">
+                  Revision information
                 </h3>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -174,11 +199,11 @@ export default function TopicDetailsDrawer({
                     <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] mb-1">
                       <span>Next Revision</span>
                       {isManual ? (
-                        <span className="text-[10px] font-mono font-bold text-amber-700 dark:text-amber-400 flex items-center gap-0.5">
+                        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-0.5">
                           <CalendarRange className="w-3 h-3" /> Manual
                         </span>
                       ) : (
-                        <span className="text-[10px] font-mono font-bold text-[var(--color-brand)] flex items-center gap-0.5">
+                        <span className="text-[10px] font-semibold text-[var(--color-brand)] flex items-center gap-0.5">
                           <Sparkles className="w-3 h-3" /> Spaced
                         </span>
                       )}
@@ -186,7 +211,7 @@ export default function TopicDetailsDrawer({
                     <div className="font-extrabold text-sm sm:text-base text-[var(--color-text)] tracking-tight">
                       {topic.nextRevision ? formatDate(topic.nextRevision, 'MMM d, yyyy') : 'Not scheduled'}
                     </div>
-                    <div className="text-[11px] font-mono font-semibold text-[var(--color-text-muted)] mt-1">
+                    <div className="text-[11px] font-medium text-[var(--color-text-muted)] mt-1">
                       {relativeNext ? relativeNext.text : 'Awaiting schedule'}
                     </div>
                   </div>
@@ -200,7 +225,7 @@ export default function TopicDetailsDrawer({
                     <div className="font-extrabold text-sm sm:text-base text-[var(--color-text)] tracking-tight">
                       {topic.lastRevised ? formatDate(topic.lastRevised, 'MMM d, yyyy') : 'Never'}
                     </div>
-                    <div className="text-[11px] font-mono font-semibold text-[var(--color-text-muted)] mt-1">
+                    <div className="text-[11px] font-medium text-[var(--color-text-muted)] mt-1">
                       {relativeLast ? relativeLast.text : 'First revision pending'}
                     </div>
                   </div>
@@ -278,12 +303,12 @@ export default function TopicDetailsDrawer({
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
                     <History className="w-4 h-4 text-[var(--color-text-muted)]" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">
-                      Revision History
+                    <h3 className="text-xs font-bold text-[var(--color-text)]">
+                      Revision history
                     </h3>
                   </div>
-                  <span className="text-xs text-[var(--color-text-muted)] font-mono">
-                    {meta.revisionHistory.length} recorded
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    <span className="font-mono">{meta.revisionHistory.length}</span> recorded
                   </span>
                 </div>
 
@@ -294,7 +319,7 @@ export default function TopicDetailsDrawer({
                       No review sessions logged yet
                     </p>
                     <p className="text-[11px] text-[var(--color-text-muted)] mt-1 max-w-xs mx-auto">
-                      Click <strong>"Review Now"</strong> to assess your recall and begin the automated spaced repetition schedule.
+                      Click <strong>“Review Now”</strong> to assess your recall and begin the automated spaced repetition schedule.
                     </p>
                     <Button
                       size="sm"
@@ -356,18 +381,50 @@ export default function TopicDetailsDrawer({
             </div>
 
             {/* Drawer Footer */}
-            <div className="p-4 border-t border-[var(--color-border-light)] bg-[var(--color-bg-subtle)] flex items-center justify-between text-xs text-[var(--color-text-muted)] shrink-0">
-              <span className="font-mono text-[11px]">
+            <div className="p-4 border-t border-[var(--color-border-light)] bg-[var(--color-bg-subtle)] flex items-center justify-between text-xs text-[var(--color-text-muted)] shrink-0 gap-2 flex-wrap">
+              <span className="text-[11px] text-[var(--color-text-muted)] truncate">
                 {isManual ? 'Manual Scheduling Active' : 'Spaced Repetition Algorithm Active'}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClose}
-                className="text-xs"
-              >
-                Close
-              </Button>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {onEditTopic && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      onClose()
+                      onEditTopic(topic)
+                    }}
+                    className="text-xs h-7 px-2 font-medium gap-1 text-[var(--color-text)]"
+                    title="Modify topic name or status"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    <span>Edit</span>
+                  </Button>
+                )}
+                {onDeleteTopic && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      onClose()
+                      onDeleteTopic(topic.id, topic.name)
+                    }}
+                    className="text-xs h-7 px-2 font-medium gap-1 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                    title="Delete topic from syllabus"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    <span>Delete</span>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onClose}
+                  className="text-xs h-7 px-2.5"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           </motion.aside>
         </div>

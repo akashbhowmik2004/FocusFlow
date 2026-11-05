@@ -43,6 +43,7 @@ const learningNavigation = [
 ]
 
 function isCurrentPath(pathname, path) {
+  if (path === '/app/progress' && pathname.startsWith('/app/insights')) return true
   return pathname === path || (path !== '/app/dashboard' && pathname.startsWith(path))
 }
 
@@ -142,7 +143,7 @@ export default function AppLayout() {
           ? 'Subjects'
           : location.pathname.includes('/revision')
             ? 'Revision Center'
-            : location.pathname.includes('/progress')
+            : location.pathname.includes('/progress') || location.pathname.includes('/insights')
               ? 'Insights'
               : location.pathname.includes('/settings')
                 ? 'Settings'

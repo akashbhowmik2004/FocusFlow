@@ -207,7 +207,7 @@ export default function Signup() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
                 <GraduationCap className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
-                <span className="text-xs font-semibold">Academic Cohort Enrollment: AY 2024/2025</span>
+                <span className="text-xs font-semibold">Academic Workspace: Student Onboarding</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text)] tracking-tight leading-tight">
                 Create Your FocusFlow Account.
@@ -234,7 +234,7 @@ export default function Signup() {
                 </div>
                 <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                   <span>Syllabus Parsing</span>
-                  <span className="font-semibold text-[var(--color-scholar-emerald)] font-tabular">100% Deterministic</span>
+                  <span className="font-semibold text-[var(--color-scholar-emerald)]">Structured Units</span>
                 </div>
               </div>
 
@@ -253,7 +253,7 @@ export default function Signup() {
                 </div>
                 <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                   <span>Session Shield</span>
-                  <span className="font-semibold text-[var(--color-text)] font-tabular">Zero Telemetry Leaks</span>
+                  <span className="font-semibold text-[var(--color-text)]">Monotasking Focus</span>
                 </div>
               </div>
 
@@ -272,7 +272,7 @@ export default function Signup() {
                 </div>
                 <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                   <span>Retention Target</span>
-                  <span className="font-semibold text-[var(--color-scholar-emerald)] font-tabular">92.4% Recall</span>
+                  <span className="font-semibold text-[var(--color-scholar-emerald)]">Spaced Repetition</span>
                 </div>
               </div>
 
@@ -291,7 +291,7 @@ export default function Signup() {
                 </div>
                 <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                   <span>Audit Metric</span>
-                  <span className="font-semibold text-[var(--color-text)] font-tabular">Raw Time Logged</span>
+                  <span className="font-semibold text-[var(--color-text)]">Duration Telemetry</span>
                 </div>
               </div>
             </div>
@@ -304,16 +304,15 @@ export default function Signup() {
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm font-semibold text-[var(--color-text)]">
-                    Institutional Quality Standard
+                    Academic Workflow Architecture
                   </p>
                   <p className="text-xs text-[var(--color-text-secondary)]">
-                    Calibrated for rigorous higher education standards: Fall 2024 / Spring 2025
+                    Designed for undergraduate courses and graduate-level research
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs">
-                <span className="text-[var(--color-text-secondary)]">Active Cohorts:</span>
-                <span className="font-bold text-[var(--color-scholar-emerald)] font-tabular">14,280+</span>
+                <span className="font-semibold text-[var(--color-scholar-emerald)]">Built for Structured Learning</span>
               </div>
             </div>
 
@@ -338,7 +337,7 @@ export default function Signup() {
                     Get Started Free
                   </h2>
                   <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[var(--color-scholar-emerald)] text-xs font-semibold">
-                    Semester Pass
+                    Student Account
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
@@ -398,7 +397,7 @@ export default function Signup() {
                       autoComplete="name"
                       {...register('name')}
                       className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
-                      placeholder="e.g. Julian Vance"
+                      placeholder="Full name"
                     />
                     <User className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                   </div>
@@ -430,7 +429,7 @@ export default function Signup() {
                       autoComplete="email"
                       {...register('email')}
                       className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
-                      placeholder="j.vance@columbia.edu"
+                      placeholder="name@university.edu"
                     />
                     <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                   </div>
@@ -598,7 +597,7 @@ export default function Signup() {
                       className="mt-0.5 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-scholar-emerald)] focus:ring-[var(--color-scholar-emerald)] cursor-pointer"
                     />
                     <span>
-                      I agree to the FocusFlow Terms of Service and Academic Privacy Policy (FERPA-Compliant).
+                      I agree to the FocusFlow Terms of Service and Privacy Policy.
                     </span>
                   </label>
                   {errors.acceptTerms && (
@@ -646,7 +645,7 @@ export default function Signup() {
               <div className="bg-[var(--color-bg-subtle)] rounded-lg p-3 flex items-center gap-2.5 text-[var(--color-text-secondary)] border border-[var(--color-border)]">
                 <ShieldCheck className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0" />
                 <span className="text-[11px] leading-tight">
-                  Protected by 256-bit TLS encryption. Academic identity verification enabled.
+                  Encrypted connection. Institutional email and Google sign-in supported.
                 </span>
               </div>
             </motion.div>
@@ -674,7 +673,7 @@ export default function Signup() {
               Institutional Terms
             </Link>
             <Link to="/#faq" className="hover:text-[var(--color-text)] transition-colors">
-              Privacy & FERPA
+              Privacy Policy
             </Link>
             <span className="flex items-center gap-1.5 text-[var(--color-scholar-emerald)] font-medium">
               <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)]" />

@@ -75,7 +75,7 @@ export const RECALL_RATINGS = [
       iconBg: 'bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400',
     },
     explanation: 'Review tomorrow to reinforce retention and rebuild the memory pathway.',
-    intervalLabel: 'Review tomorrow',
+    intervalLabel: 'Review tomorrow (1d)',
   },
   {
     id: 'hard',
@@ -140,7 +140,84 @@ export const RECALL_RATINGS = [
 ]
 
 export function getRecallOption(ratingId) {
-  return RECALL_RATINGS.find((r) => r.id === ratingId) || RECALL_RATINGS[2] // default to 'good'
+  const norm = String(ratingId || 'good').toLowerCase()
+  return RECALL_RATINGS.find((r) => r.id === norm) || RECALL_RATINGS[2] // default to 'good'
+}
+
+export const MIN_EASE_FACTOR = 1.3
+export const INITIAL_EASE_FACTOR = 2.5
+
+export const RATING_QUALITY = {
+  AGAIN: 0,
+  HARD: 3,
+  GOOD: 4,
+  EASY: 5,
+}
+
+export function calculateEaseFactor(currentEaseFactor = INITIAL_EASE_FACTOR, quality = 4) {
+  const updatedEaseFactor =
+    currentEaseFactor +
+    (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+
+  return Math.max(
+    MIN_EASE_FACTOR,
+    Number(updatedEaseFactor.toFixed(2))
+  )
+}
+
+/**
+ * Canonical SM-2 Calculation Engine
+ * Matches the backend spacedRepetition.service.js implementation exactly.
+ */
+export function calculateCanonicalSM2({
+  rating,
+  repetitions = 0,
+  intervalDays = 0,
+  easeFactor = INITIAL_EASE_FACTOR,
+  reviewedAt = new Date(),
+}) {
+  const normalizedRating = String(rating || 'GOOD').trim().toUpperCase()
+  const quality = RATING_QUALITY[normalizedRating] ?? 4
+  const nextEaseFactor = calculateEaseFactor(easeFactor, quality)
+
+  let nextRepetitions
+  let nextInterval
+
+  if (normalizedRating === 'AGAIN') {
+    nextRepetitions = 0
+    nextInterval = 1
+  } else if (normalizedRating === 'HARD') {
+    nextRepetitions = repetitions + 1
+    nextInterval = Math.max(1, Math.ceil(intervalDays * 1.2) || 1)
+  } else if (normalizedRating === 'GOOD') {
+    nextRepetitions = repetitions + 1
+    if (repetitions === 0) {
+      nextInterval = 1
+    } else if (repetitions === 1) {
+      nextInterval = 3
+    } else {
+      nextInterval = Math.round(intervalDays * nextEaseFactor)
+    }
+  } else {
+    // EASY
+    nextRepetitions = repetitions + 1
+    if (repetitions === 0) {
+      nextInterval = 4
+    } else {
+      nextInterval = Math.round(Math.max(intervalDays, 1) * (nextEaseFactor + 0.3))
+    }
+  }
+
+  const lastRevised = new Date(reviewedAt)
+  const nextRevision = addDays(lastRevised, nextInterval)
+
+  return {
+    repetitions: nextRepetitions,
+    intervalDays: nextInterval,
+    easeFactor: nextEaseFactor,
+    lastRevised,
+    nextRevision,
+  }
 }
 
 /**
@@ -149,34 +226,28 @@ export function getRecallOption(ratingId) {
  */
 export function calculateNextRevision(topic, ratingId, baseDate = new Date()) {
   const rating = getRecallOption(ratingId)
-  const currentInterval = topic?.intervalDays || 4
-  const currentCount = topic?.revisionCount || (topic?.lastRevised ? 1 : 0)
+  const ratingUpper = (ratingId || 'good').toUpperCase()
+  const repetitions = topic?.repetitions ?? topic?.revisionCount ?? (topic?.lastRevised ? 1 : 0)
+  const intervalDays = topic?.intervalDays ?? 0
+  const easeFactor = topic?.easeFactor ?? INITIAL_EASE_FACTOR
 
-  let nextIntervalDays = 1
+  const sm2 = calculateCanonicalSM2({
+    rating: ratingUpper,
+    repetitions,
+    intervalDays,
+    easeFactor,
+    reviewedAt: baseDate,
+  })
 
-  switch (ratingId) {
-    case 'again':
-      nextIntervalDays = 1
-      break
-    case 'hard':
-      nextIntervalDays = currentCount === 0 ? 2 : Math.max(2, Math.round(currentInterval * 0.75))
-      break
-    case 'good':
-      nextIntervalDays = currentCount === 0 ? 5 : Math.max(4, Math.round(currentInterval * 1.8))
-      break
-    case 'easy':
-      nextIntervalDays = currentCount === 0 ? 10 : Math.max(8, Math.round(currentInterval * 2.5))
-      break
-    default:
-      nextIntervalDays = 7
-  }
-
-  const calculatedDate = addDays(baseDate, nextIntervalDays)
+  const nextIntervalDays = sm2.intervalDays
+  const calculatedDate = sm2.nextRevision
   const nextRevisionIso = format(calculatedDate, 'yyyy-MM-dd')
 
   return {
     nextRevision: nextRevisionIso,
     intervalDays: nextIntervalDays,
+    repetitions: sm2.repetitions,
+    easeFactor: sm2.easeFactor,
     rating,
     previewDateText: format(calculatedDate, 'MMM d, yyyy'),
     explanation: rating.explanation,
@@ -241,16 +312,6 @@ export function getTopicRevisionMeta(topic) {
   const lastHistoryItem = history[history.length - 1]
   const recentRecall = lastHistoryItem ? getRecallOption(lastHistoryItem.recall) : null
 
-  // Estimated retention score (0-100%)
-  let retentionScore = 0
-  if (topic.status === 'completed') {
-    retentionScore = isOverdue ? 65 : 92
-  } else if (topic.status === 'in-progress') {
-    retentionScore = isOverdue ? 40 : 68
-  } else {
-    retentionScore = 15
-  }
-
   return {
     revisionCount,
     intervalDays,
@@ -260,7 +321,6 @@ export function getTopicRevisionMeta(topic) {
     isDue,
     isOverdue,
     daysUntilNext,
-    retentionScore,
   }
 }
 

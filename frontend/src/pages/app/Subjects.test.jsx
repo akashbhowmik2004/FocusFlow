@@ -47,6 +47,14 @@ describe('Subjects Page Integration with Zod Validation', () => {
     expect(screen.getByRole('button', { name: /Add Subject/i })).toBeInTheDocument()
   })
 
+  it('renders authentic academic telemetry summary strip', () => {
+    renderComponent()
+    expect(screen.getByText('Enrolled Subjects')).toBeInTheDocument()
+    expect(screen.getAllByText('Syllabus Completion')[0]).toBeInTheDocument()
+    expect(screen.getByText('Spaced Revision Queue')).toBeInTheDocument()
+    expect(screen.getByText('Nearest Exam Horizon')).toBeInTheDocument()
+  })
+
   it('opens Add Subject dialog and shows Zod validation error when submitting empty name without separate validation', async () => {
     renderComponent()
 
@@ -106,5 +114,133 @@ describe('Subjects Page Integration with Zod Validation', () => {
         '/app/subjects/sub-new-1?addTopic=true'
       )
     })
+  })
+
+  it('filters subject cards by search query matching course code or title', () => {
+    renderComponent()
+
+    const searchInput = screen.getByPlaceholderText('Filter subjects...')
+    fireEvent.change(searchInput, { target: { value: 'Algorithms' } })
+
+    // "Data Structures & Algorithms" should be visible
+    expect(screen.getByText(/Data Structures & Algorithms/i)).toBeInTheDocument()
+
+    // Non-matching courses should be filtered out
+    expect(screen.queryByText(/Database Systems/i)).not.toBeInTheDocument()
+  })
+
+  it('shows empty filter state when search has no matches and allows resetting filters', () => {
+    renderComponent()
+
+    const searchInput = screen.getByPlaceholderText('Filter subjects...')
+    fireEvent.change(searchInput, { target: { value: 'NonexistentCourseXYZ' } })
+
+    expect(screen.getByText('No matching subjects found')).toBeInTheDocument()
+
+    const resetBtn = screen.getByRole('button', { name: /Reset all filters/i })
+    fireEvent.click(resetBtn)
+
+    expect(searchInput.value).toBe('')
+    expect(screen.getByText(/Data Structures & Algorithms/i)).toBeInTheDocument()
+  })
+
+  it('opens edit dialog and updates existing subject with success toast', async () => {
+    vi.spyOn(subjectService, 'updateSubject').mockResolvedValueOnce({
+      message: 'Subject updated successfully',
+      subject: {
+        id: 'sub-1',
+        name: 'Advanced Algorithms & Complexity',
+        code: 'CS201-A',
+        color: '#6366f1',
+        examDate: '2026-11-20',
+      },
+    })
+
+    renderComponent()
+
+    // Find the edit button for Algorithms
+    const editBtn = screen.getByLabelText(/Edit Data Structures & Algorithms/i)
+    fireEvent.click(editBtn)
+
+    // Edit modal dialog should be displayed with current values
+    expect(screen.getByText('Edit Course / Subject')).toBeInTheDocument()
+
+    const nameInput = screen.getByDisplayValue('Data Structures & Algorithms')
+    fireEvent.change(nameInput, { target: { value: 'Advanced Algorithms & Complexity' } })
+
+    const saveBtn = screen.getByRole('button', { name: /Save Changes/i })
+    fireEvent.click(saveBtn)
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith(
+        'Updated subject "Advanced Algorithms & Complexity"!'
+      )
+    })
+  })
+
+  it('opens delete confirmation dialog and deletes subject upon confirmation', async () => {
+    vi.spyOn(subjectService, 'deleteSubject').mockResolvedValueOnce({
+      message: 'Subject deleted successfully',
+    })
+
+    renderComponent()
+
+    // Find the delete button for Operating Systems
+    const deleteBtn = screen.getByLabelText(/Delete Operating Systems/i)
+    fireEvent.click(deleteBtn)
+
+    // Delete confirmation modal should open
+    expect(screen.getByRole('heading', { name: 'Delete Subject' })).toBeInTheDocument()
+    expect(
+      screen.getByText(/All syllabus topics, spaced recall records/i)
+    ).toBeInTheDocument()
+
+    const confirmDeleteBtn = screen.getByRole('button', { name: /^Delete Subject$/i })
+    fireEvent.click(confirmDeleteBtn)
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Subject deleted successfully')
+    })
+  })
+
+  it('filters subject cards by status: Upcoming Exams and agrees with countdown', () => {
+    renderComponent()
+
+    const statusSelect = screen.getByRole('combobox', { name: /Filter by status/i })
+    fireEvent.change(statusSelect, { target: { value: 'upcoming-exam' } })
+
+    // Only courses with active, future or today exam dates should be visible
+    // In mockData: Operating Systems, Database Systems, Computer Networks, Linear Algebra have exams
+    expect(screen.getByText(/Operating Systems/i)).toBeInTheDocument()
+    expect(screen.getByText(/Linear Algebra/i)).toBeInTheDocument()
+  })
+
+  it('filters subject cards by status: Needs Syllabus and displays empty state when none match', () => {
+    renderComponent()
+
+    const statusSelect = screen.getByRole('combobox', { name: /Filter by status/i })
+
+    // Needs Syllabus: All default mock subjects have syllabus topics, so none match
+    fireEvent.change(statusSelect, { target: { value: 'needs-syllabus' } })
+    expect(screen.getByText('No matching subjects found')).toBeInTheDocument()
+
+    // Switch back to All Courses
+    fireEvent.change(statusSelect, { target: { value: 'all' } })
+    expect(screen.getByText(/Data Structures & Algorithms/i)).toBeInTheDocument()
+  })
+
+  it('provides accessible color palette buttons with aria-labels and complete states', () => {
+    renderComponent()
+
+    const openBtn = screen.getByRole('button', { name: /Add Subject/i })
+    fireEvent.click(openBtn)
+
+    const blueSwatch = screen.getByRole('button', { name: 'Blue' })
+    expect(blueSwatch).toBeInTheDocument()
+    expect(blueSwatch).toHaveAttribute('title', 'Blue')
+
+    const purpleSwatch = screen.getByRole('button', { name: 'Purple' })
+    fireEvent.click(purpleSwatch)
+    expect(purpleSwatch).toHaveClass('scale-115')
   })
 })

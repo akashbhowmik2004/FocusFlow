@@ -98,8 +98,28 @@ describe('TopicDetailsDrawer', () => {
     fireEvent.click(markRevisedBtn)
     expect(handleMarkRevisedToday).toHaveBeenCalled()
 
-    const scheduleBtn = screen.getByRole('button', { name: /Schedule/i })
+    const scheduleBtn = screen.getByRole('button', { name: /^Schedule$/i })
     fireEvent.click(scheduleBtn)
     expect(handleOpenSchedule).toHaveBeenCalled()
+  })
+
+  it('renders "Studied today" indicator and triggers schedule study session when provided', () => {
+    const handleScheduleSession = vi.fn()
+    render(
+      <TopicDetailsDrawer
+        open={true}
+        onClose={vi.fn()}
+        topic={mockTopic}
+        subject={mockSubject}
+        isStudiedToday={true}
+        onScheduleStudySession={handleScheduleSession}
+      />
+    )
+
+    expect(screen.getByText('Studied today')).toBeInTheDocument()
+    const scheduleSessionBtn = screen.getByRole('button', { name: /Schedule Session/i })
+    expect(scheduleSessionBtn).toBeInTheDocument()
+    fireEvent.click(scheduleSessionBtn)
+    expect(handleScheduleSession).toHaveBeenCalled()
   })
 })

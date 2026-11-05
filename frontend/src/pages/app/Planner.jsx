@@ -1,31 +1,28 @@
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Timer
-} from 'lucide-react'
+import { useState, useRef, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp, useSessions } from '@/context/AppContext'
 import {
   formatDate,
-  getCalendarDays,
   getWeekDays,
   addMonths,
   subMonths,
   addWeeks,
   subWeeks,
-  isSameDay,
-  isSameMonth,
-  isToday
+  addDays,
+  subDays,
+  startOfWeek,
+  endOfWeek,
+  parseCalendarDate,
 } from '@/lib/dates'
 import { getCalendarDateKey } from '@/lib/revisionSummary'
-import { cn } from '@/lib/utils'
-import Button from '@/components/ui/Button'
-import Card, { SessionCard } from '@/components/ui/Card'
+import { getWeekStudyStats, getDayStudyStats } from '@/lib/calendarGrid'
 import ScheduleSessionDialog from '@/components/sessions/ScheduleSessionDialog'
-import EmptyState from '@/components/ui/EmptyState'
+import PlannerHeader from '@/components/planner/PlannerHeader'
+import PlannerWeekView from '@/components/planner/PlannerWeekView'
+import PlannerDayView from '@/components/planner/PlannerDayView'
+import PlannerMonthView from '@/components/planner/PlannerMonthView'
+import PlannerSidePanel from '@/components/planner/PlannerSidePanel'
+import CancelSessionDialog from '@/components/planner/CancelSessionDialog'
 import { toast } from 'sonner'
 import { notifySessionSuccess } from '@/lib/sessionPresentation'
 
@@ -33,44 +30,89 @@ export default function Planner() {
   const { state } = useApp()
   const {
     sessions,
-    addSession,
     completeSession,
+    updateSession,
     activeFocusSession,
     startFocusSession,
     resumeFocusSession,
   } = useSessions()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [viewMode, setViewMode] = useState(() =>
-    typeof window !== 'undefined' && window.innerWidth < 640 ? 'week' : 'month',
-  ) // 'month' | 'week'
-  const [subjectFilter, setSubjectFilter] = useState('all')
+  const [currentDate, setCurrentDate] = useState(() => {
+    const paramDate = searchParams.get('date')
+    if (paramDate) {
+      const parsed = parseCalendarDate(paramDate)
+      if (parsed) return parsed
+    }
+    return new Date()
+  })
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const paramDate = searchParams.get('date')
+    if (paramDate) {
+      const parsed = parseCalendarDate(paramDate)
+      if (parsed) return parsed
+    }
+    return new Date()
+  })
+  const [viewMode, setViewMode] = useState(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      return 'day'
+    }
+    return 'week'
+  })
+  const [subjectFilter, setSubjectFilter] = useState(() => {
+    return searchParams.get('subjectId') || 'all'
+  })
+  const [selectedSession, setSelectedSession] = useState(null)
 
   // Add / Edit Session Dialog
-  const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [editingSession, setEditingSession] = useState(null)
+  const [addDialogOpen, setAddDialogOpen] = useState(() => {
+    return (
+      searchParams.get('create') === 'true' ||
+      searchParams.get('action') === 'create'
+    )
+  })
+  const [editingSession, setEditingSession] = useState(() => {
+    const shouldCreate =
+      searchParams.get('create') === 'true' ||
+      searchParams.get('action') === 'create'
+    if (shouldCreate) {
+      const paramDate = searchParams.get('date')
+      return {
+        subjectId: searchParams.get('subjectId') || '',
+        topicId: searchParams.get('topicId') || '',
+        date: paramDate || getCalendarDateKey(new Date()),
+      }
+    }
+    return null
+  })
 
-  const handleOpenAddDialog = () => {
-    setEditingSession(null)
-    setAddDialogOpen(true)
-  }
+  // Cancel Session Dialog
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancellingSession, setCancellingSession] = useState(null)
+  const [isCancelling, setIsCancelling] = useState(false)
 
   // Navigation handlers
   const handlePrev = () => {
     if (viewMode === 'month') {
-      setCurrentDate(subMonths(currentDate, 1))
+      setCurrentDate((prev) => subMonths(prev, 1))
+    } else if (viewMode === 'week') {
+      setCurrentDate((prev) => subWeeks(prev, 1))
     } else {
-      setCurrentDate(subWeeks(currentDate, 1))
+      setSelectedDate((prev) => subDays(prev, 1))
+      setCurrentDate((prev) => subDays(prev, 1))
     }
   }
 
   const handleNext = () => {
     if (viewMode === 'month') {
-      setCurrentDate(addMonths(currentDate, 1))
+      setCurrentDate((prev) => addMonths(prev, 1))
+    } else if (viewMode === 'week') {
+      setCurrentDate((prev) => addWeeks(prev, 1))
     } else {
-      setCurrentDate(addWeeks(currentDate, 1))
+      setSelectedDate((prev) => addDays(prev, 1))
+      setCurrentDate((prev) => addDays(prev, 1))
     }
   }
 
@@ -80,26 +122,108 @@ export default function Planner() {
     setSelectedDate(now)
   }
 
-  // Filtered sessions
-  const filteredSessions = sessions.filter((s) => {
-    if (subjectFilter !== 'all' && s.subjectId !== subjectFilter) return false
-    return true
-  })
-
-  // Selected date sessions
-  const selectedDateStr = getCalendarDateKey(selectedDate)
-  const selectedDaySessions = filteredSessions.filter((s) => s.date === selectedDateStr)
-
-  // Calendar cells
-  const monthDays = getCalendarDays(currentDate)
-  const weekDays = getWeekDays(currentDate)
-
-  // Helper to check if any subject has an exam on this day
-  const getExamOnDay = (date) => {
-    const dStr = getCalendarDateKey(date)
-    return state.subjects.find((s) => s.examDate === dStr)
+  const handleOpenAddDialog = () => {
+    setEditingSession({
+      subjectId: subjectFilter !== 'all' ? subjectFilter : '',
+      date: getCalendarDateKey(selectedDate),
+    })
+    setAddDialogOpen(true)
   }
 
+  const handleEditSession = (session) => {
+    setEditingSession(session)
+    setAddDialogOpen(true)
+  }
+
+  const handleOpenCancelDialog = (sessionId) => {
+    const target = sessions.find((s) => s.id === sessionId)
+    if (target) {
+      setCancellingSession(target)
+      setCancelDialogOpen(true)
+    }
+  }
+
+  const handleConfirmCancel = async () => {
+    if (!cancellingSession) return
+    try {
+      setIsCancelling(true)
+      await updateSession({
+        id: cancellingSession.id,
+        status: 'cancelled',
+      })
+      notifySessionSuccess(
+        'cancelled',
+        cancellingSession.id,
+        `Session "${cancellingSession.title}" cancelled.`
+      )
+      setCancelDialogOpen(false)
+      setCancellingSession(null)
+      if (selectedSession?.id === cancellingSession.id) {
+        setSelectedSession(null)
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to cancel session.')
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  // Filtered sessions by selected subject
+  const filteredSessions = useMemo(() => {
+    return sessions.filter((s) => {
+      if (subjectFilter !== 'all' && s.subjectId !== subjectFilter) return false
+      return true
+    })
+  }, [sessions, subjectFilter])
+
+  // Week days for current date (Monday to Sunday)
+  const weekDays = useMemo(() => {
+    return getWeekDays(currentDate)
+  }, [currentDate])
+
+  // Aggregate stats for header display
+  const weekStats = useMemo(() => {
+    return getWeekStudyStats(filteredSessions, weekDays, getCalendarDateKey)
+  }, [filteredSessions, weekDays])
+
+  const dayStats = useMemo(() => {
+    return getDayStudyStats(filteredSessions, getCalendarDateKey(selectedDate))
+  }, [filteredSessions, selectedDate])
+
+  const totalPlannedHours = useMemo(() => {
+    if (viewMode === 'day') {
+      return dayStats.plannedHours
+    }
+    return weekStats.totalPlannedHours
+  }, [viewMode, dayStats, weekStats])
+
+  // Header Titles
+  const headerDateInfo = useMemo(() => {
+    if (viewMode === 'day') {
+      return {
+        title: formatDate(selectedDate, 'EEEE, MMMM d, yyyy'),
+        subtitle: '1-Day Focus View',
+      }
+    }
+    if (viewMode === 'week') {
+      const wStart = startOfWeek(currentDate, { weekStartsOn: 1 })
+      const wEnd = endOfWeek(currentDate, { weekStartsOn: 1 })
+      const sameMonth = wStart.getMonth() === wEnd.getMonth()
+      const title = sameMonth
+        ? `${formatDate(wStart, 'MMMM d')} – ${formatDate(wEnd, 'd, yyyy')}`
+        : `${formatDate(wStart, 'MMM d')} – ${formatDate(wEnd, 'MMM d, yyyy')}`
+      return {
+        title,
+        subtitle: 'Academic Week',
+      }
+    }
+    return {
+      title: formatDate(currentDate, 'MMMM yyyy'),
+      subtitle: 'Monthly Syllabus Distribution',
+    }
+  }, [viewMode, selectedDate, currentDate])
+
+  // Focus action handler respecting one-active-session rule
   const completingRef = useRef(new Set())
 
   const handleCompleteSession = async (id, title) => {
@@ -116,10 +240,24 @@ export default function Planner() {
   }
 
   const handleFocus = async (id, title, status = 'upcoming') => {
+    if (['completed', 'cancelled', 'missed'].includes(status)) {
+      toast.error('Completed or cancelled sessions cannot be started.')
+      return
+    }
+
+    // Priority 1: If current session is already active, navigate straight to it
     if (status === 'in-progress' && activeFocusSession?.id === id) {
       navigate(`/app/focus/${id}`)
       return
     }
+
+    // Priority 2: One-active-session rule enforcement
+    if (activeFocusSession?.id && activeFocusSession.id !== id) {
+      toast.info('Another focus session is currently active. Opening it instead.')
+      navigate(`/app/focus/${activeFocusSession.id}`)
+      return
+    }
+
     try {
       if (status === 'paused') {
         await resumeFocusSession(id)
@@ -129,7 +267,7 @@ export default function Planner() {
       navigate(`/app/focus/${id}`)
     } catch (error) {
       if (error?.status === 409 && activeFocusSession?.id) {
-        toast.error('Another session is active. Opening it instead.')
+        toast.info('Another focus session is active. Opening it instead.')
         navigate(`/app/focus/${activeFocusSession.id}`)
       } else {
         toast.error(error.message || `Could not start "${title}".`)
@@ -138,350 +276,99 @@ export default function Planner() {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-14 max-w-7xl mx-auto overflow-x-clip">
       {state.sessionsError && (
-        <div role="alert" className="rounded-xl border border-[var(--color-error-border)] bg-[var(--color-error-light)] px-4 py-3 text-sm text-[var(--color-error-text)]">
+        <div
+          role="alert"
+          className="rounded-xl border border-rose-200 bg-rose-50 dark:border-rose-900/60 dark:bg-rose-950/40 px-4 py-3 text-xs font-semibold text-rose-800 dark:text-rose-200"
+        >
           We couldn’t load your planner sessions. Refresh the page to try again.
         </div>
       )}
-      {/* Top Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center border border-[var(--color-border)] rounded-lg overflow-hidden bg-[var(--color-bg-subtle)]">
-            <button
-              onClick={handlePrev}
-              className="p-2 hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors cursor-pointer"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleNext}
-              className="p-2 hover:bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors cursor-pointer border-l border-[var(--color-border)]"
-              aria-label="Next"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
 
-          <div>
-            <h1 className="text-lg sm:text-xl font-extrabold text-[var(--color-text)]">
-              {formatDate(currentDate, viewMode === 'month' ? 'MMMM yyyy' : "'Week of' MMMM d, yyyy")}
-            </h1>
-            <p className="text-xs text-[var(--color-text-muted)]">
-              {viewMode === 'month' ? 'Monthly syllabus & session distribution' : 'Weekly time-block scheduling'}
-            </p>
-          </div>
+      {/* 1. Academic Planner Header & Controls */}
+      <PlannerHeader
+        currentDateTitle={headerDateInfo.title}
+        currentDateSubtitle={headerDateInfo.subtitle}
+        viewMode={viewMode}
+        onChangeViewMode={(mode) => setViewMode(mode)}
+        onPrev={handlePrev}
+        onNext={handleNext}
+        onToday={handleToday}
+        subjectFilter={subjectFilter}
+        onChangeSubjectFilter={setSubjectFilter}
+        subjects={state.subjects}
+        totalPlannedHours={totalPlannedHours}
+        onOpenCreateSession={handleOpenAddDialog}
+      />
+
+      {/* 2. Responsive 2-Column Workspace Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        {/* Left Primary Calendar Area (8 cols on desktop) */}
+        <div className="xl:col-span-8 space-y-4">
+          {viewMode === 'week' && (
+            <PlannerWeekView
+              weekDays={weekDays}
+              sessions={filteredSessions}
+              subjects={state.subjects}
+              selectedDate={selectedDate}
+              onSelectDate={(d) => setSelectedDate(d)}
+              onSelectSession={(s) => setSelectedSession(s)}
+              activeFocusSession={activeFocusSession}
+            />
+          )}
+
+          {viewMode === 'day' && (
+            <PlannerDayView
+              selectedDate={selectedDate}
+              sessions={filteredSessions}
+              subjects={state.subjects}
+              onSelectSession={(s) => setSelectedSession(s)}
+              onOpenCreateSession={handleOpenAddDialog}
+              onStartFocus={(id, title) => handleFocus(id, title)}
+              onResumeFocus={(id, title, status) =>
+                handleFocus(id, title, status)
+              }
+              onCompleteSession={handleCompleteSession}
+              onEditSession={handleEditSession}
+              onCancelSession={handleOpenCancelDialog}
+              activeFocusSession={activeFocusSession}
+            />
+          )}
+
+          {viewMode === 'month' && (
+            <PlannerMonthView
+              currentDate={currentDate}
+              selectedDate={selectedDate}
+              onSelectDate={(d) => setSelectedDate(d)}
+              sessions={filteredSessions}
+              subjects={state.subjects}
+              onSelectSession={(s) => setSelectedSession(s)}
+            />
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {/* Today Button */}
-          <Button variant="outline" size="sm" onClick={handleToday} className="text-xs">
-            Today
-          </Button>
-
-          {/* View Toggle */}
-          <div className="flex items-center p-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-xs">
-            <button
-              onClick={() => setViewMode('month')}
-              className={cn(
-                'px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer',
-                viewMode === 'month'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-xs'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
-              )}
-            >
-              Month
-            </button>
-            <button
-              onClick={() => setViewMode('week')}
-              className={cn(
-                'px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer',
-                viewMode === 'week'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-xs'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
-              )}
-            >
-              Week
-            </button>
-          </div>
-
-          {/* Subject Filter */}
-          <select
-            value={subjectFilter}
-            onChange={(e) => setSubjectFilter(e.target.value)}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1.5 text-xs text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
-          >
-            <option value="all">All Subjects</option>
-            {state.subjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.code || s.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Add Session CTA */}
-          <Button
-            size="sm"
-            onClick={handleOpenAddDialog}
-            className="text-xs font-semibold gap-1.5"
-          >
-            <Plus className="w-3.5 h-3.5" /> Add Session
-          </Button>
+        {/* Right Supporting Side Panel (4 cols on desktop) */}
+        <div className="xl:col-span-4 space-y-4">
+          <PlannerSidePanel
+            selectedDate={selectedDate}
+            selectedSession={selectedSession}
+            onDeselectSession={() => setSelectedSession(null)}
+            sessions={filteredSessions}
+            subjects={state.subjects}
+            onOpenCreateSession={handleOpenAddDialog}
+            onStartFocus={(id, title) => handleFocus(id, title)}
+            onResumeFocus={(id, title, status) =>
+              handleFocus(id, title, status)
+            }
+            onCompleteSession={handleCompleteSession}
+            onEditSession={handleEditSession}
+            onOpenCancelSession={handleOpenCancelDialog}
+          />
         </div>
       </div>
 
-      {/* Main Grid + Selected Day Inspector */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Calendar View Area (8 or 9 cols on large screen) */}
-        <div className="lg:col-span-8 space-y-4">
-          <Card className="p-3 sm:p-5 overflow-hidden">
-            {/* Weekdays Bar */}
-            <div className="grid grid-cols-7 gap-1 text-center font-bold text-xs text-[var(--color-text-muted)] pb-2 mb-2 border-b border-[var(--color-border-light)]">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                <div key={day} className="py-1">
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Month View Grid */}
-            {viewMode === 'month' && (
-              <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
-                {monthDays.map((day, idx) => {
-                  const dayStr = getCalendarDateKey(day)
-                  const daySessions = filteredSessions.filter((s) => s.date === dayStr)
-                  const isCurrentMonth = isSameMonth(day, currentDate)
-                  const isDayToday = isToday(day)
-                  const isSelected = isSameDay(day, selectedDate)
-                  const exam = getExamOnDay(day)
-
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => setSelectedDate(day)}
-                      className={cn(
-                        'min-h-[72px] sm:min-h-[96px] p-1.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between',
-                        isSelected
-                          ? 'border-[var(--color-brand)] ring-2 ring-[var(--color-brand-50)] bg-[var(--color-surface)] shadow-xs'
-                          : 'border-[var(--color-border-light)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]',
-                        !isCurrentMonth && 'opacity-40 bg-[var(--color-bg-subtle)]'
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span
-                          className={cn(
-                            'w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold',
-                            isDayToday
-                              ? 'bg-[var(--color-brand)] text-white font-bold'
-                              : 'text-[var(--color-text)]'
-                          )}
-                        >
-                          {day.getDate()}
-                        </span>
-
-                        {exam && (
-                          <span
-                            className="w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[var(--color-surface)]"
-                            title={`Exam: ${exam.name}`}
-                          />
-                        )}
-                      </div>
-
-                      {/* Session Badges in Cell */}
-                      <div className="space-y-1 mt-1 overflow-hidden">
-                        {daySessions.slice(0, 2).map((ses) => {
-                          const sub = state.subjects.find((s) => s.id === ses.subjectId)
-                          return (
-                            <div
-                              key={ses.id}
-                              className={cn(
-                                'text-[10px] px-1.5 py-0.5 rounded truncate font-medium flex items-center gap-1',
-                                ses.status === 'completed'
-                                  ? 'bg-[var(--color-bg-muted)] text-[var(--color-text-muted)] line-through'
-                                  : 'text-white'
-                              )}
-                              style={{ backgroundColor: ses.status !== 'completed' ? sub?.color : undefined }}
-                            >
-                              <span className="truncate">{ses.title}</span>
-                            </div>
-                          )
-                        })}
-                        {daySessions.length > 2 && (
-                          <div className="text-[9px] font-bold text-[var(--color-text-muted)] px-1">
-                            +{daySessions.length - 2} more
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Week View Grid */}
-            {viewMode === 'week' && (
-              <div className="grid grid-cols-1 sm:grid-cols-7 gap-2">
-                {weekDays.map((day, idx) => {
-                  const dayStr = getCalendarDateKey(day)
-                  const daySessions = filteredSessions.filter((s) => s.date === dayStr)
-                  const isDayToday = isToday(day)
-                  const isSelected = isSameDay(day, selectedDate)
-                  const exam = getExamOnDay(day)
-
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => setSelectedDate(day)}
-                      className={cn(
-                        'p-2.5 rounded-xl border transition-all cursor-pointer min-h-[220px] flex flex-col justify-between',
-                        isSelected
-                          ? 'border-[var(--color-brand)] bg-[var(--color-surface)] shadow-xs'
-                          : 'border-[var(--color-border-light)] hover:bg-[var(--color-bg-subtle)]'
-                      )}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between pb-2 border-b border-[var(--color-border-light)] mb-2">
-                          <span className="text-xs font-bold text-[var(--color-text-secondary)]">
-                            {formatDate(day, 'EEE')}
-                          </span>
-                          <span
-                            className={cn(
-                              'w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold',
-                              isDayToday
-                                ? 'bg-[var(--color-brand)] text-white'
-                                : 'text-[var(--color-text)]'
-                            )}
-                          >
-                            {day.getDate()}
-                          </span>
-                        </div>
-
-                        {exam && (
-                          <div className="mb-2 p-1 rounded bg-[var(--color-error-light)] text-[10px] font-bold text-[var(--color-error-text)] border border-[var(--color-error-border)] flex items-center gap-1">
-                            <Timer className="w-3 h-3 text-rose-600 dark:text-rose-400" />
-                            <span className="truncate">Exam: {exam.code || exam.name}</span>
-                          </div>
-                        )}
-
-                        <div className="space-y-1.5">
-                          {daySessions.map((ses) => {
-                            return (
-                              <div
-                                key={ses.id}
-                                className={cn(
-                                  'p-1.5 rounded-lg text-[11px] border',
-                                  ses.status === 'completed'
-                                    ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)] text-[var(--item-completed-text)] line-through'
-                                    : 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] text-[var(--color-text)]'
-                                )}
-                              >
-                                <div className="font-semibold truncate">{ses.title}</div>
-                                <div className="flex items-center justify-between text-[10px] text-[var(--color-text-muted)] mt-0.5">
-                                  <span>{ses.startTime}</span>
-                                  <span>{ses.duration}m</span>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedDate(day)
-                          handleOpenAddDialog()
-                        }}
-                        className="mt-3 w-full py-1 text-[11px] font-semibold text-[var(--color-brand)] hover:bg-[var(--color-brand-50)] rounded transition-colors text-center cursor-pointer"
-                      >
-                        + Add
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </Card>
-        </div>
-
-        {/* Selected Day Inspector Panel (4 cols) */}
-        <div className="lg:col-span-4 space-y-4">
-          <Card variant="panel" className="p-5">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--card-border-subtle)]">
-              <div>
-                <h3 className="text-base font-bold text-[var(--color-text)] tracking-tight">
-                  {formatDate(selectedDate, 'EEEE')}
-                </h3>
-                <p className="text-xs text-[var(--color-text-muted)] font-mono">
-                  {formatDate(selectedDate, 'MMMM d, yyyy')}
-                </p>
-              </div>
-              <Button
-                size="sm"
-                onClick={handleOpenAddDialog}
-                className="text-xs font-semibold gap-1"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add
-              </Button>
-            </div>
-
-            {/* Check for exam on this selected day */}
-            {getExamOnDay(selectedDate) && (
-              <div className="mb-3 p-3 rounded-lg bg-[var(--color-error-light)] border border-[var(--color-error-border)] text-[var(--color-error-text)] text-xs flex items-start gap-2">
-                <Timer className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold">Scheduled Examination Day</p>
-                  <p className="text-[11px] text-rose-700 dark:text-rose-300 font-mono">
-                    {getExamOnDay(selectedDate).name} ({getExamOnDay(selectedDate).code})
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {selectedDaySessions.length === 0 ? (
-              <EmptyState
-                icon={Calendar}
-                bordered
-                title="No sessions booked"
-                description={`No study blocks scheduled for ${formatDate(selectedDate, 'MMM d')}.`}
-                action={
-                  <Button
-                    onClick={handleOpenAddDialog}
-                    size="sm"
-                    className="text-xs font-semibold gap-1"
-                  >
-                    <Plus className="w-3 h-3" /> Schedule Session
-                  </Button>
-                }
-              />
-            ) : (
-              <div className="space-y-2.5">
-                {selectedDaySessions.map((session) => {
-                  const subject = state.subjects.find((s) => s.id === session.subjectId)
-                  return (
-                    <SessionCard
-                      key={session.id}
-                      session={session}
-                      subject={subject}
-                      onComplete={handleCompleteSession}
-                      onEdit={(sess) => {
-                        setEditingSession(sess)
-                        setAddDialogOpen(true)
-                      }}
-                      onStartFocus={(id, title) => handleFocus(id, title)}
-                      onResumeFocus={(id, title, status) => handleFocus(id, title, status)}
-                      showActions={true}
-                    />
-                  )
-                })}
-              </div>
-            )}
-          </Card>
-        </div>
-      </div>
-
-      {/* Add / Edit Study Session Modal Dialog */}
+      {/* 3. Schedule / Edit Study Session Dialog */}
       <ScheduleSessionDialog
         open={addDialogOpen}
         onClose={() => {
@@ -489,11 +376,23 @@ export default function Planner() {
           setEditingSession(null)
         }}
         initialSession={editingSession}
-        defaultDate={selectedDateStr}
+        defaultDate={getCalendarDateKey(selectedDate)}
         defaultStartTime="09:00"
         defaultEndTime="10:30"
-        description={`Set up a session for ${formatDate(selectedDate, 'MMMM d, yyyy')}.`}
-        submitLabel="Save to Calendar"
+        description={`Set up a study block for ${formatDate(selectedDate, 'MMMM d, yyyy')}.`}
+        submitLabel={editingSession?.id ? 'Save Changes' : 'Save to Calendar'}
+      />
+
+      {/* 4. Cancel Session Confirmation Dialog */}
+      <CancelSessionDialog
+        open={cancelDialogOpen}
+        onClose={() => {
+          setCancelDialogOpen(false)
+          setCancellingSession(null)
+        }}
+        session={cancellingSession}
+        onConfirm={handleConfirmCancel}
+        isCancelling={isCancelling}
       />
     </div>
   )

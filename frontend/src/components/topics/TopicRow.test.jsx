@@ -75,4 +75,36 @@ describe('TopicRow', () => {
     fireEvent.click(detailsBtn)
     expect(handleOpenDetails).toHaveBeenCalledWith(mockTopic)
   })
+
+  it('renders Focus button when topic has not been studied today', () => {
+    const handleFocusTopic = vi.fn()
+    render(
+      <TopicRow
+        topic={mockTopic}
+        subject={mockSubject}
+        onOpenDetails={vi.fn()}
+        onFocusTopic={handleFocusTopic}
+        isStudiedToday={false}
+      />
+    )
+
+    expect(screen.getByTitle('Start focus session for "Stacks & Queues"')).toBeInTheDocument()
+    expect(screen.queryByText('Studied today')).not.toBeInTheDocument()
+  })
+
+  it('renders "Studied today" status badge instead of Focus button when studied today', () => {
+    const handleFocusTopic = vi.fn()
+    render(
+      <TopicRow
+        topic={mockTopic}
+        subject={mockSubject}
+        onOpenDetails={vi.fn()}
+        onFocusTopic={handleFocusTopic}
+        isStudiedToday={true}
+      />
+    )
+
+    expect(screen.getByText('Studied today')).toBeInTheDocument()
+    expect(screen.queryByTitle('Start focus session for "Stacks & Queues"')).not.toBeInTheDocument()
+  })
 })
