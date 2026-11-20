@@ -18,6 +18,8 @@ import {
   RotateCcw,
   Search,
   Settings,
+  Sun,
+  Moon,
   User,
   X,
   Zap,
@@ -95,7 +97,7 @@ function Navigation({ items, pathname, collapsed, onNavigate }) {
 }
 
 export default function AppLayout() {
-  const { state, dispatch } = useApp()
+  const { state, dispatch, toggleTheme } = useApp()
   const { logout, isAuthenticated } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
@@ -371,7 +373,7 @@ export default function AppLayout() {
       <div className="flex h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:hidden">
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]"
+          className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -382,7 +384,18 @@ export default function AppLayout() {
           </span>
           <span className="text-sm font-semibold">FocusFlow</span>
         </Link>
-        <div className="w-9" />
+        <button
+          onClick={toggleTheme}
+          className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
+          title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {state.theme === 'dark' ? (
+            <Sun className="h-4 w-4 text-amber-400" />
+          ) : (
+            <Moon className="h-4 w-4 text-slate-600" />
+          )}
+        </button>
       </div>
 
       {/* Mobile navigation drawer */}
@@ -487,6 +500,20 @@ export default function AppLayout() {
                 <kbd className="ml-auto flex items-center gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--color-text-muted)]">
                   <Command className="h-2.5 w-2.5" />K
                 </kbd>
+              </button>
+
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
+                title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {state.theme === 'dark' ? (
+                  <Sun className="h-4 w-4 text-amber-400" />
+                ) : (
+                  <Moon className="h-4 w-4 text-slate-600" />
+                )}
               </button>
 
               {/* Notifications */}
