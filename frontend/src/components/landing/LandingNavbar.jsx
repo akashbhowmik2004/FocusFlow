@@ -36,9 +36,9 @@ export default function LandingNavbar({ isDark = false, onToggleTheme }) {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-200 ${
+      className={`sticky top-0 z-50 transition-[background-color,border-color] duration-150 ${
         scrolled
-          ? 'bg-white/85 dark:bg-[#070b14]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs'
+          ? 'bg-white/95 dark:bg-[#070b14]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 shadow-xs'
           : 'bg-transparent border-b border-transparent'
       }`}
     >
@@ -85,7 +85,7 @@ export default function LandingNavbar({ isDark = false, onToggleTheme }) {
             {/* Primary CTA Button */}
             <Link
               to="/signup"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-bold shadow-md hover:shadow-indigo-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-bold shadow-xs transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-500"
             >
               <span>Get Started Free</span>
               <ArrowRight className="w-4 h-4" />

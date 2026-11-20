@@ -33,52 +33,30 @@ export default function HeroDashboardPreview({ isDark = false }) {
 
   return (
     <div className="relative w-full max-w-2xl mx-auto lg:max-w-none">
-      {/* Background Soft Glow Blobs */}
-      <div
-        className="absolute -top-12 -right-12 w-80 h-80 rounded-full bg-indigo-500/20 dark:bg-indigo-600/15 blur-3xl pointer-events-none"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute -bottom-10 -left-10 w-72 h-72 rounded-full bg-purple-500/15 dark:bg-purple-600/10 blur-3xl pointer-events-none"
-        aria-hidden="true"
-      />
-
-      {/* Decorative Radiating Sunburst Lines (top-left of preview) */}
-      <div
-        className="absolute -top-6 -left-6 w-16 h-16 pointer-events-none hidden sm:block text-indigo-400/60 dark:text-indigo-400/40"
-        aria-hidden="true"
-      >
-        <svg viewBox="0 0 60 60" fill="none" className="w-full h-full">
-          <line x1="8" y1="28" x2="2" y2="28" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="14" y1="14" x2="6" y2="6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="28" y1="8" x2="28" y2="2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-        </svg>
-      </div>
-
       {/* Floating "Dream Big. Study Smart." Badge (Top Right) */}
       <div
-        className="absolute -top-5 right-4 sm:-right-4 z-20 flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/95 dark:bg-[#151c2e]/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-700/80 shadow-lg text-slate-900 dark:text-white transition-transform hover:-translate-y-0.5 duration-200"
+        className="absolute -top-4 right-4 sm:-right-2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-[#151c2e] border border-slate-200 dark:border-slate-700 shadow-md text-slate-900 dark:text-white"
       >
-        <div className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-          <BookOpen className="w-4 h-4 stroke-[2.2]" />
+        <div className="w-6 h-6 rounded-md bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+          <BookOpen className="w-3.5 h-3.5 stroke-[2]" />
         </div>
         <div className="leading-tight text-left">
-          <span className="block text-[11px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <span className="block text-[11px] font-bold text-slate-900 dark:text-white">
             Dream Big.
           </span>
-          <span className="block text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
+          <span className="block text-[10px] font-medium text-indigo-600 dark:text-indigo-400">
             Study Smart.
           </span>
         </div>
       </div>
 
-      {/* Main Perspective Container */}
+      {/* Main Perspective Container matching Concept Mockup */}
       <div
-        className="relative rounded-2xl border border-slate-200/90 dark:border-slate-700/70 bg-white dark:bg-[#0c1220] shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-indigo-500/10"
+        className="relative rounded-xl border border-slate-200/90 dark:border-slate-700/70 bg-white dark:bg-[#0c1220] shadow-2xl overflow-hidden lg:[transform:perspective(1200px)_rotateY(-6deg)_rotateX(3deg)] motion-reduce:transform-none transition-transform duration-300"
         style={{
           boxShadow: isDark
-            ? '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.12)'
-            : '0 25px 50px -12px rgba(15, 23, 42, 0.15), 0 0 40px rgba(99, 102, 241, 0.08)',
+            ? '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
+            : '0 25px 50px -12px rgba(15, 23, 42, 0.12)',
         }}
       >
         <div className="flex h-[360px] sm:h-[400px]">
@@ -136,8 +114,8 @@ export default function HeroDashboardPreview({ isDark = false }) {
             {/* Top Greeting & Action Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {isDark ? 'Good Evening, Akash 🌙' : 'Good Morning, Akash 👋'}
+                <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                  {isDark ? 'Good evening, Akash' : 'Good morning, Akash'}
                 </p>
                 <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white mt-0.5">
                   Let’s make today count!

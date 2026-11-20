@@ -20,7 +20,7 @@ export default function ConceptUpcomingDeadlines({ upcomingExams = [] }) {
       ]
 
   return (
-    <div className="h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col justify-between shadow-xs">
+    <div className="h-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col justify-between shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <h2 className="text-base font-bold text-[var(--color-text)] tracking-tight">
@@ -40,8 +40,8 @@ export default function ConceptUpcomingDeadlines({ upcomingExams = [] }) {
         {deadlines.map((dl, idx) => (
           <div key={idx} className="flex items-center justify-between py-1 group">
             <div className="flex items-center gap-3 min-w-0">
-              <CalendarDays className="h-4 w-4 text-[var(--color-text-muted)] shrink-0" />
-              <span className="text-sm font-medium text-[var(--color-text)] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <CalendarDays className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span className="text-sm font-medium text-[var(--color-text)] truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 {dl.title}
               </span>
             </div>
@@ -50,16 +50,6 @@ export default function ConceptUpcomingDeadlines({ upcomingExams = [] }) {
             </span>
           </div>
         ))}
-      </div>
-
-      {/* Footer link to schedule */}
-      <div className="pt-3 border-t border-[var(--color-border)] text-right">
-        <Link
-          to="/app/planner"
-          className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline"
-        >
-          Open Academic Timetable →
-        </Link>
       </div>
     </div>
   )

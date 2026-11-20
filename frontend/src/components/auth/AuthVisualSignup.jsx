@@ -4,14 +4,6 @@ export default function AuthVisualSignup() {
   return (
     <div className="flex flex-col justify-between space-y-8 lg:pr-4 select-none">
       <div className="space-y-6">
-        {/* Pill-Free Academic Badge */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
-            <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-xs font-semibold tracking-wide">Student Workspace Architecture</span>
-          </div>
-        </div>
-
         {/* Headline & Proposition */}
         <div className="space-y-3">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text)] tracking-tight leading-tight">
@@ -20,6 +12,10 @@ export default function AuthVisualSignup() {
           <p className="text-base sm:text-lg text-[var(--color-text-secondary)] max-w-lg leading-relaxed">
             Plan your study sessions, master your syllabus with spaced repetition, and track your academic progress in one focused workspace.
           </p>
+          <div className="inline-flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Student Workspace Architecture</span>
+          </div>
         </div>
 
         {/* Academic Pillars Trio (Single Containment Layer) */}

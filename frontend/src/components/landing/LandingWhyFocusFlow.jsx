@@ -65,9 +65,6 @@ export default function LandingWhyFocusFlow() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14 space-y-3">
-          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            WHY CHOOSE FOCUSFLOW
-          </p>
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
             Built for Academic Excellence, Not Generic Checklists
           </h2>
@@ -89,9 +86,9 @@ export default function LandingWhyFocusFlow() {
                   key={pillar.id}
                   type="button"
                   onClick={() => setActivePillar(idx)}
-                  className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-start gap-4 ${
+                  className={`w-full text-left p-4 sm:p-5 rounded-xl border transition-colors duration-150 cursor-pointer flex items-start gap-4 focus-visible:outline-2 focus-visible:outline-indigo-500 ${
                     isSelected
-                      ? 'bg-white dark:bg-[#0c1220] border-indigo-500/80 dark:border-indigo-500 shadow-md ring-1 ring-indigo-500/20'
+                      ? 'bg-white dark:bg-[#0c1220] border-indigo-600 dark:border-indigo-500 shadow-sm'
                       : 'bg-transparent border-slate-200/70 dark:border-slate-800/70 hover:bg-white/60 dark:hover:bg-[#0c1220]/60 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >

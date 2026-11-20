@@ -4,14 +4,6 @@ export default function AuthVisualLogin() {
   return (
     <div className="flex flex-col justify-between space-y-8 lg:pr-4 select-none">
       <div className="space-y-6">
-        {/* Institutional Pill-Free Badge */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
-            <GraduationCap className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-xs font-semibold tracking-wide">Academic Deep Work Platform</span>
-          </div>
-        </div>
-
         {/* Headline & Proposition */}
         <div className="space-y-3">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text)] tracking-tight leading-tight">
@@ -20,6 +12,10 @@ export default function AuthVisualLogin() {
           <p className="text-base sm:text-lg text-[var(--color-text-secondary)] max-w-lg leading-relaxed">
             Your next productive study session starts here. Continue building a measured, distraction-free routine engineered for cognitive retention.
           </p>
+          <div className="inline-flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Academic Deep Work Platform</span>
+          </div>
         </div>
 
         {/* Academic Session Dossier Preview Card (Single containment layer) */}
@@ -52,7 +48,7 @@ export default function AuthVisualLogin() {
               </span>
             </div>
             <div className="w-full bg-[var(--color-border)] rounded-full h-2 overflow-hidden">
-              <div className="bg-indigo-600 dark:bg-indigo-500 h-2 rounded-full w-[72%] transition-all duration-300" />
+              <div className="bg-indigo-600 dark:bg-indigo-500 h-2 rounded-full w-[72%] transition-[width] duration-300" />
             </div>
             <div className="flex items-center justify-between text-xs text-[var(--color-text-secondary)] pt-0.5">
               <span className="flex items-center gap-1.5">
@@ -77,7 +73,7 @@ export default function AuthVisualLogin() {
         </div>
 
         {/* Minimal Academic Desk Vignette */}
-        <div className="relative p-5 rounded-xl bg-gradient-to-br from-indigo-50/40 to-slate-50/40 dark:from-indigo-950/20 dark:to-slate-900/30 border border-[var(--color-border)] overflow-hidden">
+        <div className="relative p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] overflow-hidden shadow-xs">
           <div className="flex items-center gap-4">
             {/* Architectural SVG Desk Illustration */}
             <div className="shrink-0 w-16 h-16 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-xs">

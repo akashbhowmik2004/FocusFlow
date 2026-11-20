@@ -5,43 +5,28 @@ export default function LandingCtaBanner() {
   return (
     <section className="py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-indigo-700 via-indigo-800 to-indigo-950 dark:from-[#0c142c] dark:via-[#101b3d] dark:to-[#080d1f] border border-indigo-500/30 dark:border-indigo-500/20 shadow-2xl p-8 sm:p-12 lg:p-14 text-white">
-          {/* Subtle Ambient Light Glows */}
-          <div
-            className="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-indigo-400/20 blur-3xl pointer-events-none"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-purple-500/20 blur-3xl pointer-events-none"
-            aria-hidden="true"
-          />
-
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 dark:from-[#17203d] dark:via-[#151c33] dark:to-[#0f172a] border border-indigo-500/30 dark:border-indigo-900/50 shadow-xl p-8 sm:p-12 lg:p-14 text-white">
           <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
             {/* Left Column: Heading, Subtitle & Action */}
             <div className="lg:col-span-8 space-y-4 sm:space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 backdrop-blur-xs text-xs font-bold tracking-wide text-indigo-200 border border-white/15">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>Zero Cost · Pure Academic Focus</span>
-              </div>
-
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
                 Ready to Transform Your Study Routine?
               </h2>
 
-              <p className="text-base sm:text-lg text-indigo-100/90 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+              <p className="text-base sm:text-lg text-slate-300 dark:text-indigo-100/90 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
                 Start your journey with FocusFlow today. It’s free, forever.
               </p>
 
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                 <Link
                   to="/signup"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-white text-indigo-900 hover:bg-indigo-50 font-extrabold text-sm sm:text-base shadow-lg transition-transform hover:scale-[1.02] cursor-pointer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-sm sm:text-base shadow-sm transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
                 >
                   <span>Get Started Free</span>
                   <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                 </Link>
 
-                <span className="text-xs text-indigo-200 font-medium">
+                <span className="text-xs text-slate-400 dark:text-indigo-200 font-medium">
                   No credit card required · Instant setup in under 60 seconds
                 </span>
               </div>

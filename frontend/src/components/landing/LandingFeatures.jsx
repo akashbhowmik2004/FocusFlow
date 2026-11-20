@@ -45,9 +45,6 @@ export default function LandingFeatures() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            POWERFUL FEATURES
-          </p>
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
             Everything You Need to Excel
           </h2>
@@ -56,35 +53,29 @@ export default function LandingFeatures() {
           </p>
         </div>
 
-        {/* 5 Features Grid */}
+        {/* 5 Features Grid matching Concept Design */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-5">
           {features.map((feature, idx) => {
             const Icon = feature.icon
             return (
               <div
                 key={idx}
-                className="group p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0c1220] shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600/80 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                className="group p-6 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0c1220] shadow-xs hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors duration-150 flex flex-col items-center text-center"
               >
-                <div>
-                  {/* Feature Icon */}
-                  <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                    <Icon className="w-6 h-6 stroke-[2]" />
-                  </div>
-
-                  {/* Feature Title */}
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-1.5">
-                    {feature.title}
-                  </h3>
-
-                  {/* Feature Description */}
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {feature.desc}
-                  </p>
+                {/* Feature Icon */}
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-4">
+                  <Icon className="w-6 h-6 stroke-[2]" />
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400 dark:text-slate-500 leading-normal">
-                  {feature.detail}
-                </div>
+                {/* Feature Title */}
+                <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+                  {feature.title}
+                </h3>
+
+                {/* Feature Description */}
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                  {feature.desc}
+                </p>
               </div>
             )
           })}

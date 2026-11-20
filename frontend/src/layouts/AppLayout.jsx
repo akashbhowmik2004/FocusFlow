@@ -315,18 +315,18 @@ export default function AppLayout() {
           </nav>
         </div>
 
-        {/* Bottom Motivation Card: "Stay Consistent!" */}
+        {/* Bottom Motivation Card: "Stay Consistent" */}
         <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
-          <div className="rounded-2xl bg-gradient-to-br from-indigo-50/70 to-blue-50/40 dark:from-slate-800/70 dark:to-slate-800/30 border border-indigo-100/60 dark:border-slate-700/60 p-3.5 flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+          <div className="rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 p-3.5 flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400">
               <Zap className="h-4 w-4 fill-current" />
             </div>
             <div>
               <span className="block text-xs font-bold text-slate-800 dark:text-slate-100">
-                Stay Consistent!
+                Stay Consistent
               </span>
-              <span className="block text-[11px] text-slate-500 dark:text-slate-400">
-                {activeStreak > 0 ? `${activeStreak}d streak active` : "You're doing great 💪"}
+              <span className="block text-[11px] text-slate-500 dark:text-slate-400 font-tabular">
+                {activeStreak > 0 ? `${activeStreak}d streak active` : 'Ready for focus block'}
               </span>
             </div>
           </div>
@@ -415,7 +415,7 @@ export default function AppLayout() {
             <div ref={userMenuRef} className="relative">
               <button
                 onClick={() => setUserMenuOpen((open) => !open)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white dark:bg-slate-100 dark:text-slate-900 ring-2 ring-transparent hover:ring-blue-500 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white dark:bg-slate-100 dark:text-slate-900 ring-2 ring-transparent hover:ring-indigo-500 transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-500"
                 title="User profile"
               >
                 {getInitials(state.user?.name || 'User')}

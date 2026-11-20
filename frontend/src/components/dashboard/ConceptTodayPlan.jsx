@@ -17,7 +17,7 @@ export default function ConceptTodayPlan({
   const displaySessions = todaySessions.length > 0 ? todaySessions.slice(0, 4) : sampleTasks
 
   return (
-    <div className="h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col justify-between shadow-xs">
+    <div className="h-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col justify-between shadow-xs">
       <div>
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">

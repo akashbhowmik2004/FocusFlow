@@ -132,7 +132,7 @@ export default function TopicReviewDialog({
                   aria-checked={isSelected}
                   onClick={() => setSelectedRating(rating.id)}
                   className={cn(
-                    'group relative text-left p-3.5 rounded-xl border transition-all cursor-pointer select-none',
+                    'group relative text-left p-3.5 rounded-xl border transition-colors duration-150 cursor-pointer select-none',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:ring-offset-2',
                     isSelected
                       ? cn(colors.selectedBorder, 'shadow-xs')

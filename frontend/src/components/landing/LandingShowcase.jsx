@@ -80,9 +80,6 @@ export default function LandingShowcase({ isDark = false }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
-          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            PRODUCT SHOWCASE
-          </p>
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
             Designed for Deep Academic Work
           </h2>
@@ -93,7 +90,7 @@ export default function LandingShowcase({ isDark = false }) {
 
         {/* Tab Controls */}
         <div className="flex items-center justify-center mb-10 overflow-x-auto pb-2 no-scrollbar">
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0c1220] shadow-xs">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0c1220] shadow-xs">
             {showcaseTabs.map((tab) => {
               const Icon = tab.icon
               const isSelected = activeTab === tab.id
@@ -102,9 +99,9 @@ export default function LandingShowcase({ isDark = false }) {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-150 cursor-pointer whitespace-nowrap focus-visible:outline-2 focus-visible:outline-indigo-500 ${
                     isSelected
-                      ? 'bg-indigo-600 text-white shadow-md'
+                      ? 'bg-indigo-600 text-white shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800/50'
                   }`}
                 >
@@ -289,8 +286,9 @@ export default function LandingShowcase({ isDark = false }) {
                   <div className="space-y-3 text-left">
                     <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-200 dark:border-slate-800">
                       <span className="font-bold text-slate-900 dark:text-white">Academic Study Telemetry</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-                        ✓ Validated Integrity
+                      <span className="text-emerald-600 dark:text-emerald-400 text-xs font-semibold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Verified Session Integrity</span>
                       </span>
                     </div>
 

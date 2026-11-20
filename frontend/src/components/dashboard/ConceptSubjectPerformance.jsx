@@ -25,7 +25,7 @@ export default function ConceptSubjectPerformance({ subjects = [] }) {
     : defaultBars
 
   return (
-    <div className="h-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col justify-between shadow-xs">
+    <div className="h-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 flex flex-col justify-between shadow-xs">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)]">
         <h2 className="text-base font-bold text-[var(--color-text)] tracking-tight">
@@ -58,7 +58,7 @@ export default function ConceptSubjectPerformance({ subjects = [] }) {
               {/* Bar */}
               <div
                 style={{ height: `${item.pct}%` }}
-                className="w-full max-w-[36px] bg-indigo-300 dark:bg-indigo-500/80 rounded-t-sm group-hover:bg-indigo-400 dark:group-hover:bg-indigo-400 transition-all duration-300 relative"
+                className="w-full max-w-[36px] bg-indigo-300 dark:bg-indigo-500/80 rounded-t-sm group-hover:bg-indigo-400 dark:group-hover:bg-indigo-400 transition-[height,background-color] duration-300 relative"
               >
                 {/* Tooltip on hover */}
                 <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-sm transition-opacity whitespace-nowrap z-10">

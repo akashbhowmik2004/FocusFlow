@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   Pause,
   Calendar,
+  X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDate, isSameDay, isToday } from '@/lib/dates'
@@ -270,9 +271,7 @@ export default function PlannerWeekView({
                       ) : isPaused ? (
                         <Pause className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
                       ) : isCancelled ? (
-                        <span className="text-[10px] text-[var(--color-text-muted)] font-bold">
-                          ✕
-                        </span>
+                        <X className="w-3 h-3 text-[var(--color-text-muted)] shrink-0" />
                       ) : null}
                     </div>
 

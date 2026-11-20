@@ -150,7 +150,7 @@ export default function RevisionCalendar({
               type="button"
               onClick={() => setViewMode('month')}
               className={cn(
-                'px-2.5 py-1 rounded-md transition-all cursor-pointer',
+                'px-2.5 py-1 rounded-md transition-colors duration-150 cursor-pointer',
                 viewMode === 'month'
                   ? 'bg-[var(--card-bg)] text-[var(--color-text)] shadow-2xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
@@ -162,7 +162,7 @@ export default function RevisionCalendar({
               type="button"
               onClick={() => setViewMode('week')}
               className={cn(
-                'px-2.5 py-1 rounded-md transition-all cursor-pointer',
+                'px-2.5 py-1 rounded-md transition-colors duration-150 cursor-pointer',
                 viewMode === 'week'
                   ? 'bg-[var(--card-bg)] text-[var(--color-text)] shadow-2xs'
                   : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'

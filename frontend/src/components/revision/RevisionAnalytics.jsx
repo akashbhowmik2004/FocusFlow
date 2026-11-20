@@ -229,7 +229,7 @@ export default function RevisionAnalytics({
                   </span>
                   <div
                     className={cn(
-                      'w-full max-w-[28px] rounded-t-md transition-all duration-300',
+                      'w-full max-w-[28px] rounded-t-md transition-[height] duration-300',
                       day.count > 0
                         ? 'bg-[var(--color-brand)] hover:brightness-110'
                         : 'bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)]'
@@ -359,7 +359,7 @@ export default function RevisionAnalytics({
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-[var(--color-bg-subtle)] overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all duration-300"
+                      className="h-full rounded-full transition-[width] duration-300"
                       style={{ width: `${pct}%`, backgroundColor: item.color }}
                     />
                   </div>

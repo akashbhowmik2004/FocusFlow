@@ -14,7 +14,7 @@ export default function ConceptMetricsRow({
     {
       id: 'progress',
       icon: BookOpen,
-      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconColor: 'text-indigo-600 dark:text-indigo-400',
       value: `${overallProgress}%`,
       trend: '+5%',
       label: 'Overall Progress',
@@ -22,7 +22,7 @@ export default function ConceptMetricsRow({
     {
       id: 'streak',
       icon: Flame,
-      iconColor: 'text-amber-500',
+      iconColor: 'text-indigo-600 dark:text-indigo-400',
       value: `${streakDays} Days`,
       trend: '+1',
       label: 'Study Streak',
@@ -38,7 +38,7 @@ export default function ConceptMetricsRow({
     {
       id: 'accuracy',
       icon: BarChart3,
-      iconColor: 'text-purple-600 dark:text-purple-400',
+      iconColor: 'text-indigo-600 dark:text-indigo-400',
       value: `${masteredPercentage}%`,
       trend: '+3%',
       label: 'Accuracy',
@@ -52,28 +52,34 @@ export default function ConceptMetricsRow({
         return (
           <div
             key={c.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col justify-between shadow-xs hover:border-[var(--color-border-hover)] transition-colors"
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 flex flex-col justify-between shadow-xs hover:border-[var(--color-border-hover)] transition-colors duration-150"
           >
-            {/* Top row: Icon */}
+            {/* Top row: Icon on left, Trend on right */}
             <div className="flex items-center justify-between">
               <Icon className={`h-5 w-5 ${c.iconColor}`} />
-            </div>
-
-            {/* Middle row: Big Value + Clean Trend Typography */}
-            <div className="mt-3 flex items-baseline justify-between">
-              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
-                {c.value}
-              </span>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 font-tabular">
                 <span>↑</span>
                 <span>{c.trend}</span>
               </span>
             </div>
 
-            {/* Bottom label */}
-            <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">
-              {c.label}
-            </p>
+            {/* Middle row: Big Value */}
+            <div className="mt-3.5">
+              <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)] font-tabular block">
+                {c.value}
+              </span>
+              <p className="mt-1 text-xs font-medium text-[var(--color-text-muted)]">
+                {c.label}
+              </p>
+              {c.id === 'progress' && (
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3">
+                  <div
+                    className="bg-indigo-500 dark:bg-indigo-400 h-full rounded-full transition-[width] duration-500"
+                    style={{ width: `${overallProgress}%` }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         )
       })}

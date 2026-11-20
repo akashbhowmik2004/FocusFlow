@@ -65,9 +65,6 @@ export default function LandingWorkflow() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14 space-y-3">
-          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            HOW FOCUSFLOW WORKS
-          </p>
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
             The 4-Stage Academic Study System
           </h2>
@@ -83,7 +80,7 @@ export default function LandingWorkflow() {
             return (
               <div
                 key={item.step}
-                className="p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0c1220] shadow-xs hover:border-indigo-400 dark:hover:border-indigo-600/70 hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                className="p-6 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-[#0c1220] shadow-xs hover:border-slate-400 dark:hover:border-slate-600 transition-colors duration-150 flex flex-col justify-between"
               >
                 <div>
                   {/* Step Header */}
@@ -91,13 +88,13 @@ export default function LandingWorkflow() {
                     <span className="font-mono text-2xl font-black text-indigo-600/30 dark:text-indigo-400/30">
                       {item.step}
                     </span>
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                       <Icon className="w-5 h-5 stroke-[2]" />
                     </div>
                   </div>
 
                   {/* Stage Label */}
-                  <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block mb-1">
+                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 block mb-1">
                     {item.tag}
                   </span>
 

@@ -17,31 +17,27 @@ export default function LandingHero({ isDark = false }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column: Value Proposition & CTAs */}
           <div className="lg:col-span-6 space-y-6 sm:space-y-8 text-center lg:text-left z-10">
-            {/* Tagline */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/60 dark:border-indigo-800/60">
-              <span className="text-[11px] sm:text-xs font-bold tracking-wider text-indigo-700 dark:text-indigo-300 uppercase">
-                PLAN · STUDY · REVISE · ACHIEVE
-              </span>
-            </div>
-
-            {/* Headline */}
+            {/* Headline matching Concept Design */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.08]">
               Your Academic <br />
-              <span className="bg-gradient-to-r from-indigo-600 to-indigo-500 dark:from-indigo-400 dark:to-indigo-300 bg-clip-text text-transparent">
-                Productivity Partner
-              </span>
+              Productivity Partner
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              FocusFlow helps you plan your studies, stay consistent, and reach your goals — all in one beautiful workspace.
-            </p>
+            {/* Subtitle & Core Pillars */}
+            <div className="space-y-3">
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                FocusFlow helps you plan your studies, stay consistent, and reach your goals — all in one beautiful workspace.
+              </p>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 tracking-normal">
+                Structured planning · Deep focus blocks · SM-2 spaced recall · Verified telemetry
+              </p>
+            </div>
 
             {/* CTA Button Row */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
               <Link
                 to="/signup"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-sm sm:text-base shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold text-sm sm:text-base shadow-sm transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-500"
               >
                 <span>Start Studying Now</span>
                 <ArrowRight className="w-4 h-4 stroke-[2.5]" />
@@ -50,7 +46,7 @@ export default function LandingHero({ isDark = false }) {
               <a
                 href="#features"
                 onClick={handleScrollToFeatures}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-200 font-semibold text-sm sm:text-base transition-colors cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-sm sm:text-base transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-500"
               >
                 <Play className="w-3.5 h-3.5 fill-indigo-600 text-indigo-600 dark:fill-indigo-400 dark:text-indigo-400" />
                 <span>Explore Features</span>
