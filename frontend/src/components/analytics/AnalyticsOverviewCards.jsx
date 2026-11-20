@@ -1,4 +1,4 @@
-import { Clock, CheckCircle2, Flame, Target, TrendingUp, TrendingDown } from 'lucide-react'
+import { Clock, CheckCircle2, Flame, Target, TrendingUp, TrendingDown, BookOpen, RotateCcw } from 'lucide-react'
 import { formatDuration } from '@/lib/utils'
 
 export default function AnalyticsOverviewCards({
@@ -8,11 +8,15 @@ export default function AnalyticsOverviewCards({
   completedSessions = 0,
   cancelledSessions = 0,
   overtimeSessions = 0,
+  averageActualMinutes = 0,
   activeStreak = 0,
   longestStreak = 0,
   dailyStudyHours = 0,
   activeDaysCount = 0,
   periodDays = 7,
+  completedTopicsCount = 0,
+  totalTopicsCount = 0,
+  upcomingRevisionCount = 0,
 }) {
   // Pacing calculations
   const cadencePct = totalPlannedMinutes > 0 ? Math.round((totalActualMinutes / totalPlannedMinutes) * 100) : 100
@@ -21,12 +25,17 @@ export default function AnalyticsOverviewCards({
 
   // Daily Cadence
   const dailyCadenceHours = periodDays > 0 ? (totalActualMinutes / 60 / periodDays).toFixed(1) : '0.0'
-  const targetPct = dailyStudyHours > 0 ? Math.min(200, Math.round(((totalActualMinutes / 60 / periodDays) / dailyStudyHours) * 100)) : null
+  const targetPct =
+    dailyStudyHours > 0
+      ? Math.min(200, Math.round(((totalActualMinutes / 60 / (periodDays || 1)) / dailyStudyHours) * 100))
+      : null
+
+  const syllabusPct = totalTopicsCount > 0 ? Math.round((completedTopicsCount / totalTopicsCount) * 100) : 0
 
   return (
     <div
       aria-label="Key Performance Indicators"
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
     >
       {/* Card 1: Actual Study Time */}
       <div className="flex flex-col justify-between p-5 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-xs">
@@ -46,7 +55,7 @@ export default function AnalyticsOverviewCards({
 
         <div className="mt-4 pt-3 border-t border-[var(--card-border-subtle)] flex flex-col gap-1 text-xs">
           {comparison.percentage !== null ? (
-            <div className="flex items-center gap-1.5 font-semibold text-[var(--color-scholar-emerald)]">
+            <div className="flex items-center gap-1.5 font-semibold">
               {comparison.percentage >= 0 ? (
                 <TrendingUp className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
               ) : (
@@ -97,7 +106,9 @@ export default function AnalyticsOverviewCards({
         <div className="mt-4 pt-3 border-t border-[var(--card-border-subtle)] flex flex-col gap-1 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-[var(--color-scholar-emerald)]">
             <CheckCircle2 className="w-4 h-4" />
-            <span className="tabular-nums">{closureRate}% verified closure rate</span>
+            <span className="tabular-nums">
+              {averageActualMinutes > 0 ? `${averageActualMinutes}m avg duration` : `${closureRate}% closure rate`}
+            </span>
           </div>
           <p className="text-[var(--color-text-secondary)] text-[11px] leading-relaxed">
             {cancelledSessions} cancelled blocks (0m credited). {overtimeSessions} overtime session{overtimeSessions === 1 ? '' : 's'}.
@@ -141,7 +152,67 @@ export default function AnalyticsOverviewCards({
         </div>
       </div>
 
-      {/* Card 4: Daily Study Cadence */}
+      {/* Card 4: Syllabus Completion */}
+      <div className="flex flex-col justify-between p-5 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-xs">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Syllabus Completion
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-2">
+              <span className="text-3xl font-extrabold text-[var(--color-text)] font-tabular tabular-nums tracking-tight">
+                {completedTopicsCount}
+              </span>
+              <span className="text-sm font-semibold text-[var(--color-text-secondary)]">
+                / {totalTopicsCount} Topics
+              </span>
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-brand)] shrink-0">
+            <BookOpen className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-[var(--card-border-subtle)] flex flex-col gap-1 text-xs">
+          <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text)]">
+            <span className="font-tabular tabular-nums">{syllabusPct}% syllabus covered</span>
+          </div>
+          <p className="text-[var(--color-text-secondary)] text-[11px] leading-relaxed">
+            Measures syllabus completion across topics, not proven subject mastery.
+          </p>
+        </div>
+      </div>
+
+      {/* Card 5: Upcoming Revision Workload */}
+      <div className="flex flex-col justify-between p-5 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-xs">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
+              Upcoming Revision Workload
+            </span>
+            <div className="flex items-baseline gap-1.5 mt-2">
+              <span className="text-3xl font-extrabold text-[var(--color-text)] font-tabular tabular-nums tracking-tight">
+                {upcomingRevisionCount}
+              </span>
+              <span className="text-sm font-semibold text-[var(--color-text-secondary)]">Due</span>
+            </div>
+          </div>
+          <div className="w-10 h-10 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-center text-[var(--color-streak-amber)] shrink-0">
+            <RotateCcw className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-[var(--card-border-subtle)] flex flex-col gap-1 text-xs">
+          <div className="flex items-center gap-1.5 font-semibold text-[var(--color-streak-amber)]">
+            <span>Active recall queue</span>
+          </div>
+          <p className="text-[var(--color-text-secondary)] text-[11px] leading-relaxed">
+            Topics currently scheduled for spaced repetition review today or overdue.
+          </p>
+        </div>
+      </div>
+
+      {/* Card 6: Daily Study Cadence */}
       <div className="flex flex-col justify-between p-5 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-xs">
         <div className="flex items-start justify-between gap-3">
           <div className="flex flex-col">

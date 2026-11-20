@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { AlertTriangle, Clock, Calendar, HelpCircle, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -7,7 +8,7 @@ import { cn } from '@/lib/utils'
  * Due Today, Overdue, Upcoming, Awaiting Schedule, Recently Reviewed.
  * Clicking a card toggles the active queue filter.
  */
-export default function RevisionSummary({
+export default memo(function RevisionSummary({
   dueTodayCount = 0,
   overdueCount = 0,
   upcomingCount = 0,
@@ -22,10 +23,12 @@ export default function RevisionSummary({
       title: 'Due Today',
       count: dueTodayCount,
       icon: Clock,
-      color: 'text-amber-600 dark:text-amber-400',
-      bgHover: 'hover:border-amber-300 dark:hover:border-amber-800',
-      activeBorder: 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/60 dark:bg-amber-950/20',
-      badgeBg: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
+      color: 'text-[var(--color-focus-amber)]',
+      borderDefault: 'border-[var(--color-amber-border)]/60',
+      bgHover: 'hover:border-[var(--color-focus-amber)]/70',
+      activeBorder: 'border-[var(--color-focus-amber)] ring-2 ring-[var(--color-focus-amber)]/20 bg-[var(--color-amber-tint)]/40 dark:bg-amber-950/25',
+      badgeBg: 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border border-[var(--color-amber-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-amber-tint)]/25 to-[var(--color-surface)] dark:from-amber-950/20 dark:to-[var(--color-surface)]',
       subtitle: dueTodayCount === 1 ? '1 topic scheduled for today' : `${dueTodayCount} topics scheduled for today`,
       emptySubtitle: 'All revisions completed for today',
     },
@@ -34,10 +37,12 @@ export default function RevisionSummary({
       title: 'Overdue',
       count: overdueCount,
       icon: AlertTriangle,
-      color: 'text-rose-600 dark:text-rose-400',
-      bgHover: 'hover:border-rose-300 dark:hover:border-rose-800',
-      activeBorder: 'border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/60 dark:bg-rose-950/20',
-      badgeBg: 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300',
+      color: 'text-[var(--color-soft-coral)]',
+      borderDefault: 'border-[var(--color-coral-border)]/60',
+      bgHover: 'hover:border-[var(--color-soft-coral)]/70',
+      activeBorder: 'border-[var(--color-soft-coral)] ring-2 ring-[var(--color-soft-coral)]/20 bg-[var(--color-coral-tint)]/40 dark:bg-rose-950/25',
+      badgeBg: 'bg-[var(--color-coral-tint)] text-[var(--color-soft-coral)] border border-[var(--color-coral-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-coral-tint)]/25 to-[var(--color-surface)] dark:from-rose-950/20 dark:to-[var(--color-surface)]',
       subtitle: overdueCount === 1 ? '1 topic requires urgent recall' : `${overdueCount} topics require urgent recall`,
       emptySubtitle: 'No overdue topics. Great pace!',
     },
@@ -46,10 +51,12 @@ export default function RevisionSummary({
       title: 'Upcoming',
       count: upcomingCount,
       icon: Calendar,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bgHover: 'hover:border-indigo-300 dark:hover:border-indigo-800',
-      activeBorder: 'border-indigo-500 ring-2 ring-indigo-500/20 bg-indigo-50/60 dark:bg-indigo-950/20',
-      badgeBg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300',
+      color: 'text-[var(--color-academic-indigo)]',
+      borderDefault: 'border-[var(--color-indigo-border)]/60',
+      bgHover: 'hover:border-[var(--color-academic-indigo)]/70',
+      activeBorder: 'border-[var(--color-academic-indigo)] ring-2 ring-[var(--color-academic-indigo)]/20 bg-[var(--color-indigo-tint)]/40 dark:bg-indigo-950/25',
+      badgeBg: 'bg-[var(--color-indigo-tint)] text-[var(--color-academic-indigo)] border border-[var(--color-indigo-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-indigo-tint)]/25 to-[var(--color-surface)] dark:from-indigo-950/20 dark:to-[var(--color-surface)]',
       subtitle: upcomingCount === 1 ? '1 topic in future pipeline' : `${upcomingCount} topics in future pipeline`,
       emptySubtitle: 'No future revisions scheduled',
     },
@@ -58,10 +65,12 @@ export default function RevisionSummary({
       title: 'Awaiting Schedule',
       count: unscheduledCount,
       icon: HelpCircle,
-      color: 'text-slate-600 dark:text-slate-400',
-      bgHover: 'hover:border-slate-300 dark:hover:border-slate-700',
-      activeBorder: 'border-slate-500 ring-2 ring-slate-500/20 bg-slate-50/60 dark:bg-slate-900/20',
-      badgeBg: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+      color: 'text-[var(--color-study-teal)]',
+      borderDefault: 'border-[var(--color-teal-border)]/60',
+      bgHover: 'hover:border-[var(--color-study-teal)]/70',
+      activeBorder: 'border-[var(--color-study-teal)] ring-2 ring-[var(--color-study-teal)]/20 bg-[var(--color-teal-tint)]/40 dark:bg-teal-950/25',
+      badgeBg: 'bg-[var(--color-teal-tint)] text-[var(--color-study-teal)] border border-[var(--color-teal-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-teal-tint)]/25 to-[var(--color-surface)] dark:from-teal-950/20 dark:to-[var(--color-surface)]',
       subtitle: unscheduledCount === 1 ? '1 topic awaiting schedule' : `${unscheduledCount} topics awaiting schedule`,
       emptySubtitle: 'All curriculum topics scheduled',
     },
@@ -70,10 +79,12 @@ export default function RevisionSummary({
       title: 'Recently Reviewed',
       count: recentlyReviewedCount,
       icon: History,
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bgHover: 'hover:border-emerald-300 dark:hover:border-emerald-800',
-      activeBorder: 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/60 dark:bg-emerald-950/20',
-      badgeBg: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
+      color: 'text-[var(--color-scholar-emerald)]',
+      borderDefault: 'border-emerald-200/60 dark:border-emerald-900/60',
+      bgHover: 'hover:border-[var(--color-scholar-emerald)]/70',
+      activeBorder: 'border-[var(--color-scholar-emerald)] ring-2 ring-[var(--color-scholar-emerald)]/20 bg-[var(--color-emerald-tint)]/40 dark:bg-emerald-950/25',
+      badgeBg: 'bg-[var(--color-emerald-tint)] text-[var(--color-scholar-emerald)] border border-emerald-300/40 dark:border-emerald-800/60',
+      surface: 'bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)]',
       subtitle: recentlyReviewedCount === 1 ? '1 topic calibrated' : `${recentlyReviewedCount} topics calibrated`,
       emptySubtitle: 'No reviews completed yet',
     },
@@ -92,9 +103,10 @@ export default function RevisionSummary({
             onClick={() => onSelectFilter(isActive ? 'all' : card.id)}
             className={cn(
               'group text-left p-3.5 rounded-xl border transition-colors cursor-pointer select-none',
-              'bg-[var(--color-surface)] shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-98',
+              card.surface,
+              'shadow-xs focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)] active:scale-98',
               card.bgHover,
-              isActive ? card.activeBorder : 'border-[var(--color-border)]'
+              isActive ? card.activeBorder : card.borderDefault
             )}
             aria-pressed={isActive}
             aria-label={`Filter by ${card.title}: ${card.count} topics`}
@@ -105,7 +117,7 @@ export default function RevisionSummary({
               </span>
               <div
                 className={cn(
-                  'w-6 h-6 rounded-lg flex items-center justify-center shrink-0',
+                  'w-7 h-7 rounded-lg flex items-center justify-center shrink-0',
                   card.badgeBg
                 )}
               >
@@ -130,4 +142,4 @@ export default function RevisionSummary({
       })}
     </div>
   )
-}
+})

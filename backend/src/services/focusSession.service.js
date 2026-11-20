@@ -77,8 +77,16 @@ async function assertSessionAssociations(tx, session) {
   }
 }
 
-async function withLockedSession(id, userId, operation) {
+async function withLockedSession(id, userId, operation, lockUser = false) {
   return prisma.$transaction(async (tx) => {
+    if (lockUser) {
+      await tx.$queryRaw`
+        SELECT "id"
+        FROM "User"
+        WHERE "id" = ${userId}
+        FOR UPDATE
+      `;
+    }
     const session = await lockOwnedSession(tx, id, userId);
     if (!session) {
       throw new FocusSessionError(404, "Session not found");
@@ -135,7 +143,7 @@ export async function startFocusSession(id, userId) {
         },
         select: focusSessionSelect,
       });
-    });
+    }, true);
   } catch (error) {
     if (error?.code === "P2002") {
       throw new FocusSessionError(409, "Another study session is already active");

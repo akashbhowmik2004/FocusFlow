@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useApp } from '@/context/AppContext'
-import { format, subDays } from '@/lib/dates'
+import { format, subDays, subWeeks, subMonths } from '@/lib/dates'
 import {
   getActualStudySeconds,
   getActualStudyMinutes,
@@ -11,6 +11,9 @@ import {
   getDailyStudyTotals,
   getSessionIntegrityAudit,
   getRevisionDiagnostics,
+  getAnalyticsDateRange,
+  getWeeklyAggregatedTrends,
+  getMonthlyStudyTrends,
 } from '@/lib/analytics'
 import { getRevisionSummary, getCalendarDateKey } from '@/lib/revisionSummary'
 import {
@@ -29,9 +32,11 @@ export default function ProgressPage() {
   const subjects = useMemo(() => state.subjects || [], [state.subjects])
   const user = state.user || {}
 
-  // Date range state: '7d' (Week) | '30d' (Month) | 'all' (All Time)
-  const [timeRange, setTimeRange] = useState('7d')
+  // Date range state: 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'custom' | 'all'
+  const [timeRange, setTimeRange] = useState('this_week')
   const [dateOffset, setDateOffset] = useState(0) // 0 = current, 1 = 1 period back, etc.
+  const [customStart, setCustomStart] = useState('')
+  const [customEnd, setCustomEnd] = useState('')
 
   // When changing time range, reset pagination offset
   const handleTimeRangeChange = (newRange) => {
@@ -39,53 +44,57 @@ export default function ProgressPage() {
     setDateOffset(0)
   }
 
-  // Window bounds calculation
-  const { windowStart, windowEnd, periodDays, windowLabel } = useMemo(() => {
+  const handleCustomDateChange = (start, end) => {
+    setCustomStart(start)
+    setCustomEnd(end)
+  }
+
+  // Calculate base reference date shifted by dateOffset
+  const offsetReferenceDate = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    if (dateOffset === 0) return today
 
-    if (timeRange === 'all') {
-      return {
-        windowStart: null,
-        windowEnd: today,
-        periodDays: 0,
-        windowLabel: 'All Recorded History',
-      }
+    if (timeRange === 'this_week' || timeRange === 'last_week' || timeRange === '7d') {
+      return subWeeks(today, dateOffset)
     }
+    if (timeRange === 'this_month' || timeRange === 'last_month' || timeRange === '30d') {
+      return subMonths(today, dateOffset)
+    }
+    return subDays(today, dateOffset * 7)
+  }, [dateOffset, timeRange])
 
-    const daysInPeriod = timeRange === '30d' ? 30 : 7
-    const end = subDays(today, dateOffset * daysInPeriod)
-    const start = subDays(end, daysInPeriod - 1)
-
-    const startStr = format(start, 'MMM d')
-    const endStr = format(end, 'MMM d, yyyy')
-    const label = `${startStr} – ${endStr}`
+  // Window bounds calculation via canonical analytics utility
+  const { windowEnd, periodDays, windowLabel, startDateKey, endDateKey } = useMemo(() => {
+    const rangeInfo = getAnalyticsDateRange(timeRange, {
+      referenceDate: offsetReferenceDate,
+      customStart,
+      customEnd,
+    })
 
     return {
-      windowStart: start,
-      windowEnd: end,
-      periodDays: daysInPeriod,
-      windowLabel: label,
+      windowEnd: rangeInfo.end,
+      periodDays: rangeInfo.periodDays,
+      windowLabel: rangeInfo.label,
+      startDateKey: rangeInfo.startDateKey,
+      endDateKey: rangeInfo.endDateKey,
     }
-  }, [timeRange, dateOffset])
+  }, [timeRange, offsetReferenceDate, customStart, customEnd])
 
   // Filter sessions within active window
   const filteredSessions = useMemo(() => {
-    if (timeRange === 'all' || !windowStart) {
+    if (timeRange === 'all' || !startDateKey) {
       return sessions
     }
-
-    const startKey = getCalendarDateKey(windowStart)
-    const endKey = getCalendarDateKey(windowEnd)
 
     return sessions.filter((session) => {
       const dateKey = getCalendarDateKey(session.date || session.startTime || session.createdAt)
       if (!dateKey) return false
-      return dateKey >= startKey && dateKey <= endKey
+      return dateKey >= startDateKey && dateKey <= endDateKey
     })
-  }, [sessions, timeRange, windowStart, windowEnd])
+  }, [sessions, timeRange, startDateKey, endDateKey])
 
-  // Telemetry integrity audit
+  // Telemetry integrity audit for filtered sessions
   const integrityAudit = useMemo(() => {
     return getSessionIntegrityAudit(filteredSessions)
   }, [filteredSessions])
@@ -100,10 +109,10 @@ export default function ProgressPage() {
         currentUntrackedSessions: integrityAudit.untrackedSessions,
       }
     }
-    return getStudyPeriodComparison(sessions, periodDays, windowEnd)
+    return getStudyPeriodComparison(sessions, periodDays || 7, windowEnd)
   }, [sessions, periodDays, windowEnd, timeRange, integrityAudit])
 
-  // Streak calculations
+  // Streak calculations (requires positive actual study time across full history)
   const activeStreak = useMemo(() => {
     return getActiveStudyStreak(sessions, new Date())
   }, [sessions])
@@ -126,10 +135,25 @@ export default function ProgressPage() {
     return getRevisionSummary(subjects, new Date())
   }, [subjects])
 
+  // Curriculum topic totals
+  const { totalTopicsCount, completedTopicsCount } = useMemo(() => {
+    let total = 0
+    let completed = 0
+    for (const sub of subjects) {
+      for (const t of sub.topics || []) {
+        total += 1
+        if (t.status === 'completed') completed += 1
+      }
+    }
+    return { totalTopicsCount: total, completedTopicsCount: completed }
+  }, [subjects])
+
+  // Upcoming revision workload
+  const upcomingRevisionCount = (revisionSummary.dueToday?.length || 0) + (revisionSummary.overdue?.length || 0)
+
   // Daily Study Velocity Chart data
   const { chartData, netDeviationMinutes } = useMemo(() => {
     if (timeRange === 'all') {
-      // For all time, aggregate the past 30 days
       const daysCount = 30
       const today = new Date()
       today.setHours(0, 0, 0, 0)
@@ -158,7 +182,7 @@ export default function ProgressPage() {
     const data = []
     let totalActual = 0
     let totalPlanned = 0
-    const count = periodDays
+    const count = Math.min(periodDays || 7, 31)
 
     for (let i = count - 1; i >= 0; i--) {
       const d = subDays(windowEnd, i)
@@ -166,7 +190,7 @@ export default function ProgressPage() {
       totalActual += totals.actualMinutes
       totalPlanned += totals.plannedMinutes
       data.push({
-        day: periodDays === 7 ? format(d, 'EEE d') : format(d, 'MMM d'),
+        day: count <= 7 ? format(d, 'EEE d') : format(d, 'MMM d'),
         actual: totals.actualMinutes,
         planned: totals.plannedMinutes,
       })
@@ -177,6 +201,15 @@ export default function ProgressPage() {
       netDeviationMinutes: totalActual - totalPlanned,
     }
   }, [timeRange, periodDays, windowEnd, sessions])
+
+  // Weekly and Monthly aggregated trends for multi-view chart
+  const weeklyChartData = useMemo(() => {
+    return getWeeklyAggregatedTrends(sessions, 6, windowEnd)
+  }, [sessions, windowEnd])
+
+  const monthlyChartData = useMemo(() => {
+    return getMonthlyStudyTrends(sessions, 6, windowEnd)
+  }, [sessions, windowEnd])
 
   // Active study days count in the filtered range
   const activeDaysCount = useMemo(() => {
@@ -192,8 +225,8 @@ export default function ProgressPage() {
   }, [filteredSessions])
 
   // Navigation handlers
-  const canNavigatePrev = timeRange !== 'all'
-  const canNavigateNext = timeRange !== 'all' && dateOffset > 0
+  const canNavigatePrev = timeRange !== 'all' && timeRange !== 'custom'
+  const canNavigateNext = timeRange !== 'all' && timeRange !== 'custom' && dateOffset > 0
 
   const handleNavigatePrev = () => {
     if (canNavigatePrev) {
@@ -262,6 +295,9 @@ export default function ProgressPage() {
         onNavigatePrev={handleNavigatePrev}
         onNavigateNext={handleNavigateNext}
         onExportAudit={handleExportAudit}
+        customStart={customStart}
+        customEnd={customEnd}
+        onCustomDateChange={handleCustomDateChange}
       />
 
       {/* 2. Key Performance Indicators Overview Cards */}
@@ -272,11 +308,15 @@ export default function ProgressPage() {
         completedSessions={integrityAudit.completedSessions}
         cancelledSessions={integrityAudit.cancelledSessions}
         overtimeSessions={integrityAudit.overtimeSessions}
+        averageActualMinutes={integrityAudit.averageActualMinutes}
         activeStreak={activeStreak}
         longestStreak={longestStreak}
         dailyStudyHours={user?.dailyStudyHours || 0}
         activeDaysCount={activeDaysCount}
-        periodDays={periodDays || 30}
+        periodDays={periodDays || 7}
+        completedTopicsCount={completedTopicsCount}
+        totalTopicsCount={totalTopicsCount}
+        upcomingRevisionCount={upcomingRevisionCount}
       />
 
       {/* 3. Study Activity Trends & Session Integrity Audit */}
@@ -285,6 +325,8 @@ export default function ProgressPage() {
         <div className="lg:col-span-7">
           <StudyVelocityChart
             chartData={chartData}
+            weeklyChartData={weeklyChartData}
+            monthlyChartData={monthlyChartData}
             baselineMinutes={user?.dailyStudyHours ? user.dailyStudyHours * 60 : 0}
             netDeviationMinutes={netDeviationMinutes}
             totalActualMinutes={integrityAudit.totalActualMinutes}
@@ -311,7 +353,7 @@ export default function ProgressPage() {
         revisionSummary={revisionSummary}
       />
 
-      {/* 5. Spaced Repetition Diagnostics & Recall Accuracy */}
+      {/* 5. Spaced Repetition Diagnostics & Authentic Recall Log */}
       <RevisionAnalyticsCard
         revisionDiagnostics={revisionDiagnostics}
         revisionSummary={revisionSummary}

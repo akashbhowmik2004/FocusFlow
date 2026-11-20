@@ -93,7 +93,6 @@ async function runUserTests() {
         preferredStartTime: "08:30",
         preferredEndTime: "17:30",
         reminderEnabled: false,
-        theme: "dark",
       }),
     });
     const validUpdateData = await validUpdateRes.json();
@@ -103,7 +102,6 @@ async function runUserTests() {
       validUpdateData.user.name === "Updated Name" &&
       validUpdateData.user.studyGoal === "Score 4.0 GPA" &&
       validUpdateData.user.dailyStudyHours === 6 &&
-      validUpdateData.user.theme === "dark" &&
       validUpdateData.user.reminderEnabled === false &&
       validUpdateData.user.passwordHash === undefined,
       "PUT /api/user/update correctly updates user details and returns safe user object"
@@ -214,27 +212,8 @@ async function runUserTests() {
     assert(newLoginRes.status === 200, "Login with new password succeeds with 200");
     const newCookie = newLoginRes.headers.get("set-cookie");
 
-    // Test 13: PUT /api/user/theme without auth returns 401
-    const unauthThemeRes = await fetch(`${baseUrl}/api/user/theme`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ theme: "dark" }),
-    });
-    assert(unauthThemeRes.status === 401, "PUT /api/user/theme without auth returns 401");
-
-    // Test 14: PUT /api/user/theme with invalid theme returns 400
-    const invalidThemeRes = await fetch(`${baseUrl}/api/user/theme`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: newCookie,
-      },
-      body: JSON.stringify({ theme: "neon-blue" }),
-    });
-    assert(invalidThemeRes.status === 400, "PUT /api/user/theme with invalid theme returns 400");
-
-    // Test 15: PUT /api/user/theme with valid theme ("dark") returns 200
-    const validThemeRes = await fetch(`${baseUrl}/api/user/theme`, {
+    // Test 13: PUT /api/user/theme is retired and returns 404
+    const retiredThemeRes = await fetch(`${baseUrl}/api/user/theme`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -242,29 +221,80 @@ async function runUserTests() {
       },
       body: JSON.stringify({ theme: "dark" }),
     });
-    const validThemeData = await validThemeRes.json();
+    assert(retiredThemeRes.status === 404, "PUT /api/user/theme is retired and returns 404 Not Found");
+
+    // Test 17: PUT /api/user/update with dailyStudyHours: 0 (configured rest / zero target)
+    const zeroHoursRes = await fetch(`${baseUrl}/api/user/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: newCookie,
+      },
+      body: JSON.stringify({ dailyStudyHours: 0 }),
+    });
+    const zeroHoursData = await zeroHoursRes.json();
     assert(
-      validThemeRes.status === 200 &&
-      validThemeData.theme === "dark" &&
-      validThemeData.user &&
-      validThemeData.user.theme === "dark" &&
-      validThemeData.user.passwordHash === undefined,
-      "PUT /api/user/theme updates theme to dark and returns safe user object"
+      zeroHoursRes.status === 200 &&
+      zeroHoursData.user &&
+      zeroHoursData.user.dailyStudyHours === 0,
+      "PUT /api/user/update accepts dailyStudyHours: 0 as a valid target"
     );
 
-    // Test 16: PATCH /api/user/theme with valid theme ("light") returns 200
-    const patchThemeRes = await fetch(`${baseUrl}/api/user/theme`, {
-      method: "PATCH",
+    // Test 18: GET /api/user/export returns structured academic backup
+    const exportRes = await fetch(`${baseUrl}/api/user/export`, {
+      headers: { Cookie: newCookie },
+    });
+    const exportData = await exportRes.json();
+    assert(
+      exportRes.status === 200 &&
+      exportData.exportedAt &&
+      exportData.user &&
+      exportData.user.email === testEmail1 &&
+      Array.isArray(exportData.subjects) &&
+      Array.isArray(exportData.sessions),
+      "GET /api/user/export returns structured academic backup JSON"
+    );
+
+    // Test 19a: DELETE /api/user/account without confirmation token returns 400
+    const unconfirmedDeleteRes = await fetch(`${baseUrl}/api/user/account`, {
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Cookie: newCookie,
       },
-      body: JSON.stringify({ theme: "light" }),
+      body: JSON.stringify({}),
     });
-    const patchThemeData = await patchThemeRes.json();
     assert(
-      patchThemeRes.status === 200 && patchThemeData.theme === "light",
-      "PATCH /api/user/theme updates theme to light"
+      unconfirmedDeleteRes.status === 400,
+      "DELETE /api/user/account without confirmation returns 400 safeguard rejection"
+    );
+
+    // Test 19b: DELETE /api/user/account with valid confirmation token wipes user and clears auth cookie
+    const deleteRes = await fetch(`${baseUrl}/api/user/account`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: newCookie,
+      },
+      body: JSON.stringify({ confirmation: "DELETE" }),
+    });
+    const deleteCookie = deleteRes.headers.get("set-cookie");
+    const deleteData = await deleteRes.json();
+    assert(
+      deleteRes.status === 200 &&
+      deleteData.message.includes("permanently deleted") &&
+      deleteCookie &&
+      deleteCookie.includes("token=;"),
+      "DELETE /api/user/account with DELETE token deletes user and clears auth cookie"
+    );
+
+    // Test 20: Verify deleted user cannot authenticate
+    const postDeleteUserRes = await fetch(`${baseUrl}/api/user`, {
+      headers: { Cookie: newCookie },
+    });
+    assert(
+      postDeleteUserRes.status === 401,
+      "Deleted user cannot access /api/user"
     );
 
     console.log(`\nUser test results: ${testPassed} passed, ${testFailed} failed.`);

@@ -9,7 +9,7 @@ describe('AppContext', () => {
     const { result } = renderHook(() => useApp(), { wrapper })
     expect(result.current.state.subjects.length).toBeGreaterThan(0)
     expect(result.current.state.user).toBeNull()
-    expect(result.current.state.theme).toBe('light')
+    expect(result.current.state.theme).toBe('dark')
   })
 
   it('can set and update user state', () => {
@@ -32,11 +32,8 @@ describe('AppContext', () => {
     expect(result.current.state.user?.name).toBe('Test Student')
   })
 
-  it('can toggle theme', () => {
+  it('enforces permanent dark theme in state', () => {
     const { result } = renderHook(() => useApp(), { wrapper })
-    act(() => {
-      result.current.dispatch({ type: 'SET_THEME', payload: 'dark' })
-    })
     expect(result.current.state.theme).toBe('dark')
   })
 

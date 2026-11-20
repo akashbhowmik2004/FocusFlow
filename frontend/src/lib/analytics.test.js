@@ -12,6 +12,9 @@ import {
   getLongestStudyStreak,
   getSessionIntegrityAudit,
   getRevisionDiagnostics,
+  getAnalyticsDateRange,
+  getWeeklyAggregatedTrends,
+  getMonthlyStudyTrends,
 } from './analytics'
 
 describe('study analytics', () => {
@@ -581,6 +584,90 @@ describe('study analytics', () => {
       expect(diag.revisionsBySubject).toHaveLength(1)
       expect(diag.revisionsBySubject[0].count).toBe(4)
       expect(diag.historyRecords).toHaveLength(4)
+    })
+  })
+
+  describe('date range and aggregated trends (getAnalyticsDateRange, getWeeklyAggregatedTrends, getMonthlyStudyTrends)', () => {
+    const refDate = new Date('2026-11-05T12:00:00Z') // Thursday, Nov 5, 2026
+
+    it('resolves this_week starting on Monday and ending on Sunday', () => {
+      const range = getAnalyticsDateRange('this_week', { referenceDate: refDate })
+      expect(range.rangeType).toBe('this_week')
+      expect(range.periodDays).toBe(7)
+      expect(range.startDateKey).toBe('2026-11-02') // Monday
+      expect(range.endDateKey).toBe('2026-11-08') // Sunday
+    })
+
+    it('resolves last_week starting on previous Monday and ending on previous Sunday', () => {
+      const range = getAnalyticsDateRange('last_week', { referenceDate: refDate })
+      expect(range.rangeType).toBe('last_week')
+      expect(range.periodDays).toBe(7)
+      expect(range.startDateKey).toBe('2026-10-26')
+      expect(range.endDateKey).toBe('2026-11-01')
+    })
+
+    it('resolves this_month for full current month', () => {
+      const range = getAnalyticsDateRange('this_month', { referenceDate: refDate })
+      expect(range.rangeType).toBe('this_month')
+      expect(range.startDateKey).toBe('2026-11-01')
+      expect(range.endDateKey).toBe('2026-11-30')
+      expect(range.periodDays).toBe(30)
+    })
+
+    it('resolves last_month for full previous month', () => {
+      const range = getAnalyticsDateRange('last_month', { referenceDate: refDate })
+      expect(range.rangeType).toBe('last_month')
+      expect(range.startDateKey).toBe('2026-10-01')
+      expect(range.endDateKey).toBe('2026-10-31')
+      expect(range.periodDays).toBe(31)
+    })
+
+    it('resolves custom date range when valid start and end are provided', () => {
+      const range = getAnalyticsDateRange('custom', {
+        customStart: '2026-10-15',
+        customEnd: '2026-10-20',
+      })
+      expect(range.rangeType).toBe('custom')
+      expect(range.startDateKey).toBe('2026-10-15')
+      expect(range.endDateKey).toBe('2026-10-20')
+      expect(range.periodDays).toBe(6)
+    })
+
+    it('resolves all time range with null start and today as end', () => {
+      const range = getAnalyticsDateRange('all', { referenceDate: refDate })
+      expect(range.rangeType).toBe('all')
+      expect(range.start).toBeNull()
+      expect(range.startDateKey).toBeNull()
+      expect(range.endDateKey).toBe('2026-11-05')
+      expect(range.label).toBe('All Recorded History')
+    })
+
+    it('aggregates weekly buckets accurately', () => {
+      const sessions = [
+        { id: '1', date: '2026-11-03', status: 'completed', actualDurationSeconds: 3600, duration: 60 },
+        { id: '2', date: '2026-10-28', status: 'completed', actualDurationSeconds: 1800, duration: 30 },
+      ]
+      const weekly = getWeeklyAggregatedTrends(sessions, 2, refDate)
+      expect(weekly).toHaveLength(2)
+      // Current week (Nov 2 - Nov 8)
+      expect(weekly[1].actualMinutes).toBe(60)
+      expect(weekly[1].completedSessions).toBe(1)
+      // Previous week (Oct 26 - Nov 1)
+      expect(weekly[0].actualMinutes).toBe(30)
+      expect(weekly[0].completedSessions).toBe(1)
+    })
+
+    it('aggregates monthly buckets accurately', () => {
+      const sessions = [
+        { id: '1', date: '2026-11-02', status: 'completed', actualDurationSeconds: 3600, duration: 60 },
+        { id: '2', date: '2026-10-15', status: 'completed', actualDurationSeconds: 5400, duration: 90 },
+      ]
+      const monthly = getMonthlyStudyTrends(sessions, 2, refDate)
+      expect(monthly).toHaveLength(2)
+      expect(monthly[1].monthKey).toBe('2026-11')
+      expect(monthly[1].actualMinutes).toBe(60)
+      expect(monthly[0].monthKey).toBe('2026-10')
+      expect(monthly[0].actualMinutes).toBe(90)
     })
   })
 })

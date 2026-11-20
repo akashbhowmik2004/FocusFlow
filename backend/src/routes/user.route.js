@@ -4,26 +4,39 @@ import {
   getUserDetails,
   updateUserDetails,
   updateUserPassword,
-  updateUserTheme,
+  deleteUserAccount,
+  exportUserData,
+  completeOnboarding,
 } from "../controllers/user.controller.js";
 import {
   updateUserSchema,
   updatePasswordSchema,
-  updateThemeSchema,
+  deleteAccountSchema,
+  onboardingSchema,
 } from "../schemas/user.schema.js";
 import { validateBody } from "../middleware/validate.middleware.js";
+import { authRateLimiter } from "../middleware/rateLimit.middleware.js";
 
 const router = Router();
 
 router.get("/", getUserDetails);
 router.put("/update", validateBody(updateUserSchema), updateUserDetails);
+router.put("/onboarding", validateBody(onboardingSchema), completeOnboarding);
+router.post("/onboarding", validateBody(onboardingSchema), completeOnboarding);
+router.put("/onboarding/progress", validateBody(onboardingSchema), completeOnboarding);
+router.patch("/onboarding", validateBody(onboardingSchema), completeOnboarding);
 router.put(
   "/update-password",
+  authRateLimiter,
   validateBody(updatePasswordSchema),
   updateUserPassword,
 );
-router.put("/theme", validateBody(updateThemeSchema), updateUserTheme);
-router.patch("/theme", validateBody(updateThemeSchema), updateUserTheme);
-router.put("/update-theme", validateBody(updateThemeSchema), updateUserTheme);
+router.delete(
+  "/account",
+  authRateLimiter,
+  validateBody(deleteAccountSchema),
+  deleteUserAccount,
+);
+router.get("/export", exportUserData);
 
 export default router;

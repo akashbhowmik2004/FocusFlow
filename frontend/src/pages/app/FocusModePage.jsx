@@ -44,17 +44,10 @@ export default function FocusModePage() {
   } = useSessions()
   const { sessionId } = useParams()
   const navigate = useNavigate()
-  const [now, setNow] = useState(() => Date.now())
   const [confirmAction, setConfirmAction] = useState(null)
   const [terminalSession, setTerminalSession] = useState(null)
   const [exitOpen, setExitOpen] = useState(false)
   const actionInFlight = useRef(false)
-
-  useEffect(() => {
-    if (!activeFocusSession) return undefined
-    const timer = window.setInterval(() => setNow(Date.now()), 1000)
-    return () => window.clearInterval(timer)
-  }, [activeFocusSession])
 
   const scheduledSession = useMemo(
     () => sessions.find((session) => session.id === sessionId) || null,
@@ -69,16 +62,7 @@ export default function FocusModePage() {
   const session = terminalSession || activeFocusSession || scheduledSession
   const subject = state.subjects.find((item) => item.id === session?.subjectId)
   const topic = subject?.topics?.find((item) => item.id === session?.topicId)
-  const elapsedSeconds = getFocusDisplaySeconds(activeFocusSession, {
-    now,
-    serverTime: focusClock?.serverTime,
-    serverTimeReceivedAt: focusClock?.receivedAt,
-  })
   const plannedSeconds = Number(session?.duration || 0) * 60
-  const isOvertime = Boolean(activeFocusSession && elapsedSeconds > plannedSeconds)
-  const progress = plannedSeconds
-    ? Math.min(100, Math.round((elapsedSeconds / plannedSeconds) * 100))
-    : 0
 
   const executeAction = async (action, success) => {
     if (actionInFlight.current) return
@@ -188,47 +172,26 @@ export default function FocusModePage() {
 
         <Card variant="panel" className="overflow-hidden p-6 sm:p-10">
           <div className="flex flex-col items-center text-center">
-            <div className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-brand)]">
-              <span className="h-2 w-2 rounded-full bg-[var(--color-brand)]" />
-              {isTerminal ? 'Session finished' : session.status === 'paused' ? 'Paused' : 'In focus'}
-            </div>
             <h1 className="max-w-2xl text-2xl font-extrabold tracking-tight text-[var(--color-text)] sm:text-3xl">
               {session.title}
             </h1>
-            <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-              {subject?.name || 'Subject unavailable'}
-              {topic ? ` · ${topic.name}` : ''}
-            </p>
-
-            <div className="my-10 sm:my-14">
-              <div
-                role="timer"
-                aria-live="polite"
-                aria-label={`Actual study time ${formatTimer(elapsedSeconds)}`}
-                className="font-mono text-6xl font-bold tracking-tight text-[var(--color-text)] sm:text-8xl"
-              >
-                {formatTimer(isTerminal ? session.actualDurationSeconds || 0 : elapsedSeconds)}
-              </div>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
-                Actual study time
-              </p>
+            <div className="mt-2.5 flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand)]" />
+                {isTerminal ? 'Session finished' : session.status === 'paused' ? 'Paused' : 'In focus'}
+              </span>
+              <span>·</span>
+              <span>{subject?.name || 'Subject unavailable'}{topic ? ` · ${topic.name}` : ''}</span>
             </div>
 
-            <div className="grid w-full max-w-md grid-cols-2 gap-3 text-left">
-              <InfoTile label="Planned duration" value={`${session.duration} min`} icon={Clock3} />
-              <InfoTile
-                label={isOvertime ? 'Over planned time' : 'Progress'}
-                value={isOvertime ? `+${formatTimer(elapsedSeconds - plannedSeconds)}` : `${progress}%`}
-                icon={isOvertime ? Zap : TimerReset}
-                accent={isOvertime}
-              />
-            </div>
-
-            {isOvertime && isActive && (
-              <p className="mt-5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                Planned time reached. Your focus timer continues until you choose to finish.
-              </p>
-            )}
+            <FocusTimerSection
+              session={session}
+              activeFocusSession={activeFocusSession}
+              focusClock={focusClock}
+              isTerminal={isTerminal}
+              isActive={isActive}
+              plannedSeconds={plannedSeconds}
+            />
 
             {focusError && (
               <div role="alert" className="mt-5 w-full rounded-lg border border-[var(--color-error-border)] bg-[var(--color-error-light)] px-4 py-3 text-left text-sm text-[var(--color-error-text)]">
@@ -325,12 +288,76 @@ export default function FocusModePage() {
 function InfoTile({ label, value, icon: Icon, accent }) {
   return (
     <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg-subtle)] p-3">
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+      <div className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-muted)]">
         <Icon className={`h-3.5 w-3.5 ${accent ? 'text-amber-500' : 'text-[var(--color-brand)]'}`} />
         {label}
       </div>
       <div className="mt-1 font-mono text-lg font-bold text-[var(--color-text)]">{value}</div>
     </div>
+  )
+}
+
+function FocusTimerSection({
+  session,
+  activeFocusSession,
+  focusClock,
+  isTerminal,
+  isActive,
+  plannedSeconds,
+}) {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!activeFocusSession || isTerminal) return undefined
+    const timer = window.setInterval(() => setNow(Date.now()), 1000)
+    return () => window.clearInterval(timer)
+  }, [activeFocusSession, isTerminal])
+
+  const elapsedSeconds = getFocusDisplaySeconds(activeFocusSession, {
+    now,
+    serverTime: focusClock?.serverTime,
+    serverTimeReceivedAt: focusClock?.receivedAt,
+  })
+
+  const isOvertime = Boolean(activeFocusSession && elapsedSeconds > plannedSeconds)
+  const progress = plannedSeconds
+    ? Math.min(100, Math.round((elapsedSeconds / plannedSeconds) * 100))
+    : 0
+
+  const displaySeconds = isTerminal ? session.actualDurationSeconds || 0 : elapsedSeconds
+
+  return (
+    <>
+      <div className="my-10 sm:my-14">
+        <div
+          role="timer"
+          aria-live="polite"
+          aria-label={`Actual study time ${formatTimer(elapsedSeconds)}`}
+          className="font-mono text-6xl font-bold tracking-tight text-[var(--color-text)] sm:text-8xl"
+        >
+          {formatTimer(displaySeconds)}
+        </div>
+        <p className="mt-3 text-xs font-medium text-[var(--color-text-muted)]">
+          Actual study time
+        </p>
+      </div>
+
+      <div className="grid w-full max-w-md grid-cols-2 gap-3 text-left">
+        <InfoTile label="Planned duration" value={`${session.duration} min`} icon={Clock3} />
+        <InfoTile
+          label={isOvertime ? 'Over planned time' : 'Progress'}
+          value={isOvertime ? `+${formatTimer(elapsedSeconds - plannedSeconds)}` : `${progress}%`}
+          icon={isOvertime ? Zap : TimerReset}
+          accent={isOvertime}
+        />
+      </div>
+
+      {isOvertime && isActive && (
+        <p className="mt-5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+          Planned time reached. Your focus timer continues until you choose to finish.
+        </p>
+      )}
+    </>
   )
 }
 

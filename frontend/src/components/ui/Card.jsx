@@ -1,4 +1,4 @@
-import { forwardRef } from 'react'
+import { forwardRef, memo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Clock,
@@ -156,13 +156,15 @@ export function CardFooter({ children, className, ...props }) {
  * Uses structured micro-typography, tabular numbers, purposeful status indicators,
  * and integrated inline progress or comparison metrics.
  */
-export function StatCard({
+export const StatCard = memo(function StatCard({
   label,
   value,
   unit,
   subtext,
   icon: Icon,
   iconColor,
+  iconClassName,
+  colorVariant, // 'indigo' | 'emerald' | 'teal' | 'amber' | 'coral' | 'slate' | 'default'
   trend, // 'up' | 'down' | 'neutral'
   trendLabel,
   progress, // { value, max, label?, color? }
@@ -172,11 +174,55 @@ export function StatCard({
   onClick,
   ...props
 }) {
+  const variantStyles = {
+    indigo: {
+      accent: 'var(--color-academic-indigo)',
+      border: 'border-[var(--color-indigo-border)]/60 hover:border-[var(--color-academic-indigo)]/60',
+      iconBox: 'bg-[var(--color-indigo-tint)] text-[var(--color-academic-indigo)] border border-[var(--color-indigo-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-indigo-tint)]/25 to-[var(--color-surface)] dark:from-indigo-950/20 dark:to-[var(--color-surface)]',
+    },
+    emerald: {
+      accent: 'var(--color-scholar-emerald)',
+      border: 'border-emerald-200/60 dark:border-emerald-900/60 hover:border-[var(--color-scholar-emerald)]/60',
+      iconBox: 'bg-[var(--color-emerald-tint)] text-[var(--color-scholar-emerald)] border border-emerald-300/40 dark:border-emerald-800/60',
+      surface: 'bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)]',
+    },
+    teal: {
+      accent: 'var(--color-study-teal)',
+      border: 'border-[var(--color-teal-border)]/60 hover:border-[var(--color-study-teal)]/60',
+      iconBox: 'bg-[var(--color-teal-tint)] text-[var(--color-study-teal)] border border-[var(--color-teal-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-teal-tint)]/25 to-[var(--color-surface)] dark:from-teal-950/20 dark:to-[var(--color-surface)]',
+    },
+    amber: {
+      accent: 'var(--color-focus-amber)',
+      border: 'border-[var(--color-amber-border)]/60 hover:border-[var(--color-focus-amber)]/60',
+      iconBox: 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border border-[var(--color-amber-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-amber-tint)]/25 to-[var(--color-surface)] dark:from-amber-950/20 dark:to-[var(--color-surface)]',
+    },
+    coral: {
+      accent: 'var(--color-soft-coral)',
+      border: 'border-[var(--color-coral-border)]/60 hover:border-[var(--color-soft-coral)]/60',
+      iconBox: 'bg-[var(--color-coral-tint)] text-[var(--color-soft-coral)] border border-[var(--color-coral-border)]/70',
+      surface: 'bg-gradient-to-b from-[var(--color-coral-tint)]/25 to-[var(--color-surface)] dark:from-rose-950/20 dark:to-[var(--color-surface)]',
+    },
+    default: {
+      accent: undefined,
+      border: 'border-[var(--color-border)]',
+      iconBox: 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]',
+      surface: 'bg-[var(--color-surface)]',
+    },
+  }
+
+  const activeVariant = colorVariant && variantStyles[colorVariant] ? variantStyles[colorVariant] : variantStyles.default
+  const effectiveAccent = accentColor || activeVariant.accent
+
   return (
     <Card
       variant="default"
       className={cn(
-        'p-4 sm:p-5 flex flex-col justify-between transition-colors transition-shadow duration-200 motion-reduce:transition-none',
+        'p-4 sm:p-5 flex flex-col justify-between transition-colors transition-shadow duration-200 motion-reduce:transition-none shadow-xs',
+        activeVariant.border,
+        activeVariant.surface,
         onClick && 'cursor-pointer hover:border-[var(--card-border-hover)] hover:shadow-[var(--card-shadow-hover)]',
         className
       )}
@@ -186,10 +232,10 @@ export function StatCard({
       {/* Top Metadata Row */}
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          {accentColor && (
+          {effectiveAccent && (
             <span
               className="w-1.5 h-1.5 rounded-full shrink-0"
-              style={{ backgroundColor: accentColor }}
+              style={{ backgroundColor: effectiveAccent }}
               aria-hidden="true"
             />
           )}
@@ -202,7 +248,10 @@ export function StatCard({
           {badge && <span className="shrink-0">{badge}</span>}
           {Icon && (
             <span
-              className="p-1 rounded text-[var(--color-text-muted)]"
+              className={cn(
+                'p-1.5 rounded-lg flex items-center justify-center shrink-0',
+                iconClassName || activeVariant.iconBox
+              )}
               style={iconColor ? { color: iconColor } : undefined}
             >
               <Icon className="w-4 h-4" />
@@ -213,11 +262,11 @@ export function StatCard({
 
       {/* Main Metric Value */}
       <div className="mt-0.5 flex items-baseline gap-2 flex-wrap">
-        <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)] tabular-nums">
+        <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)] tabular-nums font-tabular">
           {value}
         </span>
         {unit && (
-          <span className="text-xs font-medium text-[var(--color-text-muted)]">
+          <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
             {unit}
           </span>
         )}
@@ -229,7 +278,7 @@ export function StatCard({
           <Progress
             value={progress.value}
             max={progress.max || 100}
-            color={progress.color || accentColor || 'var(--color-brand)'}
+            color={progress.color || effectiveAccent || 'var(--color-brand)'}
             size="sm"
           />
           <div className="flex items-center justify-between text-[11px] text-[var(--color-text-muted)]">
@@ -248,8 +297,8 @@ export function StatCard({
             <span
               className={cn(
                 'inline-flex items-center gap-1 font-semibold text-[11px]',
-                trend === 'up' && 'text-emerald-600 dark:text-emerald-400',
-                trend === 'down' && 'text-rose-600 dark:text-rose-400',
+                trend === 'up' && 'text-[var(--color-scholar-emerald)]',
+                trend === 'down' && 'text-[var(--color-soft-coral)]',
                 (!trend || trend === 'neutral') && 'text-[var(--color-text-secondary)]'
               )}
             >
@@ -267,7 +316,7 @@ export function StatCard({
       )}
     </Card>
   )
-}
+})
 
 /* ── 2. SubjectCard: Academic Course Dossier Card ────────── */
 /**
@@ -276,7 +325,7 @@ export function StatCard({
  * Features an academic index-dossier layout with course code badge, exam countdown pill,
  * topic mastery ratio, empty syllabus callout, and clean curriculum explorer link.
  */
-export function SubjectCard({
+export const SubjectCard = memo(function SubjectCard({
   subject,
   totalTopics: propTotalTopics,
   completedTopics: propCompletedTopics,
@@ -495,7 +544,7 @@ export function SubjectCard({
       </Link>
     </Card>
   )
-}
+})
 
 export { SubjectCard as CourseCard }
 
@@ -505,7 +554,7 @@ export { SubjectCard as CourseCard }
  * Distinct schedule-oriented layout with time ribbon, state indicators
  * (upcoming, in-progress, completed), subject badge, and quick completion trigger.
  */
-export function SessionCard({
+export const SessionCard = memo(function SessionCard({
   session,
   subject,
   onComplete,
@@ -597,27 +646,32 @@ export function SessionCard({
 
             {/* Live Status Badge */}
             {isCurrentLive && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-brand-text)] bg-[var(--color-brand-50)] border border-[var(--color-brand-100)] px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full font-tabular">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                 Live Now
+              </span>
+            )}
+            {session.status === 'paused' && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 px-2 py-0.5 rounded-md font-tabular">
+                Paused
               </span>
             )}
           </div>
 
           {/* Time & Duration Meta */}
-          <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] mt-1 font-mono flex-wrap">
-            <span className="flex items-center gap-1 font-medium">
-              <Clock className="w-3 h-3 text-[var(--color-text-secondary)]" />
+          <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] mt-1 font-mono flex-wrap">
+            <span className="flex items-center gap-1 font-medium text-[var(--color-text)]">
+              <Clock className="w-3 h-3 text-[var(--color-scholar-emerald)]" />
               <span>{session.startTime}</span>
               <span className="text-[var(--color-text-muted)] font-sans">to</span>
               <span>{session.endTime}</span>
             </span>
             <span className="inline-block w-1 h-1 rounded-full bg-[var(--color-border-hover)]" aria-hidden="true" />
-            <span>{getPlannedDurationMinutes(session)}m planned</span>
+            <span className="font-tabular font-medium text-[var(--color-text-secondary)]">{getPlannedDurationMinutes(session)}m planned</span>
             {isCompleted && typeof session.actualDurationSeconds === 'number' && (
               <>
                 <span className="inline-block w-1 h-1 rounded-full bg-[var(--color-border-hover)]" aria-hidden="true" />
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold font-tabular">
                   {Math.round(session.actualDurationSeconds / 60)}m actual
                 </span>
               </>
@@ -711,7 +765,7 @@ export function SessionCard({
       )}
     </div>
   )
-}
+})
 
 /* ── 4. RevisionCard: Spaced Repetition Review Ledger ────── */
 /**

@@ -292,13 +292,13 @@ async function runAudit() {
     await setupMocks(desktopCtx, 'light')
     const page = await desktopCtx.newPage()
 
-    await page.goto('http://127.0.0.1:5173/app/progress', { waitUntil: 'networkidle' })
+    await page.goto('http://localhost:5173/app/progress', { waitUntil: 'networkidle' })
     await page.waitForTimeout(1000)
     await captureScreenshot(page, '01_desktop_insights_overview_1440x1024.png')
 
     // 2. Desktop Month View
     console.log('Capturing Desktop Month View...')
-    const monthButton = page.locator('button:has-text("Month")')
+    const monthButton = page.getByRole('button', { name: 'This Month' })
     if (await monthButton.isVisible()) {
       await monthButton.click()
       await page.waitForTimeout(600)
@@ -312,7 +312,7 @@ async function runAudit() {
     })
     await setupMocks(tabletCtx, 'light')
     const tabletPage = await tabletCtx.newPage()
-    await tabletPage.goto('http://127.0.0.1:5173/app/progress', { waitUntil: 'networkidle' })
+    await tabletPage.goto('http://localhost:5173/app/progress', { waitUntil: 'networkidle' })
     await tabletPage.waitForTimeout(800)
     await captureScreenshot(tabletPage, '03_tablet_insights_768x1024.png')
 
@@ -323,7 +323,7 @@ async function runAudit() {
     })
     await setupMocks(mobileCtx, 'light')
     const mobilePage = await mobileCtx.newPage()
-    await mobilePage.goto('http://127.0.0.1:5173/app/progress', { waitUntil: 'networkidle' })
+    await mobilePage.goto('http://localhost:5173/app/progress', { waitUntil: 'networkidle' })
     await mobilePage.waitForTimeout(800)
     await captureScreenshot(mobilePage, '04_mobile_insights_390x844.png')
 
@@ -334,7 +334,7 @@ async function runAudit() {
     })
     await setupMocks(darkCtx, 'dark')
     const darkPage = await darkCtx.newPage()
-    await darkPage.goto('http://127.0.0.1:5173/app/progress', { waitUntil: 'networkidle' })
+    await darkPage.goto('http://localhost:5173/app/progress', { waitUntil: 'networkidle' })
     await darkPage.evaluate(() => {
       document.documentElement.classList.add('dark')
     })

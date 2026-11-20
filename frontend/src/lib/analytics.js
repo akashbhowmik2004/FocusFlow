@@ -1,5 +1,14 @@
 import { getCalendarDateKey } from './revisionSummary'
-import { parseCalendarDate } from './dates'
+import {
+  parseCalendarDate,
+  format,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  subWeeks,
+  subMonths,
+} from './dates'
 import { getPlannedDurationMinutes } from './sessionPresentation'
 
 /**
@@ -591,4 +600,272 @@ export function getRevisionDiagnostics(subjects = []) {
     revisionsBySubject: Array.from(subjectMap.values()).sort((a, b) => b.count - a.count),
     historyRecords: history.sort((a, b) => new Date(b.reviewedAt || b.createdAt) - new Date(a.reviewedAt || a.createdAt)),
   }
+}
+
+/**
+ * Resolves the calendar date range boundaries and display label for analytics filtering.
+ *
+ * Supported ranges:
+ * - 'this_week': Current week Monday to Sunday (Asia/Kolkata calendar days)
+ * - 'last_week': Previous week Monday to Sunday
+ * - 'this_month': First to last day of current calendar month
+ * - 'last_month': First to last day of previous calendar month
+ * - 'custom': Defined by options.customStart and options.customEnd (YYYY-MM-DD or Date)
+ * - 'all': Unbounded start (all historical sessions), ending today
+ *
+ * @param {string} [rangeType='this_week']
+ * @param {object} [options={}]
+ * @param {Date|string} [options.referenceDate=new Date()]
+ * @param {string|Date} [options.customStart]
+ * @param {string|Date} [options.customEnd]
+ * @returns {{
+ *   rangeType: string,
+ *   start: Date|null,
+ *   end: Date,
+ *   startDateKey: string|null,
+ *   endDateKey: string,
+ *   periodDays: number,
+ *   label: string
+ * }}
+ */
+export function getAnalyticsDateRange(rangeType = 'this_week', options = {}) {
+  const refDate = parseCalendarDate(options.referenceDate) || new Date()
+  refDate.setHours(0, 0, 0, 0)
+
+  let start
+  let end
+  let label
+  let periodDays
+
+  switch (rangeType) {
+    case 'this_week': {
+      start = startOfWeek(refDate, { weekStartsOn: 1 })
+      end = endOfWeek(refDate, { weekStartsOn: 1 })
+      start.setHours(0, 0, 0, 0)
+      end.setHours(0, 0, 0, 0)
+      periodDays = 7
+      label = `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`
+      break
+    }
+    case 'last_week': {
+      const prevWeek = subWeeks(refDate, 1)
+      start = startOfWeek(prevWeek, { weekStartsOn: 1 })
+      end = endOfWeek(prevWeek, { weekStartsOn: 1 })
+      start.setHours(0, 0, 0, 0)
+      end.setHours(0, 0, 0, 0)
+      periodDays = 7
+      label = `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`
+      break
+    }
+    case 'this_month': {
+      start = startOfMonth(refDate)
+      end = endOfMonth(refDate)
+      start.setHours(0, 0, 0, 0)
+      end.setHours(0, 0, 0, 0)
+      periodDays = Math.round((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1
+      label = format(start, 'MMMM yyyy')
+      break
+    }
+    case 'last_month': {
+      const prevMonth = subMonths(refDate, 1)
+      start = startOfMonth(prevMonth)
+      end = endOfMonth(prevMonth)
+      start.setHours(0, 0, 0, 0)
+      end.setHours(0, 0, 0, 0)
+      periodDays = Math.round((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1
+      label = format(start, 'MMMM yyyy')
+      break
+    }
+    case 'custom': {
+      const parsedStart = parseCalendarDate(options.customStart)
+      const parsedEnd = parseCalendarDate(options.customEnd)
+      if (parsedStart && parsedEnd && parsedStart <= parsedEnd) {
+        start = parsedStart
+        end = parsedEnd
+        periodDays = Math.round((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)) + 1
+        label = `${format(start, 'MMM d, yyyy')} – ${format(end, 'MMM d, yyyy')}`
+      } else if (parsedStart) {
+        start = parsedStart
+        end = parsedStart
+        periodDays = 1
+        label = format(start, 'MMM d, yyyy')
+      } else {
+        start = startOfWeek(refDate, { weekStartsOn: 1 })
+        end = endOfWeek(refDate, { weekStartsOn: 1 })
+        periodDays = 7
+        label = `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`
+      }
+      break
+    }
+    case 'all':
+    default: {
+      start = null
+      end = refDate
+      periodDays = 0
+      label = 'All Recorded History'
+      break
+    }
+  }
+
+  return {
+    rangeType,
+    start,
+    end,
+    startDateKey: start ? getCalendarDateKey(start) : null,
+    endDateKey: getCalendarDateKey(end),
+    periodDays,
+    label,
+  }
+}
+
+/**
+ * Aggregates study totals into weekly buckets (e.g. past 4, 8, or 12 weeks).
+ *
+ * @param {Array} sessions
+ * @param {number} [weeksCount=4]
+ * @param {Date|string} [referenceDate=new Date()]
+ * @returns {Array<{
+ *   weekLabel: string,
+ *   startDateKey: string,
+ *   endDateKey: string,
+ *   plannedMinutes: number,
+ *   actualMinutes: number,
+ *   actualSeconds: number,
+ *   completedSessions: number,
+ *   measuredSessions: number,
+ *   untrackedSessions: number
+ * }>}
+ */
+export function getWeeklyAggregatedTrends(
+  sessions = [],
+  weeksCount = 4,
+  referenceDate = new Date(),
+) {
+  const baseDate = parseCalendarDate(referenceDate) || new Date()
+  const results = []
+
+  for (let i = weeksCount - 1; i >= 0; i--) {
+    const targetRef = subWeeks(baseDate, i)
+    const wStart = startOfWeek(targetRef, { weekStartsOn: 1 })
+    const wEnd = endOfWeek(targetRef, { weekStartsOn: 1 })
+    wStart.setHours(0, 0, 0, 0)
+    wEnd.setHours(0, 0, 0, 0)
+
+    const startKey = getCalendarDateKey(wStart)
+    const endKey = getCalendarDateKey(wEnd)
+
+    let actualSeconds = 0
+    let plannedMinutes = 0
+    let completedSessions = 0
+    let measuredSessions = 0
+    let untrackedSessions = 0
+
+    for (const session of sessions) {
+      const sKey = getCalendarDateKey(session.date || session.startTime || session.createdAt)
+      if (!sKey || sKey < startKey || sKey > endKey) continue
+
+      plannedMinutes += getPlannedDurationMinutes(session)
+      if (session.status === 'completed') {
+        completedSessions += 1
+        const secs = getActualStudySeconds(session)
+        if (typeof secs === 'number') {
+          actualSeconds += secs
+          measuredSessions += 1
+        } else {
+          untrackedSessions += 1
+        }
+      }
+    }
+
+    results.push({
+      weekLabel: `${format(wStart, 'MMM d')}–${format(wEnd, 'd')}`,
+      startDateKey: startKey,
+      endDateKey: endKey,
+      plannedMinutes,
+      actualMinutes: Math.round(actualSeconds / 60),
+      actualSeconds,
+      completedSessions,
+      measuredSessions,
+      untrackedSessions,
+    })
+  }
+
+  return results
+}
+
+/**
+ * Aggregates study totals into monthly buckets (e.g. past 6 months).
+ *
+ * @param {Array} sessions
+ * @param {number} [monthsCount=6]
+ * @param {Date|string} [referenceDate=new Date()]
+ * @returns {Array<{
+ *   monthLabel: string,
+ *   monthKey: string,
+ *   startDateKey: string,
+ *   endDateKey: string,
+ *   plannedMinutes: number,
+ *   actualMinutes: number,
+ *   actualSeconds: number,
+ *   completedSessions: number,
+ *   measuredSessions: number,
+ *   untrackedSessions: number
+ * }>}
+ */
+export function getMonthlyStudyTrends(
+  sessions = [],
+  monthsCount = 6,
+  referenceDate = new Date(),
+) {
+  const baseDate = parseCalendarDate(referenceDate) || new Date()
+  const results = []
+
+  for (let i = monthsCount - 1; i >= 0; i--) {
+    const targetRef = subMonths(baseDate, i)
+    const mStart = startOfMonth(targetRef)
+    const mEnd = endOfMonth(targetRef)
+    mStart.setHours(0, 0, 0, 0)
+    mEnd.setHours(0, 0, 0, 0)
+
+    const startKey = getCalendarDateKey(mStart)
+    const endKey = getCalendarDateKey(mEnd)
+
+    let actualSeconds = 0
+    let plannedMinutes = 0
+    let completedSessions = 0
+    let measuredSessions = 0
+    let untrackedSessions = 0
+
+    for (const session of sessions) {
+      const sKey = getCalendarDateKey(session.date || session.startTime || session.createdAt)
+      if (!sKey || sKey < startKey || sKey > endKey) continue
+
+      plannedMinutes += getPlannedDurationMinutes(session)
+      if (session.status === 'completed') {
+        completedSessions += 1
+        const secs = getActualStudySeconds(session)
+        if (typeof secs === 'number') {
+          actualSeconds += secs
+          measuredSessions += 1
+        } else {
+          untrackedSessions += 1
+        }
+      }
+    }
+
+    results.push({
+      monthLabel: format(mStart, 'MMM yyyy'),
+      monthKey: format(mStart, 'yyyy-MM'),
+      startDateKey: startKey,
+      endDateKey: endKey,
+      plannedMinutes,
+      actualMinutes: Math.round(actualSeconds / 60),
+      actualSeconds,
+      completedSessions,
+      measuredSessions,
+      untrackedSessions,
+    })
+  }
+
+  return results
 }

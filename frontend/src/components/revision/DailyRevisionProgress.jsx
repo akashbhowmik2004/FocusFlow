@@ -16,42 +16,50 @@ export default function DailyRevisionProgress({
   overdueCount = 0,
 }) {
   const totalDueToday = completedToday + dueTodayCount
-  const percentage =
-    totalDueToday > 0 ? Math.min(100, Math.round((completedToday / totalDueToday) * 100)) : 100
+  const hasTasks = totalDueToday > 0
+  const percentage = hasTasks
+    ? Math.min(100, Math.round((completedToday / totalDueToday) * 100))
+    : 0
 
   // Realistic study estimate: 3 minutes per active recall session
   const remainingWorkloadMinutes = (dueTodayCount + overdueCount) * 3
 
   return (
-    <div className="p-4 sm:p-5 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--shadow-xs)] space-y-3">
+    <div className="p-4 sm:p-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs space-y-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-emerald-tint)] text-[var(--color-scholar-emerald)] border border-emerald-300/40 dark:border-emerald-800/60 flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-4 h-4 stroke-[2.2]" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-[var(--color-text)] uppercase tracking-wider">
-              Daily Revision Pace
+            <h3 className="text-xs font-bold text-[var(--color-text)]">
+              Daily revision pace
             </h3>
-            <p className="text-[11px] text-[var(--color-text-muted)]">
-              {completedToday} of {totalDueToday} revision {totalDueToday === 1 ? 'task' : 'tasks'} completed today
+            <p className="text-[11px] text-[var(--color-text-muted)] font-medium">
+              {hasTasks
+                ? `${completedToday} of ${totalDueToday} revision ${totalDueToday === 1 ? 'task' : 'tasks'} completed today`
+                : 'No revision tasks due today — curriculum up to date'}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 self-end sm:self-auto text-xs">
           {remainingWorkloadMinutes > 0 ? (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-900/50">
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-[var(--color-focus-amber)] bg-[var(--color-amber-tint)] px-2 py-0.5 rounded-md border border-[var(--color-amber-border)]/70">
               <Clock className="w-3 h-3" />
               <span>~{remainingWorkloadMinutes} min workload remaining</span>
             </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/50">
-              <Sparkles className="w-3 h-3 text-emerald-500" />
+          ) : hasTasks && percentage === 100 ? (
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-[var(--color-emerald-dark)] bg-[var(--color-emerald-tint)] px-2 py-0.5 rounded-md border border-[var(--color-scholar-emerald)]/30">
+              <Sparkles className="w-3 h-3 text-[var(--color-scholar-emerald)]" />
               <span>Daily goal reached!</span>
             </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+              <span>Queue clear</span>
+            </span>
           )}
-          <span className="font-mono font-bold text-[var(--color-text)]">{percentage}%</span>
+          <span className="font-mono font-bold text-[var(--color-text)] tabular-nums">{percentage}%</span>
         </div>
       </div>
 

@@ -26,14 +26,14 @@ export default function SubjectTopicToolbar({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
         {/* Left: Search Input */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative w-full sm:w-64 min-w-[200px]">
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search syllabus topics by name..."
+            placeholder="Search topics..."
             aria-label="Search syllabus topics"
             className="w-full pl-9 pr-8 py-2 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] text-xs text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] transition-colors"
           />

@@ -60,27 +60,27 @@ export default function SubjectHeader({
 
         <div className="flex items-center gap-2">
           {subject.code && (
-            <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded bg-[var(--card-bg-subtle)] text-[var(--color-text)] border border-[var(--card-border)]">
+            <span className="font-mono text-xs font-bold px-2.5 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
               {subject.code}
             </span>
           )}
-          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[11px] font-semibold">
+          <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-emerald-tint)] text-[var(--color-emerald-dark)] dark:bg-emerald-950/50 dark:text-emerald-300 border border-[var(--color-scholar-emerald)]/30 text-[11px] font-semibold">
             Active Syllabus
           </span>
         </div>
       </div>
 
       {/* Main Course Header Card */}
-      <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 sm:p-6 shadow-[var(--shadow-xs)]">
+      <div className="rounded-xl border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] via-[var(--color-surface-secondary)]/35 to-[var(--color-surface)] p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           {/* Left: Swatch Icon, Title, Subtitle */}
           <div className="flex items-start gap-4 min-w-0 flex-1">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 text-white font-bold shadow-xs ring-2 ring-white dark:ring-slate-900"
-              style={{ backgroundColor: subject.color || 'var(--color-brand)' }}
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-white font-bold shadow-sm ring-2 ring-white dark:ring-slate-900"
+              style={{ backgroundColor: subject.color || 'var(--color-scholar-emerald)' }}
               aria-hidden="true"
             >
-              <BookOpen className="w-6 h-6 stroke-[2.2]" />
+              <BookOpen className="w-7 h-7 stroke-[2.2]" />
             </div>
 
             <div className="min-w-0 flex-1">
@@ -91,10 +91,10 @@ export default function SubjectHeader({
                     className={cn(
                       'text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border',
                       examStatus.isCompleted
-                        ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        ? 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
                         : examStatus.isUrgent
-                        ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200 dark:border-rose-800'
-                        : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                        ? 'bg-[var(--color-coral-tint)] text-[var(--color-soft-coral)] border border-[var(--color-coral-border)]/70'
+                        : 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border border-[var(--color-amber-border)]/70'
                     )}
                   >
                     {examStatus.isCompleted ? (
@@ -119,7 +119,7 @@ export default function SubjectHeader({
                 )}
 
                 {!subject.examDate && (
-                  <span className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
+                  <span className="text-xs text-[var(--color-text-muted)] flex items-center gap-1 font-medium">
                     <Calendar className="w-3 h-3" />
                     <span>No exam date set</span>
                   </span>
@@ -134,13 +134,13 @@ export default function SubjectHeader({
                 <span>
                   <strong className="font-semibold text-[var(--color-text)] font-mono tabular-nums">{topicsCount}</strong> syllabus topics
                 </span>
-                <span className="text-[var(--color-border)] select-none">|</span>
+                <span className="text-[var(--color-border)] select-none">•</span>
                 <span>
-                  <strong className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">{completedTopicsCount}</strong> completed
+                  <strong className="font-semibold text-[var(--color-scholar-emerald)] font-mono tabular-nums">{completedTopicsCount}</strong> completed
                 </span>
-                <span className="text-[var(--color-border)] select-none">|</span>
+                <span className="text-[var(--color-border)] select-none">•</span>
                 <span>
-                  <strong className="font-semibold text-amber-600 dark:text-amber-400 font-mono tabular-nums">{inProgressTopicsCount}</strong> in progress
+                  <strong className="font-semibold text-[var(--color-study-teal)] font-mono tabular-nums">{inProgressTopicsCount}</strong> in progress
                 </span>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function SubjectHeader({
                 variant="default"
                 size="sm"
                 onClick={onLaunchFocus}
-                className="text-xs gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs focus-visible:ring-emerald-500 active:scale-95"
+                className="text-xs gap-1.5 font-semibold bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white shadow-xs focus-visible:ring-[var(--color-scholar-emerald)] active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>{activeSessionId ? 'Resume Focus' : 'Start Focus'}</span>

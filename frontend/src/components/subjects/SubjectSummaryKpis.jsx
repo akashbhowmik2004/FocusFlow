@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { BookOpen, CheckCircle2, RotateCw, Calendar, ArrowRight } from 'lucide-react'
 import { getExamCountdown, formatDate } from '@/lib/dates'
@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
  * 3. Spaced Recall Review Queue
  * 4. Nearest Exam Horizon
  */
-export default function SubjectSummaryKpis({ subjects = [] }) {
+export default memo(function SubjectSummaryKpis({ subjects = [] }) {
   const telemetry = useMemo(() => {
     const totalSubjects = subjects.length
 
@@ -60,12 +60,12 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* 1. Enrolled Subjects */}
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-2xs">
+      <div className="rounded-xl border border-[var(--color-indigo-border)]/70 bg-gradient-to-b from-[var(--color-indigo-tint)]/30 to-[var(--color-surface)] dark:from-indigo-950/20 dark:to-[var(--color-surface)] p-4 shadow-xs transition-colors hover:border-[var(--color-academic-indigo)]/60">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
             Enrolled Subjects
           </span>
-          <div className="p-2 rounded-lg bg-[var(--color-brand-subtle)] text-[var(--color-brand)]">
+          <div className="p-2 rounded-lg bg-[var(--color-indigo-tint)] text-[var(--color-academic-indigo)] border border-[var(--color-indigo-border)]/70">
             <BookOpen className="w-4 h-4" />
           </div>
         </div>
@@ -81,12 +81,12 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
       </div>
 
       {/* 2. Syllabus Completion */}
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-2xs">
+      <div className="rounded-xl border border-[var(--color-teal-border)]/70 bg-gradient-to-b from-[var(--color-teal-tint)]/30 to-[var(--color-surface)] dark:from-teal-950/20 dark:to-[var(--color-surface)] p-4 shadow-xs transition-colors hover:border-[var(--color-study-teal)]/60">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
             Syllabus Completion
           </span>
-          <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+          <div className="p-2 rounded-lg bg-[var(--color-teal-tint)] text-[var(--color-study-teal)] border border-[var(--color-teal-border)]/70">
             <CheckCircle2 className="w-4 h-4" />
           </div>
         </div>
@@ -100,24 +100,31 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
         </div>
         <div className="mt-2 w-full bg-[var(--color-border-light)] rounded-full h-1.5 overflow-hidden">
           <div
-            className="h-full bg-[var(--color-brand)] rounded-full"
+            className="h-full bg-[var(--color-study-teal)] rounded-full"
             style={{ width: `${telemetry.overallPercentage}%` }}
           />
         </div>
       </div>
 
       {/* 3. Spaced Recall Review Queue */}
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-2xs">
+      <div
+        className={cn(
+          'rounded-xl p-4 shadow-xs transition-colors',
+          telemetry.dueCount > 0
+            ? 'border border-[var(--color-amber-border)]/70 bg-gradient-to-b from-[var(--color-amber-tint)]/35 to-[var(--color-surface)] dark:from-amber-950/25 dark:to-[var(--color-surface)] hover:border-[var(--color-focus-amber)]/70'
+            : 'border border-[var(--color-amber-border)]/50 bg-gradient-to-b from-[var(--color-amber-tint)]/20 to-[var(--color-surface)] dark:from-amber-950/15 dark:to-[var(--color-surface)] hover:border-[var(--color-focus-amber)]/50'
+        )}
+      >
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
             Spaced Revision Queue
           </span>
           <div
             className={cn(
-              'p-2 rounded-lg',
+              'p-2 rounded-lg border',
               telemetry.dueCount > 0
-                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
-                : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                ? 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border-[var(--color-amber-border)]/70'
+                : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
             )}
           >
             <RotateCw className="w-4 h-4" />
@@ -127,7 +134,7 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
           <span
             className={cn(
               'text-2xl font-bold font-mono tabular-nums',
-              telemetry.dueCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--color-text)]'
+              telemetry.dueCount > 0 ? 'text-[var(--color-focus-amber)]' : 'text-[var(--color-text)]'
             )}
           >
             {telemetry.dueCount}
@@ -142,7 +149,7 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
           </p>
           <Link
             to="/app/revision"
-            className="text-[11px] font-semibold text-[var(--color-brand)] hover:underline flex items-center gap-0.5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand)]"
+            className="text-[11px] font-semibold text-[var(--color-scholar-emerald)] hover:underline flex items-center gap-0.5 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-scholar-emerald)]"
           >
             Review <ArrowRight className="w-3 h-3" />
           </Link>
@@ -150,12 +157,26 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
       </div>
 
       {/* 4. Nearest Exam Horizon */}
-      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 shadow-2xs">
+      <div
+        className={cn(
+          'rounded-xl p-4 shadow-xs transition-colors',
+          telemetry.nearestExam
+            ? 'border border-[var(--color-coral-border)]/60 bg-gradient-to-b from-[var(--color-coral-tint)]/25 to-[var(--color-surface)] dark:from-rose-950/20 dark:to-[var(--color-surface)] hover:border-[var(--color-soft-coral)]/60'
+            : 'border border-[var(--color-border)] bg-gradient-to-b from-[var(--color-bg-subtle)]/40 to-[var(--color-surface)] dark:from-slate-900/30 dark:to-[var(--color-surface)] hover:border-[var(--color-border-hover)]'
+        )}
+      >
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
             Nearest Exam Horizon
           </span>
-          <div className="p-2 rounded-lg bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400">
+          <div
+            className={cn(
+              'p-2 rounded-lg border',
+              telemetry.nearestExam
+                ? 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border-[var(--color-amber-border)]/70'
+                : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
+            )}
+          >
             <Calendar className="w-4 h-4" />
           </div>
         </div>
@@ -188,4 +209,4 @@ export default function SubjectSummaryKpis({ subjects = [] }) {
       </div>
     </div>
   )
-}
+})

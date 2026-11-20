@@ -78,25 +78,6 @@ describe('userService', () => {
     expect(response.message).toBe('Password updated successfully')
   })
 
-  it('updates theme via PUT /api/user/theme', async () => {
-    global.fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({
-        message: 'Theme updated successfully',
-        theme: 'dark',
-        user: { id: 'usr-1', theme: 'dark' },
-      }),
-    })
-
-    const response = await userService.updateTheme('dark')
-    expect(global.fetch).toHaveBeenCalledWith('/api/user/theme', expect.objectContaining({
-      method: 'PUT',
-      credentials: 'include',
-      body: JSON.stringify({ theme: 'dark' }),
-    }))
-    expect(response.theme).toBe('dark')
-  })
-
   it('throws an error with status and message when backend rejects request', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,

@@ -69,9 +69,9 @@ export default function PlannerWeekView({
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs overflow-hidden flex flex-col">
       {/* 7-Day Header Row (Sticky) */}
-      <div className="grid grid-cols-8 border-b border-[var(--color-border-light)] bg-[var(--color-bg-subtle)] select-none">
+      <div className="grid grid-cols-8 border-b border-[var(--color-border)]/70 bg-[var(--color-bg-subtle)] select-none">
         {/* Top-Left Axis Corner */}
-        <div className="p-2 sm:p-3 flex flex-col justify-end items-center border-r border-[var(--color-border-light)] bg-[var(--color-bg-subtle)]">
+        <div className="p-2 sm:p-3 flex flex-col justify-end items-center border-r border-[var(--color-border)]/60 bg-[var(--color-bg-subtle)]">
           <span className="text-[10px] font-semibold text-[var(--color-text-muted)]">
             Time
           </span>
@@ -89,19 +89,19 @@ export default function PlannerWeekView({
               key={dayKey}
               onClick={() => onSelectDate(day)}
               className={cn(
-                'p-2 sm:p-2.5 flex flex-col items-center justify-between border-r last:border-r-0 border-[var(--color-border-light)] cursor-pointer transition-colors',
+                'p-2 sm:p-2.5 flex flex-col items-center justify-between border-r last:border-r-0 border-[var(--color-border)]/60 cursor-pointer transition-colors',
                 isSelected
-                  ? 'bg-[var(--color-surface)] ring-2 ring-inset ring-[var(--color-brand)]'
+                  ? 'bg-[var(--color-emerald-tint)]/40 ring-2 ring-inset ring-[var(--color-scholar-emerald)]'
                   : 'hover:bg-[var(--color-surface)]',
-                isDayToday && 'bg-emerald-50/40 dark:bg-emerald-950/20'
+                isDayToday && !isSelected && 'bg-emerald-50/40 dark:bg-emerald-950/20'
               )}
             >
               <div className="flex flex-col items-center">
                 <span
                   className={cn(
                     'text-[11px] font-medium',
-                    isDayToday
-                      ? 'text-[var(--color-brand)] font-bold'
+                    isDayToday || isSelected
+                      ? 'text-[var(--color-scholar-emerald)] font-bold'
                       : 'text-[var(--color-text-secondary)]'
                   )}
                 >
@@ -111,7 +111,9 @@ export default function PlannerWeekView({
                   className={cn(
                     'w-7 h-7 flex items-center justify-center rounded-full text-sm font-extrabold mt-0.5',
                     isDayToday
-                      ? 'bg-[var(--color-brand-primary)] text-white shadow-xs'
+                      ? 'bg-[var(--color-scholar-emerald)] text-white shadow-xs'
+                      : isSelected
+                      ? 'bg-[var(--color-scholar-emerald)]/15 text-[var(--color-scholar-emerald)] font-bold'
                       : 'text-[var(--color-text)]'
                   )}
                 >
@@ -125,8 +127,8 @@ export default function PlannerWeekView({
                   <span
                     className={cn(
                       'inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold',
-                      isDayToday
-                        ? 'bg-[var(--color-brand)]/15 text-[var(--color-brand)]'
+                      isDayToday || isSelected
+                        ? 'bg-emerald-500/15 text-[var(--color-scholar-emerald)]'
                         : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border border-[var(--color-border-light)]'
                     )}
                   >
@@ -146,11 +148,11 @@ export default function PlannerWeekView({
       {/* Timetable Body (12+ Hours Grid) */}
       <div className="relative grid grid-cols-8 min-h-[640px] bg-[var(--color-surface)] overflow-x-auto">
         {/* Left Time Axis (Hours) */}
-        <div className="col-span-1 border-r border-[var(--color-border-light)] bg-[var(--color-bg-subtle)]/30 flex flex-col select-none">
+        <div className="col-span-1 border-r border-[var(--color-border)]/60 bg-[var(--color-bg-subtle)]/30 flex flex-col select-none">
           {hours.map((hour) => (
             <div
               key={hour}
-              className="h-16 border-b border-[var(--color-border-light)]/60 pr-2 pt-1 flex justify-end text-[10px] sm:text-[11px] font-mono font-medium text-[var(--color-text-muted)]"
+              className="h-16 border-b border-[var(--color-border)]/50 pr-2 pt-1 flex justify-end text-[10px] sm:text-[11px] font-mono font-medium text-[var(--color-text-muted)]"
             >
               <span>{formatHourLabel(hour)}</span>
             </div>
@@ -174,8 +176,8 @@ export default function PlannerWeekView({
               key={dayKey}
               onClick={() => onSelectDate(day)}
               className={cn(
-                'relative col-span-1 border-r last:border-r-0 border-[var(--color-border-light)] flex flex-col',
-                isSelected && 'bg-[var(--color-brand)]/[0.02]',
+                'relative col-span-1 border-r last:border-r-0 border-[var(--color-border)]/60 flex flex-col',
+                isSelected && 'bg-emerald-500/[0.04]',
                 isDayToday && 'bg-emerald-500/[0.02]'
               )}
             >
@@ -183,7 +185,7 @@ export default function PlannerWeekView({
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="h-16 border-b border-[var(--color-border-light)]/40 pointer-events-none"
+                  className="h-16 border-b border-[var(--color-border)]/50 pointer-events-none"
                 />
               ))}
 
@@ -228,16 +230,16 @@ export default function PlannerWeekView({
                     }}
                     className={cn(
                       'absolute p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer select-none overflow-hidden flex flex-col justify-between shadow-xs',
-                      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
+                      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)]',
                       isCompleted
-                        ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)] opacity-85'
+                        ? 'bg-[var(--color-emerald-tint)]/40 border-emerald-300/70 dark:border-emerald-800/60'
                         : isCancelled
                         ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-60'
                         : isLive
-                        ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40 z-10'
+                        ? 'bg-[var(--color-emerald-tint)] dark:bg-emerald-950/60 border-[var(--color-scholar-emerald)] ring-2 ring-[var(--color-scholar-emerald)]/30 z-10'
                         : isPaused
-                        ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-500 z-10'
-                        : 'bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:shadow-sm'
+                        ? 'bg-[var(--color-amber-tint)] dark:bg-amber-950/50 border-[var(--color-focus-amber)] z-10'
+                        : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-scholar-emerald)]/50 hover:shadow-xs'
                     )}
                   >
                     {/* Top Subject Badge & Status Icon */}
@@ -303,7 +305,7 @@ export default function PlannerWeekView({
       {weekSessions.length === 0 && (
         <div className="p-6 text-center border-t border-[var(--color-border-light)] bg-[var(--color-bg-subtle)]/40">
           <div className="max-w-md mx-auto flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)]">
-            <Calendar className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
+            <Calendar className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0" />
             <span>
               No study blocks booked for this week. Click any day column or{' '}
               <strong>Create Study Session</strong> above to plan your schedule.

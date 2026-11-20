@@ -72,12 +72,19 @@ export default function Login() {
           type: 'UPDATE_USER',
           payload: response.user,
         })
-        toast.success(`Welcome back, ${response.user.name}! Redirecting to dashboard...`)
+        toast.success(`Welcome back, ${response.user.name}!`)
       } else {
-        toast.success('Welcome back! Redirecting to dashboard...')
+        toast.success('Welcome back!')
       }
-      const destination = location.state?.from?.pathname || '/app/dashboard'
-      navigate(destination, { replace: true })
+
+      if (response?.user && !response.user.onboardingCompleted) {
+        navigate('/onboarding', { replace: true })
+      } else {
+        const fromPath = location.state?.from?.pathname
+        const isFromValid = fromPath && !['/login', '/signup', '/onboarding'].includes(fromPath)
+        const destination = isFromValid ? fromPath : '/app/dashboard'
+        navigate(destination, { replace: true })
+      }
     } catch (err) {
       const errorMsg = err.message || 'Login failed. Please check your credentials.'
       setAuthError(errorMsg)
@@ -99,7 +106,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-950 font-sans">
+    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-950 font-sans">
       {/* ── Top Header Navigation ───────────────────────────── */}
       <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/90 backdrop-blur-xl border-b border-[var(--color-border)]">
         <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
@@ -173,8 +180,8 @@ export default function Login() {
                       <div className="text-xs text-[var(--color-text-secondary)]">Sample Academic Workspace (Illustrative Preview)</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 shadow-xs">
-                    <Flame className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 shadow-xs">
+                    <Flame className="w-3.5 h-3.5 text-amber-600" />
                     <span className="text-xs font-bold">Study Consistency</span>
                   </div>
                 </div>
@@ -249,9 +256,9 @@ export default function Login() {
               {displayError && (
                 <div
                   role="alert"
-                  className="rounded-lg p-3.5 flex items-start gap-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 transition-opacity"
+                  className="rounded-lg p-3.5 flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-800 transition-opacity"
                 >
-                  <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
                   <div className="text-xs space-y-0.5">
                     <div className="font-semibold">Authentication Notice</div>
                     <div>{displayError}</div>

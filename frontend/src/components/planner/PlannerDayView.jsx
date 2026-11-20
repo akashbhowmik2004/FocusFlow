@@ -99,7 +99,7 @@ export default function PlannerDayView({
             className={cn(
               'w-11 h-11 rounded-xl flex flex-col items-center justify-center font-mono shrink-0 shadow-xs',
               isDayToday
-                ? 'bg-[var(--color-brand-primary)] text-white'
+                ? 'bg-[var(--color-scholar-emerald)] text-white'
                 : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)]'
             )}
           >
@@ -164,11 +164,11 @@ export default function PlannerDayView({
       ) : (
         <div className="relative grid grid-cols-12 min-h-[680px] bg-[var(--color-surface)]">
           {/* Left Time Axis (2 cols) */}
-          <div className="col-span-3 sm:col-span-2 border-r border-[var(--color-border-light)] bg-[var(--color-bg-subtle)]/40 flex flex-col select-none">
+          <div className="col-span-3 sm:col-span-2 border-r border-[var(--color-border)]/60 bg-[var(--color-bg-subtle)]/40 flex flex-col select-none">
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="h-24 border-b border-[var(--color-border-light)]/60 pr-3 pt-2 flex justify-end text-xs font-mono font-medium text-[var(--color-text-muted)]"
+                className="h-24 border-b border-[var(--color-border)]/50 pr-3 pt-2 flex justify-end text-xs font-mono font-medium text-[var(--color-text-muted)]"
               >
                 <span>{formatHourLabel(hour)}</span>
               </div>
@@ -181,7 +181,7 @@ export default function PlannerDayView({
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="h-24 border-b border-[var(--color-border-light)]/40 pointer-events-none"
+                className="h-24 border-b border-[var(--color-border)]/50 pointer-events-none"
               />
             ))}
 
@@ -226,16 +226,16 @@ export default function PlannerDayView({
                   }}
                   className={cn(
                     'absolute p-3 sm:p-4 rounded-xl border transition-colors cursor-pointer select-none overflow-hidden flex flex-col justify-between shadow-xs',
-                    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
+                    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)]',
                     isCompleted
-                      ? 'bg-[var(--item-completed-bg)] border-[var(--item-completed-border)]'
+                      ? 'bg-[var(--color-emerald-tint)]/40 border-emerald-300/70 dark:border-emerald-800/60'
                       : isCancelled
                       ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-60'
                       : isLive
-                      ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500 ring-2 ring-emerald-500/40 z-10'
+                      ? 'bg-[var(--color-emerald-tint)] dark:bg-emerald-950/60 border-[var(--color-scholar-emerald)] ring-2 ring-[var(--color-scholar-emerald)]/30 z-10'
                       : isPaused
-                      ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-500 z-10'
-                      : 'bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:shadow-sm'
+                      ? 'bg-[var(--color-amber-tint)] dark:bg-amber-950/50 border-[var(--color-focus-amber)] z-10'
+                      : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-scholar-emerald)]/50 hover:shadow-xs'
                   )}
                 >
                   <div>

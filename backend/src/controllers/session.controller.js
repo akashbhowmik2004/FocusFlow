@@ -41,14 +41,36 @@ const findOwnedSubject = (userId, subjectId) =>
 
 export const getSessions = async (req, res) => {
   try {
+    const { startDate, endDate, status, subjectId } = req.query;
+    const where = { userId: req.user.id };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (subjectId) {
+      where.subjectId = subjectId;
+    }
+
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) {
+        where.date.gte = parseDate(startDate);
+      }
+      if (endDate) {
+        where.date.lte = parseDate(endDate);
+      }
+    }
+
     const sessions = await prisma.studySession.findMany({
-      where: { userId: req.user.id },
+      where,
       select: sessionSelect,
       orderBy: [{ date: "asc" }, { startTime: "asc" }],
     });
     res.status(200).json({ sessions });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Get sessions error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -91,7 +113,8 @@ export const addSession = async (req, res) => {
     });
     res.status(201).json({ session });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Add session error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -187,7 +210,8 @@ export const updateSession = async (req, res) => {
     });
     res.status(200).json({ session });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Update session error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -282,6 +306,7 @@ export const deleteSession = async (req, res) => {
     await prisma.studySession.delete({ where: { id: existing.id } });
     res.status(200).json({ id: existing.id });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Delete session error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

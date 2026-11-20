@@ -104,12 +104,12 @@ export default function RevisionQueue({
   const totalFilteredCount = activeItems.length
 
   const filterTabs = [
-    { id: 'all', label: 'All Due Tasks', count: filteredOverdue.length + filteredDueToday.length },
+    { id: 'all', label: 'All Due', fullLabel: 'All Due Tasks', count: filteredOverdue.length + filteredDueToday.length },
     { id: 'overdue', label: 'Overdue', count: filteredOverdue.length, alertColor: 'text-rose-600' },
-    { id: 'due', label: 'Due Today', count: filteredDueToday.length, alertColor: 'text-amber-600' },
+    { id: 'due', label: 'Today', fullLabel: 'Due Today', count: filteredDueToday.length, alertColor: 'text-amber-600' },
     { id: 'upcoming', label: 'Upcoming', count: filteredUpcoming.length },
     { id: 'unscheduled', label: 'Unscheduled', count: filteredUnscheduled.length },
-    { id: 'reviewed', label: 'Recently Reviewed', count: filteredReviewed.length },
+    { id: 'reviewed', label: 'Reviewed', fullLabel: 'Recently Reviewed', count: filteredReviewed.length },
   ]
 
   return (

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight,
@@ -15,7 +16,7 @@ import { getRevisionSummary } from '@/lib/revisionSummary'
  * Multi-meter diagnostic strip presenting syllabus completion metrics,
  * active recall queue status, and authoritative measured study telemetry.
  */
-export default function SubjectDiagnosticMeters({
+export default memo(function SubjectDiagnosticMeters({
   subject,
   topics = [],
   sessions = [],
@@ -70,18 +71,18 @@ export default function SubjectDiagnosticMeters({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
       {/* 1. Syllabus Completion Meter (7 cols) */}
-      <div className="lg:col-span-7 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 sm:p-5 flex flex-col justify-between shadow-[var(--shadow-xs)]">
+      <div className="lg:col-span-7 rounded-xl border border-[var(--color-teal-border)]/70 bg-gradient-to-b from-[var(--color-teal-tint)]/25 to-[var(--color-surface)] dark:from-teal-950/20 dark:to-[var(--color-surface)] p-4 sm:p-5 flex flex-col justify-between shadow-xs transition-colors hover:border-[var(--color-study-teal)]/60">
         <div>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
                 Syllabus Completion
               </span>
-              <span className="text-xs text-[var(--color-text-muted)]">
+              <span className="text-xs text-[var(--color-text-muted)] font-medium">
                 (<span className="font-mono tabular-nums font-semibold">{completedTopics}</span> / <span className="font-mono tabular-nums font-semibold">{totalTopics}</span> Topics)
               </span>
             </div>
-            <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="text-sm font-semibold text-[var(--color-study-teal)]">
               <span className="font-mono tabular-nums font-bold">{completionPercentage}%</span> Complete
             </span>
           </div>
@@ -90,7 +91,7 @@ export default function SubjectDiagnosticMeters({
             <Progress
               value={completedTopics}
               max={Math.max(totalTopics, 1)}
-              color={subject.color || 'var(--color-brand)'}
+              color={subject?.color || 'var(--color-study-teal)'}
               size="default"
               aria-label={`Syllabus completion: ${completionPercentage}%`}
             />
@@ -98,30 +99,30 @@ export default function SubjectDiagnosticMeters({
         </div>
 
         {/* Legend Badges */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--card-border-subtle)] text-[11px] font-medium">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400" />
-            <span className="font-mono tabular-nums font-bold">{completedTopics}</span> Completed (<span className="font-mono tabular-nums">{completionPercentage}%</span>)
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--color-border-light)] text-[11px] font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-emerald-tint)] text-[var(--color-emerald-dark)] dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-800/40">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)]" />
+            <span className="font-mono tabular-nums font-bold">{completedTopics}</span> Completed · <span className="font-mono tabular-nums">{completionPercentage}%</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-teal-tint)] text-[var(--color-study-teal)] border border-[var(--color-teal-border)]/60">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-study-teal)]" />
             <span className="font-mono tabular-nums font-bold">{inProgressTopics}</span> In Progress
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-            <span className="w-2 h-2 rounded-full bg-slate-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
+            <span className="w-2 h-2 rounded-full bg-[var(--color-text-muted)]" />
             <span className="font-mono tabular-nums font-bold">{notStartedTopics}</span> Not Started
           </span>
         </div>
       </div>
 
       {/* 2. Spaced Revision & Study Horizon Diagnostics (5 cols) */}
-      <div className="lg:col-span-5 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 sm:p-5 flex flex-col justify-between shadow-[var(--shadow-xs)]">
+      <div className="lg:col-span-5 rounded-xl border border-[var(--color-indigo-border)]/70 bg-gradient-to-b from-[var(--color-indigo-tint)]/25 to-[var(--color-surface)] dark:from-indigo-950/20 dark:to-[var(--color-surface)] p-4 sm:p-5 flex flex-col justify-between shadow-xs transition-colors hover:border-[var(--color-academic-indigo)]/60">
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
               Spaced Revision Queue
             </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 text-[11px] font-semibold">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--color-indigo-tint)] text-[var(--color-indigo-dark)] dark:text-indigo-300 border border-[var(--color-indigo-border)] text-[11px] font-bold">
               <Sparkles className="w-3 h-3" />
               <span>SM-2 Memory Sync</span>
             </span>
@@ -145,14 +146,14 @@ export default function SubjectDiagnosticMeters({
                   ? formatDate(nearestRevision.nextRevision, 'MMM d, yyyy')
                   : 'No dates queued'}
               </span>
-              <span className="text-[11px] text-[var(--color-text-muted)] block mt-0.5">
+              <span className="text-[11px] text-[var(--color-text-muted)] block mt-0.5 font-medium">
                 {recallLabel}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border-subtle)] text-xs">
+        <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-light)] text-xs">
           <div className="flex items-center gap-2 text-[var(--color-text-muted)] text-[11px] flex-wrap">
             <span
               className="flex items-center gap-1"
@@ -167,7 +168,7 @@ export default function SubjectDiagnosticMeters({
                 <strong className="font-semibold text-[var(--color-text)] font-mono tabular-nums">{studyTimeString}</strong> logged
               </span>
               {untrackedCount > 0 && (
-                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                <span className="text-[10px] text-[var(--color-focus-amber)] font-medium">
                   ({untrackedCount} untracked)
                 </span>
               )}
@@ -181,7 +182,7 @@ export default function SubjectDiagnosticMeters({
 
           <Link
             to="/app/revision"
-            className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--color-brand)] hover:underline active:scale-95"
+            className="inline-flex items-center gap-1 font-semibold text-xs text-[var(--color-academic-indigo)] hover:underline active:scale-95"
           >
             <span>Revision Center</span>
             <ArrowRight className="w-3 h-3" />
@@ -190,4 +191,4 @@ export default function SubjectDiagnosticMeters({
       </div>
     </div>
   )
-}
+})

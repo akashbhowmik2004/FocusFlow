@@ -1,5 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
 
 // Layouts & Route guards
 import AppLayout from '@/layouts/AppLayout'
@@ -21,6 +21,28 @@ const ProgressPage = lazy(() => import('@/pages/app/ProgressPage'))
 const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
 const FocusModePage = lazy(() => import('@/pages/app/FocusModePage'))
 
+function ThemeRouteSynchronizer() {
+  const location = useLocation()
+
+  useEffect(() => {
+    const isPublic =
+      location.pathname === '/' ||
+      location.pathname === '/login' ||
+      location.pathname === '/signup'
+
+    const root = document.documentElement
+    if (isPublic) {
+      root.classList.remove('dark')
+      root.style.colorScheme = 'light'
+    } else {
+      root.classList.add('dark')
+      root.style.colorScheme = 'dark'
+    }
+  }, [location.pathname])
+
+  return null
+}
+
 function LoadingFallback() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-[var(--color-bg)]">
@@ -34,7 +56,9 @@ function LoadingFallback() {
 
 export default function App() {
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <>
+      <ThemeRouteSynchronizer />
+      <Suspense fallback={<LoadingFallback />}>
       <Routes>
         {/* Public landing page */}
         <Route path="/" element={<Landing />} />
@@ -68,5 +92,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
+    </>
   )
 }

@@ -37,7 +37,32 @@ model User {
   preferredStartTime String  @default("09:00")
   preferredEndTime   String  @default("18:00")
   reminderEnabled    Boolean @default(true)
-  theme              String  @default("light")
+
+  onboardingCompleted   Boolean   @default(false)
+  onboardingCompletedAt DateTime?
+
+  // Academic Profile: Identity
+  institution String?
+  degree      String?
+  department  String?
+
+  // Academic Profile: Position
+  academicYear           Int?
+  currentSemester        Int?
+  academicSession        String?
+  semesterStartDate      DateTime? @db.Date
+  semesterEndDate        DateTime? @db.Date
+  expectedGraduationYear Int?
+
+  // Academic Profile: Goals
+  secondaryGoals       String[]  @default([])
+  customGoal           String?
+  targetCgpa           Float?
+  targetCompletionDate DateTime? @db.Date
+
+  // Study Preferences
+  defaultFocusDuration Int @default(25)
+  defaultBreakDuration Int @default(5)
 
   oauthAccounts OAuthAccount[]
   subjects      Subject[]
@@ -99,6 +124,7 @@ model Topic {
   subject      Subject              @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@index([subjectId])
+  @@index([nextRevision])
 }
 
 model TopicRevision {
@@ -153,6 +179,7 @@ model StudySession {
   topic   Topic?  @relation(fields: [topicId], references: [id], onDelete: SetNull)
 
   @@index([userId, date])
+  @@index([userId, status, date])
   @@index([subjectId])
   @@index([topicId])
 }

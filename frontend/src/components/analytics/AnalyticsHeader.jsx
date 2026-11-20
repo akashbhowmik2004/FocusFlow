@@ -1,8 +1,17 @@
 import { ChevronRight, ChevronLeft, Calendar as CalendarIcon, Download, ShieldCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+const RANGE_OPTIONS = [
+  { id: 'this_week', label: 'This Week' },
+  { id: 'last_week', label: 'Last Week' },
+  { id: 'this_month', label: 'This Month' },
+  { id: 'last_month', label: 'Last Month' },
+  { id: 'custom', label: 'Custom' },
+  { id: 'all', label: 'All Time' },
+]
+
 export default function AnalyticsHeader({
-  timeRange = '7d',
+  timeRange = 'this_week',
   onTimeRangeChange,
   windowLabel = '',
   canNavigatePrev = true,
@@ -10,7 +19,18 @@ export default function AnalyticsHeader({
   onNavigatePrev,
   onNavigateNext,
   onExportAudit,
+  customStart = '',
+  customEnd = '',
+  onCustomDateChange,
 }) {
+  // Normalize legacy range identifiers
+  const activeRange =
+    timeRange === '7d'
+      ? 'this_week'
+      : timeRange === '30d'
+      ? 'this_month'
+      : timeRange
+
   return (
     <div className="flex flex-col gap-4">
       {/* Top Bar: Breadcrumb + Heading & Controls */}
@@ -35,51 +55,75 @@ export default function AnalyticsHeader({
           </p>
         </div>
 
-        {/* Controls & Range Selector */}
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          {/* Preset Range Selector */}
-          <div
-            role="group"
-            aria-label="Date Range Scope"
-            className="flex items-center p-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-xs"
+        {/* Action Export Button */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={onExportAudit}
+            className="flex items-center gap-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text)] font-semibold text-xs px-3 py-1.5 rounded-lg border border-[var(--color-border)] shadow-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <button
-              type="button"
-              onClick={() => onTimeRangeChange('7d')}
-              className={cn(
-                'px-3 py-1.5 rounded-md font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-[0.98]',
-                timeRange === '7d'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-xs'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
-              )}
-            >
-              Week
-            </button>
-            <button
-              type="button"
-              onClick={() => onTimeRangeChange('30d')}
-              className={cn(
-                'px-3 py-1.5 rounded-md font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-[0.98]',
-                timeRange === '30d'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-xs'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
-              )}
-            >
-              Month
-            </button>
-            <button
-              type="button"
-              onClick={() => onTimeRangeChange('all')}
-              className={cn(
-                'px-3 py-1.5 rounded-md font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-[0.98]',
-                timeRange === 'all'
-                  ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-xs'
-                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
-              )}
-            >
-              All Time
-            </button>
-          </div>
+            <Download className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
+            <span>Export Audit</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Filter Toolbar: Range Selector, Date Navigator & Custom Range Inputs */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-2 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xs">
+        {/* Preset Range Selector */}
+        <div
+          role="group"
+          aria-label="Date Range Scope"
+          className="flex flex-wrap items-center p-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-xs"
+        >
+          {RANGE_OPTIONS.map((opt) => {
+            const isSelected = activeRange === opt.id
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => onTimeRangeChange(opt.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-md font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-[0.98]',
+                  isSelected
+                    ? 'bg-[var(--color-surface)] text-[var(--color-brand)] shadow-xs'
+                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
+                )}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Custom Date Pickers */}
+          {activeRange === 'custom' && (
+            <div className="flex items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] px-2.5 py-1 rounded-lg text-xs shadow-xs">
+              <label htmlFor="analytics-custom-start" className="text-[var(--color-text-secondary)] font-medium">
+                From:
+              </label>
+              <input
+                id="analytics-custom-start"
+                type="date"
+                aria-label="Start date"
+                value={customStart || ''}
+                onChange={(e) => onCustomDateChange?.(e.target.value, customEnd)}
+                className="bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] text-[var(--color-text)] rounded px-1.5 py-0.5 text-xs font-mono tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+              />
+              <label htmlFor="analytics-custom-end" className="text-[var(--color-text-secondary)] font-medium ml-1">
+                To:
+              </label>
+              <input
+                id="analytics-custom-end"
+                type="date"
+                aria-label="End date"
+                value={customEnd || ''}
+                onChange={(e) => onCustomDateChange?.(customStart, e.target.value)}
+                className="bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] text-[var(--color-text)] rounded px-1.5 py-0.5 text-xs font-mono tabular-nums focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]"
+              />
+            </div>
+          )}
 
           {/* Active Window Navigator */}
           <div className="flex items-center gap-1 bg-[var(--color-surface)] border border-[var(--color-border)] px-2.5 py-1 rounded-lg text-xs shadow-xs">
@@ -116,16 +160,6 @@ export default function AnalyticsHeader({
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Action Export Button */}
-          <button
-            type="button"
-            onClick={onExportAudit}
-            className="flex items-center gap-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text)] font-semibold text-xs px-3 py-1.5 rounded-lg border border-[var(--color-border)] shadow-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Download className="w-3.5 h-3.5 text-[var(--color-text-secondary)]" />
-            <span>Export Audit</span>
-          </button>
         </div>
       </div>
 

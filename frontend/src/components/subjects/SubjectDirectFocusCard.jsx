@@ -15,7 +15,7 @@ export default function SubjectDirectFocusCard({
   const isActive = Boolean(activeSession?.id)
 
   return (
-    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-[var(--shadow-xs)] flex flex-col gap-3">
+    <div className="rounded-xl border border-emerald-200/60 dark:border-emerald-900/60 bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] p-5 shadow-xs flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
           Direct Deep Work
@@ -35,7 +35,7 @@ export default function SubjectDirectFocusCard({
         <p className="text-xs text-[var(--color-text-muted)] mt-1 leading-relaxed">
           {eligibleTopic
             ? `Distraction-free block configured for topic: "${eligibleTopic.name}".`
-            : `Initiate a dedicated focus block mapped directly against ${subject?.name || 'this course'}.`}
+            : `Initiate a dedicated focus block mapped directly against ${(subject?.name || 'this course').replace(/\.+$/, '')}.`}
         </p>
       </div>
 

@@ -1,13 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { addDays, format } from 'date-fns'
 import ScheduleRevisionDialog from './ScheduleRevisionDialog'
 
 describe('ScheduleRevisionDialog', () => {
+  const tomorrowStr = format(addDays(new Date(), 1), 'yyyy-MM-dd')
   const mockTopic = {
     id: 'top-1',
     name: 'Binary Search Trees',
     status: 'completed',
-    nextRevision: '2026-11-05',
+    nextRevision: tomorrowStr,
     schedulingType: 'algorithm',
   }
 

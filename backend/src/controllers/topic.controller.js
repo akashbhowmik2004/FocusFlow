@@ -3,9 +3,24 @@ import { calculateNextRevision } from "../services/spacedRepetition.service.js";
 
 export const getAllTopics = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user.id;
+    const { dueOnly, subjectId } = req.query;
+
+    const where = {
+      subject: { userId },
+    };
+
+    if (subjectId) {
+      where.subjectId = subjectId;
+    }
+
+    if (dueOnly === "true") {
+      where.nextRevision = { lte: new Date() };
+    }
+
     const topics = await prisma.topic.findMany({
-      where: userId ? { subject: { userId } } : {},
+      where,
+      orderBy: dueOnly === "true" ? { nextRevision: "asc" } : undefined,
     });
     res.status(200).json(topics);
   } catch (error) {
@@ -16,11 +31,11 @@ export const getAllTopics = async (req, res) => {
 export const getTopicById = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user.id;
     const topic = await prisma.topic.findFirst({
       where: {
         id,
-        ...(userId ? { subject: { userId } } : {}),
+        subject: { userId },
       },
       include: {
         revisions: {

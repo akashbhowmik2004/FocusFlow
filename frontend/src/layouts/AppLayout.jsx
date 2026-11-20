@@ -12,14 +12,12 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   PanelLeft,
   PanelLeftClose,
   Play,
   RotateCcw,
   Search,
   Settings,
-  Sun,
   User,
   X,
   Zap,
@@ -28,6 +26,7 @@ import { useApp } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
 import { cn, getInitials } from '@/lib/utils'
 import { getRevisionSummary } from '@/lib/revisionSummary'
+import { getActiveStudyStreak } from '@/lib/analytics'
 import { toast } from 'sonner'
 
 const primaryNavigation = [
@@ -63,8 +62,8 @@ function Navigation({ items, pathname, collapsed, onNavigate }) {
               'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
               collapsed && 'justify-center px-0',
               active
-                ? 'bg-[var(--color-ink-slate)] text-white shadow-sm font-medium dark:bg-slate-800 dark:text-white'
-                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-white',
+                ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
             )}
           >
             <Icon
@@ -81,7 +80,7 @@ function Navigation({ items, pathname, collapsed, onNavigate }) {
                 <span
                   className={cn(
                     'mt-0.5 block truncate text-[10px]',
-                    active ? 'text-slate-300 dark:text-slate-400' : 'text-[var(--color-text-muted)]',
+                    active ? 'text-emerald-100 dark:text-indigo-100 font-medium' : 'text-[var(--color-text-muted)]',
                   )}
                 >
                   {item.description}
@@ -97,7 +96,7 @@ function Navigation({ items, pathname, collapsed, onNavigate }) {
 
 export default function AppLayout() {
   const { state, dispatch } = useApp()
-  const { logout, updateTheme, isAuthenticated } = useAuth()
+  const { logout, isAuthenticated } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const shouldReduceMotion = useReducedMotion()
@@ -132,6 +131,29 @@ export default function AppLayout() {
 
   const revisionSummary = useMemo(() => getRevisionSummary(state.subjects), [state.subjects])
   const dueCount = revisionSummary.overdueCount + revisionSummary.dueTodayCount
+
+  const activeStreak = useMemo(() => {
+    return getActiveStudyStreak(state.sessions) || 0
+  }, [state.sessions])
+
+  const semesterBadgeText = useMemo(() => {
+    const sem = state.user?.currentSemester
+    if (!sem) return null
+    const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
+    const semStr = `Semester ${roman[sem - 1] || sem}`
+
+    if (state.user?.semesterStartDate) {
+      const start = new Date(state.user.semesterStartDate)
+      if (!isNaN(start.getTime())) {
+        const diffMs = Date.now() - start.getTime()
+        if (diffMs >= 0) {
+          const week = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1
+          return `${semStr} · Week ${week}`
+        }
+      }
+    }
+    return semStr
+  }, [state.user?.currentSemester, state.user?.semesterStartDate])
 
   const pageTitle = location.pathname.includes('/day')
     ? 'My Day'
@@ -170,18 +192,6 @@ export default function AppLayout() {
     document.addEventListener('keydown', handleShortcut)
     return () => document.removeEventListener('keydown', handleShortcut)
   }, [])
-
-  const toggleTheme = async () => {
-    const nextTheme = state.theme === 'dark' ? 'light' : 'dark'
-    dispatch({ type: 'SET_THEME', payload: nextTheme })
-    if (isAuthenticated && updateTheme) {
-      try {
-        await updateTheme(nextTheme)
-      } catch {
-        toast.error('Theme preference could not be saved')
-      }
-    }
-  }
 
   const handleSignOut = async () => {
     await logout()
@@ -315,12 +325,15 @@ export default function AppLayout() {
           to="/app/settings"
           onClick={() => mobile && setMobileMenuOpen(false)}
           className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
+            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
             !mobile && !state.sidebarOpen && 'justify-center px-0',
+            location.pathname.startsWith('/app/settings')
+              ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
+              : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]'
           )}
           title={!mobile && !state.sidebarOpen ? 'Settings' : undefined}
         >
-          <Settings className="h-[18px] w-[18px]" />
+          <Settings className={cn('h-[18px] w-[18px] shrink-0', location.pathname.startsWith('/app/settings') ? 'text-white' : 'text-[var(--color-text-muted)]')} />
           {(state.sidebarOpen || mobile) && <span>Settings</span>}
         </Link>
         {(state.sidebarOpen || mobile) && (
@@ -369,13 +382,7 @@ export default function AppLayout() {
           </span>
           <span className="text-sm font-semibold">FocusFlow</span>
         </Link>
-        <button
-          onClick={toggleTheme}
-          className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]"
-          aria-label="Toggle theme"
-        >
-          {state.theme === 'dark' ? <Sun className="h-5 w-5 text-amber-400" /> : <Moon className="h-5 w-5" />}
-        </button>
+        <div className="w-9" />
       </div>
 
       {/* Mobile navigation drawer */}
@@ -440,13 +447,31 @@ export default function AppLayout() {
 
               {/* Academic Term & Streak Indicators */}
               <div className="hidden lg:flex items-center gap-2 ml-4 pl-4 border-l border-[var(--color-border-light)]">
-                <span className="inline-flex items-center rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-0.5 text-xs font-medium text-[var(--color-text-secondary)] font-tabular">
-                  Semester II · Week 8
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 px-2.5 py-0.5 text-xs font-medium font-tabular">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-streak-amber)]" aria-hidden="true" />
-                  14d Streak
-                </span>
+                {semesterBadgeText ? (
+                  <span className="inline-flex items-center rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-0.5 text-xs font-medium text-[var(--color-text-secondary)] font-tabular">
+                    {semesterBadgeText}
+                  </span>
+                ) : (
+                  <Link
+                    to="/app/settings"
+                    className="inline-flex items-center rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-0.5 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-scholar-emerald)] hover:border-[var(--color-scholar-emerald)] transition-colors font-tabular"
+                    title="Configure current semester and dates in Settings"
+                  >
+                    Set up semester
+                  </Link>
+                )}
+
+                {activeStreak > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 px-2.5 py-0.5 text-xs font-medium font-tabular">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-streak-amber)]" aria-hidden="true" />
+                    {activeStreak}d Streak
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border border-[var(--color-border)] px-2.5 py-0.5 text-xs font-medium font-tabular">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true" />
+                    0d Streak
+                  </span>
+                )}
               </div>
             </div>
 
@@ -462,19 +487,6 @@ export default function AppLayout() {
                 <kbd className="ml-auto flex items-center gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--color-text-muted)]">
                   <Command className="h-2.5 w-2.5" />K
                 </kbd>
-              </button>
-
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
-                title="Toggle theme"
-              >
-                {state.theme === 'dark' ? (
-                  <Sun className="h-4 w-4 text-amber-400" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
               </button>
 
               {/* Notifications */}

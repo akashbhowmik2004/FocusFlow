@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { authService } from '@/services/authService'
 import { userService } from '@/services/userService'
@@ -36,7 +37,7 @@ export function AuthProvider({ children }) {
         if (isMounted && response?.user) {
           setUserState(response.user)
         }
-      } catch (err) {
+      } catch {
         // If unauthenticated (401) or session expired, user remains null
         if (isMounted) {
           setUserState(null)
@@ -102,6 +103,22 @@ export function AuthProvider({ children }) {
     return response
   }, [])
 
+  const completeOnboarding = useCallback(async (profileData) => {
+    const response = await userService.completeOnboarding(profileData)
+    if (response?.user) {
+      setUserState(response.user)
+    }
+    return response
+  }, [])
+
+  const saveOnboardingProgress = useCallback(async (profileData) => {
+    const response = await userService.saveOnboardingProgress(profileData)
+    if (response?.user) {
+      setUserState(response.user)
+    }
+    return response
+  }, [])
+
   const refreshUser = useCallback(async () => {
     const response = await userService.getUserDetails()
     const userData = response?.user || response
@@ -111,16 +128,23 @@ export function AuthProvider({ children }) {
     return userData
   }, [])
 
-  const updateTheme = useCallback(async (newTheme) => {
-    const response = await userService.updateTheme(newTheme)
-    if (response?.user) {
-      setUserState(response.user)
-    }
-    return response
-  }, [])
-
   const loginWithGoogle = useCallback(() => {
     window.location.href = authService.getGoogleAuthUrl()
+  }, [])
+
+  const deleteAccount = useCallback(async (confirmation = 'DELETE') => {
+    try {
+      await userService.deleteAccount(confirmation)
+    } finally {
+      setUserState(null)
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.removeItem('focusflow_auth_user')
+        }
+      } catch {
+        // ignore
+      }
+    }
   }, [])
 
   const value = {
@@ -130,9 +154,11 @@ export function AuthProvider({ children }) {
     login,
     signup,
     logout,
+    deleteAccount,
     setUser,
     updateUser,
-    updateTheme,
+    completeOnboarding,
+    saveOnboardingProgress,
     refreshUser,
     loginWithGoogle,
   }
@@ -151,10 +177,12 @@ export function useAuth() {
       login: async () => ({ user: null }),
       signup: async () => ({ user: null }),
       logout: async () => {},
+      deleteAccount: async () => {},
       loginWithGoogle: () => {},
       setUser: () => {},
       updateUser: async () => ({ user: null }),
-      updateTheme: async () => ({ theme: 'light' }),
+      completeOnboarding: async () => ({ user: null }),
+      saveOnboardingProgress: async () => ({ user: null }),
       refreshUser: async () => null,
     }
   }

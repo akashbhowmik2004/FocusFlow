@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
   BarChart,
   Bar,
@@ -10,7 +11,7 @@ import {
 } from 'recharts'
 import { Flame } from 'lucide-react'
 
-export default function WeeklyCadenceChart({
+export default memo(function WeeklyCadenceChart({
   weeklyStudyData = [],
   dailyTargetHours = 5,
   streakDays = null,
@@ -29,7 +30,7 @@ export default function WeeklyCadenceChart({
   const dailyAverageHours = ((weeklyActualMinutes / 60) / divisor).toFixed(1)
 
   return (
-    <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/25 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         {/* Header Row */}
         <div className="flex items-center justify-between mb-2">
@@ -115,7 +116,9 @@ export default function WeeklyCadenceChart({
               />
               <Bar
                 dataKey="planned"
-                fill="#cbd5e1"
+                fill="var(--color-indigo-tint)"
+                stroke="var(--color-academic-indigo)"
+                strokeWidth={1.5}
                 name="Planned Target"
                 radius={[3, 3, 0, 0]}
               />
@@ -168,4 +171,4 @@ export default function WeeklyCadenceChart({
       )}
     </section>
   )
-}
+})

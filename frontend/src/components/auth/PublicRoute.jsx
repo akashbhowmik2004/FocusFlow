@@ -18,13 +18,16 @@ function LoadingFallback() {
  * rather than asking them to login/signup again.
  */
 export default function PublicRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
 
   if (isLoading) {
     return <LoadingFallback />
   }
 
   if (isAuthenticated) {
+    if (!user?.onboardingCompleted) {
+      return <Navigate to="/onboarding" replace />
+    }
     return <Navigate to="/app/dashboard" replace />
   }
 

@@ -17,7 +17,7 @@ export default function DashboardGreeting({
   const nearestExam = upcomingExams[0]
 
   return (
-    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 pb-1">
+    <div className="p-5 sm:p-6 rounded-2xl border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] via-[var(--color-surface-secondary)]/30 to-[var(--color-surface)] shadow-xs flex flex-col lg:flex-row lg:items-end justify-between gap-4">
       <div className="space-y-1.5">
         {/* Milestone / Academic Context Banner */}
         <div className="flex items-center gap-2 flex-wrap">

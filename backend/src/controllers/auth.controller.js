@@ -12,7 +12,23 @@ const SAFE_USER_SELECT = {
   preferredStartTime: true,
   preferredEndTime: true,
   reminderEnabled: true,
-  theme: true,
+  onboardingCompleted: true,
+  onboardingCompletedAt: true,
+  institution: true,
+  degree: true,
+  department: true,
+  academicYear: true,
+  currentSemester: true,
+  academicSession: true,
+  semesterStartDate: true,
+  semesterEndDate: true,
+  expectedGraduationYear: true,
+  secondaryGoals: true,
+  customGoal: true,
+  targetCgpa: true,
+  targetCompletionDate: true,
+  defaultFocusDuration: true,
+  defaultBreakDuration: true,
   createdAt: true,
 };
 
@@ -68,7 +84,7 @@ export async function login(req, res) {
     const { email, password } = req.body;
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
 
@@ -92,6 +108,25 @@ export async function login(req, res) {
       });
     }
 
+    // Backward compatibility: If an existing user has subjects/sessions or registered before academic onboarding
+    // was introduced (prior to 2026-11-06), ensure their onboardingCompleted status is marked so existing students
+    // are never trapped in onboarding. Newly registered students without subjects/sessions remain in-progress.
+    if (!user.onboardingCompleted) {
+      const subjectCount = await prisma.subject.count({ where: { userId: user.id } });
+      const sessionCount = await prisma.studySession.count({ where: { userId: user.id } });
+      const createdBeforeCutoff = new Date(user.createdAt) < new Date("2026-11-06T04:24:39.000Z");
+
+      if (subjectCount > 0 || sessionCount > 0 || createdBeforeCutoff) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            onboardingCompleted: true,
+            onboardingCompletedAt: user.updatedAt || user.createdAt,
+          },
+        });
+      }
+    }
+
     setAuthCookie(res, user.id);
 
     const safeUser = {
@@ -104,7 +139,23 @@ export async function login(req, res) {
       preferredStartTime: user.preferredStartTime,
       preferredEndTime: user.preferredEndTime,
       reminderEnabled: user.reminderEnabled,
-      theme: user.theme,
+      onboardingCompleted: user.onboardingCompleted,
+      onboardingCompletedAt: user.onboardingCompletedAt,
+      institution: user.institution,
+      degree: user.degree,
+      department: user.department,
+      academicYear: user.academicYear,
+      currentSemester: user.currentSemester,
+      academicSession: user.academicSession,
+      semesterStartDate: user.semesterStartDate,
+      semesterEndDate: user.semesterEndDate,
+      expectedGraduationYear: user.expectedGraduationYear,
+      secondaryGoals: user.secondaryGoals,
+      customGoal: user.customGoal,
+      targetCgpa: user.targetCgpa,
+      targetCompletionDate: user.targetCompletionDate,
+      defaultFocusDuration: user.defaultFocusDuration,
+      defaultBreakDuration: user.defaultBreakDuration,
       createdAt: user.createdAt,
     };
 
@@ -304,7 +355,11 @@ export async function googleCallback(req, res) {
 
     setAuthCookie(res, user.id);
 
-    return res.redirect(`${frontendUrl}/app/dashboard`);
+    const destination = user.onboardingCompleted
+      ? `${frontendUrl}/app/dashboard`
+      : `${frontendUrl}/onboarding`;
+
+    return res.redirect(destination);
   } catch (error) {
     console.error("Google callback processing error:", error);
     return res.redirect(
@@ -457,7 +512,23 @@ export async function googleToken(req, res) {
       preferredStartTime: user.preferredStartTime,
       preferredEndTime: user.preferredEndTime,
       reminderEnabled: user.reminderEnabled,
-      theme: user.theme,
+      onboardingCompleted: user.onboardingCompleted,
+      onboardingCompletedAt: user.onboardingCompletedAt,
+      institution: user.institution,
+      degree: user.degree,
+      department: user.department,
+      academicYear: user.academicYear,
+      currentSemester: user.currentSemester,
+      academicSession: user.academicSession,
+      semesterStartDate: user.semesterStartDate,
+      semesterEndDate: user.semesterEndDate,
+      expectedGraduationYear: user.expectedGraduationYear,
+      secondaryGoals: user.secondaryGoals,
+      customGoal: user.customGoal,
+      targetCgpa: user.targetCgpa,
+      targetCompletionDate: user.targetCompletionDate,
+      defaultFocusDuration: user.defaultFocusDuration,
+      defaultBreakDuration: user.defaultBreakDuration,
       createdAt: user.createdAt,
     };
 

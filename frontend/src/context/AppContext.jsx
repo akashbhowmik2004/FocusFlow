@@ -29,14 +29,6 @@ const normalizeSession = (session) => {
   };
 };
 
-const getInitialTheme = () => {
-  if (typeof window !== "undefined" && window.localStorage) {
-    const saved = localStorage.getItem("focusflow_theme");
-    if (saved === "dark" || saved === "light") return saved;
-  }
-  return "light";
-};
-
 const isTestEnvironment = import.meta.env.MODE === "test";
 
 const initialState = {
@@ -51,7 +43,7 @@ const initialState = {
   sessionsError: null,
   sessionsLoading: true,
   user: null,
-  theme: getInitialTheme(),
+  theme: "dark",
   sidebarOpen: true,
   searchQuery: "",
   notifications: [],
@@ -63,8 +55,6 @@ const initialState = {
 
 function appReducer(state, action) {
   switch (action.type) {
-    case "SET_THEME":
-      return { ...state, theme: action.payload };
     case "TOGGLE_SIDEBAR":
       return { ...state, sidebarOpen: !state.sidebarOpen };
     case "SET_SIDEBAR":
@@ -499,30 +489,6 @@ export function AppProvider({ children }) {
       isMounted = false;
     };
   }, [auth?.user?.id]);
-
-  // Sync user theme preference when authenticated
-  useEffect(() => {
-    if (auth?.user?.theme && (auth.user.theme === "light" || auth.user.theme === "dark")) {
-      dispatch({ type: "SET_THEME", payload: auth.user.theme });
-    }
-  }, [auth?.user?.theme]);
-
-  // Theme management & persistence
-  useEffect(() => {
-    const root = document.documentElement;
-    if (state.theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.setItem("focusflow_theme", state.theme);
-      }
-    } catch {
-      // ignore
-    }
-  }, [state.theme]);
 
   return (
     <AppContext.Provider

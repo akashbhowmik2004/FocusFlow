@@ -23,7 +23,8 @@ export const addSubject = async (req, res) => {
       subject,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Add subject error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -52,7 +53,8 @@ export const getSubjects = async (req, res) => {
       subjects,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Get subjects error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -83,7 +85,8 @@ export const getSubjectById = async (req, res) => {
       subject,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Get subject by id error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -120,7 +123,8 @@ export const updateSubject = async (req, res) => {
       subject,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Update subject error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -144,6 +148,7 @@ export const deleteSubject = async (req, res) => {
       id,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Delete subject error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -49,6 +49,7 @@ export const authRateLimiter = rateLimit({
   max: authMax,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "GET" && (req.path === "/me" || req.originalUrl?.startsWith("/api/auth/me")),
   message: "Too many authentication attempts. Please try again later.",
   handler: customHandler("Too many authentication attempts. Please try again later."),
 });

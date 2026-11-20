@@ -14,7 +14,7 @@ export default function TodayTimeline({
   onAddSession,
 }) {
   return (
-    <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/25 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         {/* Header Row */}
         <div className="flex items-center justify-between mb-4">

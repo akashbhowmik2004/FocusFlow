@@ -173,8 +173,7 @@ export default function MyDay() {
           value={formatDuration(totalPlannedMinutes)}
           unit="planned"
           icon={Clock}
-          iconColor="var(--color-brand)"
-          accentColor="var(--color-brand)"
+          colorVariant="indigo"
           subtext={`${daySessions.length} session${daySessions.length !== 1 ? 's' : ''} planned`}
         />
 
@@ -183,8 +182,7 @@ export default function MyDay() {
           value={formatDuration(actualStudyMinutes)}
           unit="actual"
           icon={CheckCircle2}
-          iconColor="#10b981"
-          accentColor="#10b981"
+          colorVariant="emerald"
           subtext={
             dayTotals.untrackedSessions > 0
               ? `${dayTotals.completedSessions} completed (${dayTotals.untrackedSessions} untracked)`
@@ -196,13 +194,13 @@ export default function MyDay() {
           label="Day Progress"
           value={`${dailyTargetMinutes > 0 ? Math.min(100, Math.round((actualStudyMinutes / dailyTargetMinutes) * 100)) : 0}%`}
           unit="of goal"
+          colorVariant="teal"
           progress={{
             value: actualStudyMinutes,
             max: Math.max(dailyTargetMinutes, 1),
             label: `Target: ${state.user?.dailyStudyHours || 5}h study goal (${formatDuration(actualStudyMinutes)} actual)`,
-            color: 'var(--color-brand)',
+            color: 'var(--color-study-teal)',
           }}
-          accentColor="var(--color-brand)"
         />
       </div>
 
@@ -211,17 +209,24 @@ export default function MyDay() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-emerald-900 dark:text-emerald-200 flex items-center justify-between shadow-xs"
+          className="p-4 sm:p-4.5 rounded-xl bg-gradient-to-r from-[var(--color-forest-deep)] to-[var(--color-scholar-emerald)] text-white border border-emerald-600/40 flex items-center justify-between shadow-sm"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
-              <Trophy className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-white/15 text-white flex items-center justify-center font-bold shadow-xs shrink-0 ring-1 ring-white/20">
+              <Trophy className="w-5 h-5 text-emerald-200 stroke-[2.2]" />
             </div>
             <div>
-              <p className="text-sm font-bold tracking-tight">Incredible job! All sessions completed for today 🎯</p>
-              <p className="text-xs text-emerald-700 dark:text-emerald-400">You’ve hit 100% of your targeted learning time for this date.</p>
+              <p className="text-sm font-bold tracking-tight text-white">
+                Incredible job! All sessions completed for today
+              </p>
+              <p className="text-xs text-emerald-100/90 font-medium">
+                You’ve hit 100% of your targeted learning time for this date.
+              </p>
             </div>
           </div>
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold text-white ring-1 ring-white/20 font-mono tabular-nums">
+            100% Achieved
+          </span>
         </motion.div>
       )}
 

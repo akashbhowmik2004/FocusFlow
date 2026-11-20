@@ -31,7 +31,7 @@ export default function RecommendedNextFocus({
     const isPaused = activeSession.status === 'paused'
 
     return (
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/30 to-[var(--color-surface)] dark:from-emerald-950/25 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Top Badging Row */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -103,7 +103,7 @@ export default function RecommendedNextFocus({
     const durationMinutes = getPlannedDurationMinutes(nextSession)
 
     return (
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Top Badging Row */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -174,7 +174,7 @@ export default function RecommendedNextFocus({
   // Case 3: Overdue or Due-Today Revision Item (No upcoming sessions)
   if (overdueRevision) {
     return (
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Top Badging Row */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -246,7 +246,7 @@ export default function RecommendedNextFocus({
     const remainingTargetMinutes = Math.max(0, dailyTargetMinutes - actualMinutes)
 
     return (
-      <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/20 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-2 mb-4">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-scholar-emerald)] border border-emerald-200 dark:border-emerald-800/60">
@@ -296,7 +296,7 @@ export default function RecommendedNextFocus({
 
   // Case 5: Empty Schedule Today
   return (
-    <section className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/35 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center gap-2 mb-4">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">

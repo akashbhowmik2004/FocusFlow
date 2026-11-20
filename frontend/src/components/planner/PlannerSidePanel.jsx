@@ -340,8 +340,8 @@ export default function PlannerSidePanel({
       <Card variant="panel" className="p-4 sm:p-5">
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--card-border-subtle)]">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] flex items-center justify-center">
-              <Timer className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+            <div className="w-7 h-7 rounded-lg bg-[var(--color-amber-tint)] border border-[var(--color-amber-border)]/70 flex items-center justify-center">
+              <Timer className="w-3.5 h-3.5 text-[var(--color-focus-amber)]" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-text)] tracking-tight">
               Exam Horizon
@@ -353,7 +353,7 @@ export default function PlannerSidePanel({
         </div>
 
         {upcomingExams.length === 0 ? (
-          <div className="py-4 text-center text-xs text-[var(--color-text-muted)]">
+          <div className="py-4 text-center text-xs text-[var(--color-text-muted)] font-medium">
             No upcoming examination dates scheduled across your enrolled subjects.
           </div>
         ) : (
@@ -361,7 +361,7 @@ export default function PlannerSidePanel({
             {upcomingExams.map(({ subject, countdown, syllabusPercent }) => (
               <div
                 key={subject.id}
-                className="p-3 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] space-y-2"
+                className="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] space-y-2 shadow-2xs hover:border-[var(--color-amber-border)]/60 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span

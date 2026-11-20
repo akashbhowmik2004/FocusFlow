@@ -45,7 +45,7 @@ export default function AddTopicDialog({
       open={open}
       onClose={handleClose}
       title="Add Syllabus Topic"
-      description={`Add a chapter or module to ${subjectName || 'this course'}.`}
+      description={`Add a chapter or module to ${(subjectName || 'this course').replace(/\.+$/, '')}.`}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2" noValidate>
         <div>

@@ -1,0 +1,17 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "academicSession" TEXT,
+ADD COLUMN     "academicYear" INTEGER,
+ADD COLUMN     "currentSemester" INTEGER,
+ADD COLUMN     "customGoal" TEXT,
+ADD COLUMN     "defaultBreakDuration" INTEGER NOT NULL DEFAULT 5,
+ADD COLUMN     "defaultFocusDuration" INTEGER NOT NULL DEFAULT 25,
+ADD COLUMN     "degree" TEXT,
+ADD COLUMN     "department" TEXT,
+ADD COLUMN     "expectedGraduationYear" INTEGER,
+ADD COLUMN     "institution" TEXT,
+ADD COLUMN     "onboardingCompleted" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "secondaryGoals" TEXT[] DEFAULT ARRAY[]::TEXT[],
+ADD COLUMN     "semesterEndDate" DATE,
+ADD COLUMN     "semesterStartDate" DATE,
+ADD COLUMN     "targetCgpa" DOUBLE PRECISION,
+ADD COLUMN     "targetCompletionDate" DATE;

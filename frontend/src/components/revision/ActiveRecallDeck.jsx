@@ -178,6 +178,34 @@ export default function ActiveRecallDeck({
           {RECALL_RATINGS.map((rating) => {
             const isSelected = selectedRating === rating.id
             const Icon = rating.icon
+            const ratingThemes = {
+              again: {
+                selected: 'border-[var(--color-soft-coral)] bg-[var(--color-soft-coral)] text-white shadow-xs',
+                unselected: 'border-[var(--color-coral-border)]/60 bg-[var(--color-surface)] text-[var(--color-text)] hover:border-[var(--color-soft-coral)]/40 hover:bg-[var(--color-coral-tint)]/30',
+                iconSelected: 'text-white',
+                iconUnselected: 'text-[var(--color-soft-coral)]',
+              },
+              hard: {
+                selected: 'border-[var(--color-focus-amber)] bg-[var(--color-focus-amber)] text-white shadow-xs',
+                unselected: 'border-[var(--color-amber-border)]/60 bg-[var(--color-surface)] text-[var(--color-text)] hover:border-[var(--color-focus-amber)]/40 hover:bg-[var(--color-amber-tint)]/30',
+                iconSelected: 'text-white',
+                iconUnselected: 'text-[var(--color-focus-amber)]',
+              },
+              good: {
+                selected: 'border-[var(--color-study-teal)] bg-[var(--color-study-teal)] text-white shadow-xs',
+                unselected: 'border-[var(--color-teal-border)]/60 bg-[var(--color-surface)] text-[var(--color-text)] hover:border-[var(--color-study-teal)]/40 hover:bg-[var(--color-teal-tint)]/30',
+                iconSelected: 'text-white',
+                iconUnselected: 'text-[var(--color-study-teal)]',
+              },
+              easy: {
+                selected: 'border-[var(--color-scholar-emerald)] bg-[var(--color-scholar-emerald)] text-white shadow-xs',
+                unselected: 'border-emerald-300/40 bg-[var(--color-surface)] text-[var(--color-text)] hover:border-[var(--color-scholar-emerald)]/40 hover:bg-[var(--color-emerald-tint)]/30',
+                iconSelected: 'text-white',
+                iconUnselected: 'text-[var(--color-scholar-emerald)]',
+              },
+            }
+            const theme = ratingThemes[rating.id] || ratingThemes.good
+
             return (
               <button
                 key={rating.id}
@@ -185,18 +213,16 @@ export default function ActiveRecallDeck({
                 onClick={() => setSelectedRating(rating.id)}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-lg border transition-colors cursor-pointer select-none text-center',
-                  'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-95',
-                  isSelected
-                    ? 'border-[var(--color-brand)] bg-[var(--color-brand)] text-white shadow-xs'
-                    : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]'
+                  'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)] active:scale-95',
+                  isSelected ? theme.selected : theme.unselected
                 )}
                 aria-pressed={isSelected}
               >
-                <Icon className={cn('w-3.5 h-3.5 mb-1', isSelected ? 'text-white' : 'text-[var(--color-text-muted)]')} />
+                <Icon className={cn('w-3.5 h-3.5 mb-1', isSelected ? theme.iconSelected : theme.iconUnselected)} />
                 <span className="text-xs font-bold leading-tight">{rating.label}</span>
                 <span
                   className={cn(
-                    'text-[10px] mt-0.5 leading-tight',
+                    'text-[10px] mt-0.5 leading-tight font-medium',
                     isSelected ? 'text-white/80' : 'text-[var(--color-text-muted)]'
                   )}
                 >

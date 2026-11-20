@@ -85,10 +85,10 @@ export default function PlannerMonthView({
               aria-label={`${day.toLocaleDateString()}, ${daySessions.length} sessions scheduled`}
               className={cn(
                 'min-h-[80px] sm:min-h-[105px] p-1.5 sm:p-2 rounded-xl border text-left transition-colors cursor-pointer flex flex-col justify-between select-none',
-                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)]',
                 isSelected
-                  ? 'border-[var(--color-brand)] ring-2 ring-[var(--color-brand)]/20 bg-[var(--color-surface)] shadow-xs'
-                  : 'border-[var(--color-border-light)] hover:border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]',
+                  ? 'border-[var(--color-scholar-emerald)] ring-2 ring-[var(--color-scholar-emerald)]/20 bg-[var(--color-surface)] shadow-xs'
+                  : 'border-[var(--color-border)]/60 hover:border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)]',
                 !isCurrentMonth && 'opacity-40 bg-[var(--color-bg-subtle)]/50'
               )}
             >
@@ -98,7 +98,7 @@ export default function PlannerMonthView({
                   className={cn(
                     'w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold',
                     isDayToday
-                      ? 'bg-[var(--color-brand-primary)] text-white font-bold shadow-2xs'
+                      ? 'bg-[var(--color-scholar-emerald)] text-white font-bold shadow-2xs'
                       : 'text-[var(--color-text)]'
                   )}
                 >

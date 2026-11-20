@@ -18,7 +18,7 @@ function DisciplineCard({ subject, revisionSummary }) {
     (revisionSummary?.dueToday?.filter((t) => t.subjectId === subject.id).length || 0)
 
   return (
-    <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] p-4 sm:p-5 flex flex-col justify-between hover:border-[var(--color-border-hover)] hover:shadow-xs transition-colors transition-shadow duration-200 motion-reduce:transition-none">
+    <div className="bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-surface-secondary)]/30 rounded-xl border border-[var(--color-border)] p-4 sm:p-5 flex flex-col justify-between hover:border-[var(--color-border-hover)] hover:shadow-xs transition-colors transition-shadow duration-200 motion-reduce:transition-none">
       <div>
         {/* Top Header: Course Code & Exam Badge */}
         <div className="flex items-center justify-between gap-2 mb-3">

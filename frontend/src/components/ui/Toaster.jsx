@@ -15,16 +15,17 @@ import { useApp } from '@/context/AppContext'
  * with dedicated semantic accents for light and dark themes.
  */
 export function Toaster({ theme: themeProp, ...props }) {
-  let appTheme = 'light'
+  let appTheme
   try {
     const { state } = useApp()
-    if (state?.theme === 'dark') {
-      appTheme = 'dark'
+    if (state?.theme) {
+      appTheme = state.theme
     }
   } catch {
     // Graceful fallback if rendered outside AppProvider
   }
-  const theme = themeProp || appTheme
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+  const theme = themeProp || appTheme || (isDark ? 'dark' : 'light')
 
   return (
     <SonnerToaster
