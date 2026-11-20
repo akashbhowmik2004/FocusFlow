@@ -5,13 +5,13 @@ A comprehensive 7-phase redesign executing from foundational design tokens and d
 
 ## Phases
 
-- [ ] **Phase 1: Design Tokens, Dual-Theme Architecture & UI Primitives** - Unified CSS token system, persistent theme state in AppContext, and redesigned core UI primitives.
-- [ ] **Phase 2: App Shell & Navigation** - Sleek collapsible academic navigation, header with theme switch and notifications, and mobile navigation drawer.
-- [ ] **Phase 3: Executive Dashboard & My Day Workspaces** - High-utility daily planner and overview without card nesting.
-- [ ] **Phase 4: Subject Catalog, Syllabus Breakdown & Spaced Repetition** - Academic syllabus hierarchy, diagnostic meters, topic inspection drawers, and active recall queue.
-- [ ] **Phase 5: Planner Calendar & Analytics Workspaces** - Multi-view schedule grid and dual-theme accessible charts.
-- [ ] **Phase 6: Focus Timer, Settings & Public/Auth Onboarding** - Fullscreen focus dial, comprehensive settings workstation, and polished landing/auth screens.
-- [ ] **Phase 7: End-to-End Verification & Quality Audit** - Automated test runs, responsive audit across breakpoints, and contrast verification.
+- [x] **Phase 1: Design Tokens, Dual-Theme Architecture & UI Primitives** - Unified CSS token system, persistent theme state in AppContext, and redesigned core UI primitives.
+- [x] **Phase 2: App Shell & Navigation** - Sleek collapsible academic navigation, header with theme switch and notifications, and mobile navigation drawer.
+- [x] **Phase 3: Executive Dashboard & My Day Workspaces** - High-utility daily planner and overview without card nesting.
+- [x] **Phase 4: Subject Catalog, Syllabus Breakdown & Spaced Repetition** - Academic syllabus hierarchy, diagnostic meters, topic inspection drawers, and active recall queue.
+- [x] **Phase 5: Planner Calendar & Analytics Workspaces** - Multi-view schedule grid and dual-theme accessible charts.
+- [x] **Phase 6: Focus Timer, Settings & Public/Auth Onboarding** - Fullscreen focus dial, comprehensive settings workstation, and polished landing/auth screens.
+- [x] **Phase 7: End-to-End Verification & Quality Audit** - Automated test runs, responsive audit across breakpoints, and contrast verification.
 
 ## Phase Details
 
