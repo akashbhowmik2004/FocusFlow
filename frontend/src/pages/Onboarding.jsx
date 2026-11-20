@@ -20,6 +20,7 @@ import {
   User,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 import { useApp, useSubjects } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
 import { subjectColors, generateId } from '@/lib/utils'
@@ -353,19 +354,7 @@ export default function Onboarding() {
       {/* ── Top Header Navigation ───────────────────────────── */}
       <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)]">
         <div className="h-16 max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white shadow-xs">
-              <GraduationCap className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <span className="font-bold text-base tracking-tight text-[var(--color-text)]">
-                FocusFlow
-              </span>
-              <span className="ml-2 text-xs font-semibold text-[var(--color-brand)]">
-                Academic Onboarding
-              </span>
-            </div>
-          </div>
+          <FocusFlowLogo size="md" to="/onboarding" tag="Onboarding" />
 
           <div className="flex items-center gap-2 text-xs text-[var(--color-text-secondary)] font-medium">
             <span>Step {step} of 5</span>

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowUp } from 'lucide-react'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 
 export default function LandingFooter() {
   const scrollToTop = () => {
@@ -20,18 +21,7 @@ export default function LandingFooter() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Info (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-                <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                  <path d="M6 6h10" />
-                  <path d="M6 10h7" />
-                </svg>
-              </div>
-              <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
-                FocusFlow
-              </span>
-            </Link>
+            <FocusFlowLogo size="md" />
 
             <p className="text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
               Your academic productivity partner. Engineered for college scholars, exam candidates, and researchers managing demanding curricula.

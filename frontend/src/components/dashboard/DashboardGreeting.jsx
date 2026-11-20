@@ -10,6 +10,7 @@ export default function DashboardGreeting({
   upcomingExams = [],
   todaySessionsCount = 0,
   onAddSession,
+  onStartSession,
 }) {
   const { state } = useApp()
   const hour = new Date().getHours()
@@ -82,12 +83,12 @@ export default function DashboardGreeting({
         {/* Action Buttons */}
         <div className="flex items-center gap-3 pt-2">
           <Button
-            onClick={onAddSession}
+            onClick={onStartSession || onAddSession}
             size="default"
             className="rounded-xl px-5 py-2.5 font-semibold text-sm bg-slate-900 hover:bg-slate-800 text-white dark:bg-indigo-600 dark:hover:bg-indigo-500 transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            <span>Add Session</span>
+            <span>Start Study Session</span>
+            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
           </Button>
 
           <Link

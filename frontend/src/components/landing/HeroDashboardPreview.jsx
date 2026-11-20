@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 import {
   BookOpen,
   Flame,
@@ -85,17 +86,8 @@ export default function HeroDashboardPreview({ isDark = false }) {
           <div className="w-28 sm:w-36 bg-slate-50/80 dark:bg-[#080d19]/90 border-r border-slate-100 dark:border-slate-800/80 p-3 flex flex-col justify-between shrink-0 select-none">
             <div className="space-y-4">
               {/* Mini Brand Logo */}
-              <div className="flex items-center gap-2 px-1 pt-1">
-                <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-                  <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                    <path d="M6 6h10" />
-                    <path d="M6 10h7" />
-                  </svg>
-                </div>
-                <span className="text-xs font-extrabold tracking-tight text-slate-900 dark:text-white hidden sm:inline">
-                  FocusFlow
-                </span>
+              <div className="px-1 pt-1">
+                <FocusFlowLogo size="xs" asLink={false} />
               </div>
 
               {/* Navigation Items */}

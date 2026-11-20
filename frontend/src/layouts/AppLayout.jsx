@@ -30,6 +30,7 @@ import { cn, getInitials } from '@/lib/utils'
 import { getRevisionSummary } from '@/lib/revisionSummary'
 import { getActiveStudyStreak } from '@/lib/analytics'
 import { toast } from 'sonner'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 
 const navItems = [
   { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
@@ -170,12 +171,7 @@ export default function AppLayout() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Link to="/app/dashboard" className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-brand)] text-white font-bold text-xs shadow-xs">
-              FF
-            </span>
-            <span className="text-sm font-bold tracking-tight text-[var(--color-text)]">FocusFlow</span>
-          </Link>
+          <FocusFlowLogo size="sm" to="/app/dashboard" />
         </div>
 
         <div className="flex items-center gap-2">
@@ -221,15 +217,12 @@ export default function AppLayout() {
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
-                  <div className="flex items-center gap-2.5">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand)] text-white font-bold text-xs shadow-xs">
-                      FF
-                    </span>
-                    <div>
-                      <span className="block text-sm font-bold tracking-tight text-[var(--color-text)]">FocusFlow</span>
-                      <span className="block text-[11px] text-[var(--color-text-muted)]">Academic Workspace</span>
-                    </div>
-                  </div>
+                  <FocusFlowLogo
+                    size="md"
+                    to="/app/dashboard"
+                    tag="Academic"
+                    onClick={() => setMobileMenuOpen(false)}
+                  />
                   <button
                     onClick={() => setMobileMenuOpen(false)}
                     className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"
@@ -293,18 +286,9 @@ export default function AppLayout() {
       <aside className="hidden md:flex flex-col justify-between w-64 shrink-0 border-r border-slate-200/80 bg-white dark:bg-[#0C111D] dark:border-slate-800/80 p-5 sticky top-0 h-screen z-30 select-none">
         {/* Top: Logo & Navigation List */}
         <div className="flex flex-col gap-6">
-          <Link
-            to="/app/dashboard"
-            className="flex items-center gap-3 px-2 group"
-            title="FocusFlow Home"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs group-hover:scale-105 transition-transform">
-              <span className="font-extrabold text-sm tracking-tight">FF</span>
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-              FocusFlow
-            </span>
-          </Link>
+          <div className="px-2">
+            <FocusFlowLogo size="md" to="/app/dashboard" />
+          </div>
 
           {/* Core Navigation Items */}
           <nav className="flex flex-col gap-1" aria-label="Main Navigation">

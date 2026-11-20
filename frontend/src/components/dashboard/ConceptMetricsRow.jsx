@@ -41,7 +41,7 @@ export default function ConceptMetricsRow({
       iconColor: 'text-purple-600 dark:text-purple-400',
       value: `${masteredPercentage}%`,
       trend: '+3%',
-      label: 'Accuracy / Mastery',
+      label: 'Accuracy',
     },
   ]
 

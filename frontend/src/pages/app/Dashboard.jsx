@@ -193,6 +193,7 @@ export default function Dashboard() {
             upcomingExams={upcomingExams}
             todaySessionsCount={todaySessions.length}
             onAddSession={handleOpenAddDialog}
+            onStartSession={handleQuickFocus}
           />
         </div>
         <div className="lg:col-span-4 flex flex-col">

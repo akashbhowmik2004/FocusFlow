@@ -16,6 +16,7 @@ import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import Dialog from '@/components/ui/Dialog'
 import EmptyState from '@/components/ui/EmptyState'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 import { toast } from 'sonner'
 import { notifySessionSuccess } from '@/lib/sessionPresentation'
 
@@ -163,7 +164,8 @@ export default function FocusModePage() {
             to="/app/day"
             className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
           >
-            <ArrowLeft className="h-4 w-4" /> FocusFlow
+            <ArrowLeft className="h-4 w-4" />
+            <FocusFlowLogo size="xs" asLink={false} />
           </Link>
           <Button variant="ghost" size="sm" onClick={() => setExitOpen(true)}>
             Exit Focus Mode

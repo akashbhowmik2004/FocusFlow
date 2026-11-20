@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Sun, Moon, Menu, X, ArrowRight } from 'lucide-react'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 
 export default function LandingNavbar({ isDark = false, onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false)
@@ -44,21 +45,7 @@ export default function LandingNavbar({ isDark = false, onToggleTheme }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Brand Logo & Wordmark */}
-          <Link
-            to="/"
-            className="flex items-center gap-2.5 group focus-visible:outline-2 focus-visible:outline-indigo-600 rounded-lg p-1"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2.5">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                <path d="M6 6h10" />
-                <path d="M6 10h7" />
-              </svg>
-            </div>
-            <span className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
-              FocusFlow
-            </span>
-          </Link>
+          <FocusFlowLogo size="md" />
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">

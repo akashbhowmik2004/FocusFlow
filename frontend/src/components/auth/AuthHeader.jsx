@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { GraduationCap, Sun, Moon } from 'lucide-react'
+import { Sun, Moon } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
+import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 
 export default function AuthHeader({ mode = 'login' }) {
   const { state, toggleTheme } = useApp()
@@ -10,15 +11,7 @@ export default function AuthHeader({ mode = 'login' }) {
     <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/85 backdrop-blur-xl border-b border-[var(--color-border)] transition-colors duration-150">
       <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
         {/* Brand identity */}
-        <Link to="/" className="flex items-center gap-2 group focus-visible:outline-2 focus-visible:outline-indigo-500 rounded-lg shrink-0">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform duration-150">
-            <GraduationCap className="w-4 h-4 text-white" />
-          </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-bold text-base sm:text-lg text-[var(--color-text)] tracking-tight">FocusFlow</span>
-            <span className="hidden sm:inline text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">Academic</span>
-          </div>
-        </Link>
+        <FocusFlowLogo size="md" to="/" tag="Academic" />
 
         {/* Center / Institutional Tag (Desktop only) */}
         <div className="hidden md:flex items-center gap-2 text-xs text-[var(--color-text-secondary)] font-medium">

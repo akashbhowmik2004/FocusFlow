@@ -7,8 +7,8 @@ export default function ConceptSubjectPerformance({ subjects = [] }) {
     { code: 'DBMS', pct: 65 },
     { code: 'CN', pct: 60 },
     { code: 'DS', pct: 75 },
-    { code: 'MATH', pct: 85 },
-    { code: 'CHEM', pct: 80 },
+    { code: 'DWDM', pct: 85 },
+    { code: 'RM', pct: 80 },
   ]
 
   const chartData = subjects.length > 0
