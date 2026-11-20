@@ -5,7 +5,7 @@ import LandingHero from '@/components/landing/LandingHero'
 import LandingFeatures from '@/components/landing/LandingFeatures'
 import LandingWhyFocusFlow from '@/components/landing/LandingWhyFocusFlow'
 import LandingShowcase from '@/components/landing/LandingShowcase'
-import LandingTestimonials from '@/components/landing/LandingTestimonials'
+import LandingWorkflow from '@/components/landing/LandingWorkflow'
 import LandingFaq from '@/components/landing/LandingFaq'
 import LandingCtaBanner from '@/components/landing/LandingCtaBanner'
 import LandingFooter from '@/components/landing/LandingFooter'
@@ -52,8 +52,8 @@ export default function Landing() {
         {/* Interactive Multi-Module Product Showcase */}
         <LandingShowcase isDark={isDark} />
 
-        {/* Student Testimonials */}
-        <LandingTestimonials />
+        {/* 4-Stage Study System Workflow */}
+        <LandingWorkflow />
 
         {/* Interactive FAQ Accordion */}
         <LandingFaq />

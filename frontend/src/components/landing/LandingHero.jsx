@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Play } from 'lucide-react'
+import { ArrowRight, Play, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react'
 import HeroDashboardPreview from './HeroDashboardPreview'
 
 export default function LandingHero({ isDark = false }) {
@@ -57,27 +57,19 @@ export default function LandingHero({ isDark = false }) {
               </a>
             </div>
 
-            {/* Student Social Proof / Trust Indicator */}
-            <div className="pt-4 flex items-center justify-center lg:justify-start gap-3.5">
-              <div className="flex -space-x-2 overflow-hidden">
-                {[
-                  { name: 'Aarav', bg: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200', initial: 'AK' },
-                  { name: 'Sneha', bg: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200', initial: 'SD' },
-                  { name: 'Rohit', bg: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200', initial: 'RS' },
-                  { name: 'Maya', bg: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200', initial: 'ML' },
-                ].map((user, idx) => (
-                  <div
-                    key={idx}
-                    className={`inline-block h-8 w-8 rounded-full ring-2 ring-white dark:ring-[#070b14] flex items-center justify-center text-[10px] font-black ${user.bg} shadow-xs`}
-                    title={user.name}
-                  >
-                    {user.initial}
-                  </div>
-                ))}
+            {/* Genuine Academic Guarantees */}
+            <div className="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3 text-xs text-slate-600 dark:text-slate-400">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 font-medium">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>100% Free Forever</span>
               </div>
-
-              <div className="text-left text-xs text-slate-600 dark:text-slate-400 font-medium">
-                <span className="font-bold text-slate-900 dark:text-white">Trusted by 10,000+</span> students across India & globally
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 font-medium">
+                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span>No Credit Card Required</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span>Open Academic Access</span>
               </div>
             </div>
           </div>

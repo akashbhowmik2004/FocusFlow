@@ -85,25 +85,23 @@ export default function AuthVisualSignup() {
           </div>
         </div>
 
-        {/* Academic Trust & Community Metric */}
-        <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-50/40 to-slate-50/40 dark:from-indigo-950/20 dark:to-slate-900/30 border border-[var(--color-border)] flex items-center justify-between gap-4">
+        {/* Genuine Workspace Commitment */}
+        <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex -space-x-2 overflow-hidden shrink-0">
-              <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[var(--color-surface)] bg-indigo-600 flex items-center justify-center text-[11px] font-bold text-white">RS</div>
-              <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[var(--color-surface)] bg-emerald-600 flex items-center justify-center text-[11px] font-bold text-white">SD</div>
-              <div className="inline-block h-8 w-8 rounded-full ring-2 ring-[var(--color-surface)] bg-amber-600 flex items-center justify-center text-[11px] font-bold text-white">AM</div>
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <p className="text-xs font-semibold text-[var(--color-text)]">
-                Trusted by 10,000+ Students
+                100% Free Academic Workspace
               </p>
               <p className="text-[11px] text-[var(--color-text-secondary)]">
-                Undergraduate & graduate scholars across India
+                Zero paywalls · No credit card required · Instant setup
               </p>
             </div>
           </div>
-          <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 font-tabular">
-            <span>Free Forever</span>
+          <div className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 font-tabular">
+            <span>Open Access</span>
           </div>
         </div>
       </div>

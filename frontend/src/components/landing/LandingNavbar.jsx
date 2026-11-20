@@ -19,7 +19,7 @@ export default function LandingNavbar({ isDark = false, onToggleTheme }) {
     { label: 'Features', href: '#features' },
     { label: 'Why FocusFlow', href: '#why-focusflow' },
     { label: 'Showcase', href: '#showcase' },
-    { label: 'Testimonials', href: '#testimonials' },
+    { label: 'How It Works', href: '#how-it-works' },
     { label: 'FAQs', href: '#faqs' },
   ]
 
