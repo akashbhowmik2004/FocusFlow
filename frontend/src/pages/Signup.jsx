@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  GraduationCap,
   Eye,
   EyeOff,
   ArrowRight,
@@ -16,19 +15,16 @@ import {
   ShieldCheck,
   CheckCircle2,
   AlertCircle,
-  Clock,
-  Sparkles,
-  GitBranch,
-  Repeat,
   Check,
-  Sun,
-  Moon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
 import GoogleButton from '@/components/ui/GoogleButton'
 import { useApp } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
+import AuthHeader from '@/components/auth/AuthHeader'
+import AuthFooter from '@/components/auth/AuthFooter'
+import AuthVisualSignup from '@/components/auth/AuthVisualSignup'
 
 const signupSchema = z
   .object({
@@ -48,7 +44,7 @@ const signupSchema = z
 export default function Signup() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { state, dispatch, toggleTheme } = useApp()
+  const { dispatch } = useApp()
   const { signup, loginWithGoogle } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -103,16 +99,16 @@ export default function Signup() {
     if (passwordVal.length > 0) {
       if (score <= 1) {
         label = 'Weak'
-        colorClass = 'text-rose-600'
+        colorClass = 'text-rose-600 dark:text-rose-400'
       } else if (score === 2) {
         label = 'Fair'
-        colorClass = 'text-amber-600'
+        colorClass = 'text-amber-600 dark:text-amber-400'
       } else if (score === 3) {
         label = 'Good'
-        colorClass = 'text-[var(--color-brand)]'
+        colorClass = 'text-indigo-600 dark:text-indigo-400'
       } else {
         label = 'Strong'
-        colorClass = 'text-[var(--color-brand)]'
+        colorClass = 'text-emerald-600 dark:text-emerald-400'
       }
     }
 
@@ -163,201 +159,49 @@ export default function Signup() {
   }
 
   return (
-    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-blue-100 selection:text-blue-950 font-sans">
+    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-indigo-100 selection:text-indigo-950 font-sans transition-colors duration-150">
       {/* ── Top Header Navigation ───────────────────────────── */}
-      <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/90 backdrop-blur-xl border-b border-[var(--color-border)]">
-        <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white shadow-xs">
-              <GraduationCap className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-bold text-lg text-[var(--color-text)] tracking-tight">FocusFlow</span>
-              <span className="text-[11px] font-semibold text-[var(--color-brand)]">Academic</span>
-            </div>
-          </Link>
-
-          <nav className="hidden sm:flex items-center gap-6 text-sm text-[var(--color-text-secondary)]">
-            <Link to="/" className="hover:text-[var(--color-text)] transition-colors">
-              Overview
-            </Link>
-            <Link to="/#capabilities" className="hover:text-[var(--color-text)] transition-colors">
-              Capabilities
-            </Link>
-            <Link to="/#how-it-works" className="hover:text-[var(--color-text)] transition-colors">
-              Operating Cadence
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand)] cursor-pointer"
-              title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {state.theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-600" />
-              )}
-            </button>
-            <Link
-              to="/login"
-              className="text-xs sm:text-sm font-semibold text-[var(--color-brand)] hover:underline"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AuthHeader mode="signup" />
 
       {/* ── Main Workspace Split Grid ────────────────────────── */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 lg:py-16 flex items-center justify-center">
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
-          {/* Left Column: Academic Proposition & Curricular Rigor */}
-          <div className="lg:col-span-6 xl:col-span-7 flex flex-col space-y-8 lg:pr-4">
-            {/* Cohort Badge & Header */}
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
-                <GraduationCap className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-                <span className="text-xs font-medium">Academic Workspace: Student Onboarding</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text)] tracking-tight leading-tight">
-                Create Your FocusFlow Account.
-              </h1>
-              <p className="text-base sm:text-lg text-[var(--color-text-secondary)] max-w-xl leading-relaxed">
-                Start organizing your subjects, study sessions, and verified academic cognition. Engineered specifically for intense university syllabi and graduate-level research blocks.
-              </p>
-            </div>
-
-            {/* Curricular Onboarding Pillars Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-              {/* Pillar 1 */}
-              <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
-                <div className="space-y-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                    <GitBranch className="w-4 h-4 text-[var(--color-brand)]" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-[var(--color-text)]">
-                    Curricular Syllabus Breakdown
-                  </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    Map raw syllabi into modular units, problem sets, and credit-weighted exam deadlines.
-                  </p>
-                </div>
-                <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
-                  <span>Syllabus Parsing</span>
-                  <span className="font-semibold text-[var(--color-brand)]">Structured Units</span>
-                </div>
-              </div>
-
-              {/* Pillar 2 */}
-              <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
-                <div className="space-y-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)]">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-[var(--color-text)]">
-                    Distraction-Shielded Focus
-                  </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    Execute 45-minute deep work cycles governed by tabular chronometers and active micro-checkpoints.
-                  </p>
-                </div>
-                <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
-                  <span>Session Shield</span>
-                  <span className="font-semibold text-[var(--color-text)]">Monotasking Focus</span>
-                </div>
-              </div>
-
-              {/* Pillar 3 */}
-              <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
-                <div className="space-y-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                    <Repeat className="w-4 h-4 text-[var(--color-brand)]" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-[var(--color-text)]">
-                    Empirical Spaced Repetition
-                  </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    Automated Ebbinghaus memory curve tracking with multi-stage Leitner active recall queues.
-                  </p>
-                </div>
-                <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
-                  <span>Retention Target</span>
-                  <span className="font-semibold text-[var(--color-brand)]">Spaced Repetition</span>
-                </div>
-              </div>
-
-              {/* Pillar 4 */}
-              <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
-                <div className="space-y-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                    <Sparkles className="w-4 h-4 text-[var(--color-brand)]" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-[var(--color-text)]">
-                    Audited Study Telemetry
-                  </h2>
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    Objective daily cadence matrices and focus heatmaps with zero artificial gamification.
-                  </p>
-                </div>
-                <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
-                  <span>Audit Metric</span>
-                  <span className="font-semibold text-[var(--color-text)]">Duration Telemetry</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Academic Trust Banner & Live Micro Stat */}
-            <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)]">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-semibold text-[var(--color-text)]">
-                    Academic Workflow Architecture
-                  </p>
-                  <p className="text-xs text-[var(--color-text-secondary)]">
-                    Designed for undergraduate courses and graduate-level research
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs">
-                <span className="font-semibold text-[var(--color-brand)]">Built for Structured Learning</span>
-              </div>
-            </div>
-
-            {/* Research Library Citation Box */}
-            <div className="p-4 rounded-xl bg-[var(--color-surface)]/60 border-l-2 border-[var(--color-brand)] text-xs text-[var(--color-text-secondary)] italic">
-              “High-performance study habits thrive when friction between planning and execution is reduced to mathematical zero.”
-            </div>
+          {/* Left Column: Academic Proposition & Habits (Desktop/Tablet) */}
+          <div className="hidden lg:block lg:col-span-6">
+            <AuthVisualSignup />
           </div>
 
           {/* Right Column: Registration Form Card */}
-          <div className="lg:col-span-6 xl:col-span-5 w-full flex justify-center lg:justify-end">
+          <div className="lg:col-span-6 flex flex-col items-center lg:items-end w-full">
+            {/* Mobile Header Branding (Shown only on small screens) */}
+            <div className="lg:hidden w-full max-w-md text-center mb-6 space-y-2">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--color-text)]">
+                Build Better Study Habits
+              </h1>
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
+                Create your student account in under 2 minutes.
+              </p>
+            </div>
+
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
-              className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl shadow-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6"
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl shadow-lg border border-[var(--color-border)] p-6 sm:p-8 space-y-6 transition-colors duration-150"
             >
               {/* Card Header */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">
-                    Get Started Free
+                    Create Your Account
                   </h2>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-medium">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-medium font-tabular">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    Student Account
+                    Student Free
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">
-                  Set up your student credentials in under 2 minutes.
+                  Join ambitious students studying smarter with FocusFlow.
                 </p>
               </div>
 
@@ -365,9 +209,9 @@ export default function Signup() {
               {displayError && (
                 <div
                   role="alert"
-                  className="rounded-lg p-3.5 flex items-start gap-3 bg-rose-50 border border-rose-200 text-rose-800"
+                  className="rounded-lg p-3.5 flex items-start gap-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-800 dark:text-rose-200"
                 >
-                  <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
                   <div className="text-xs space-y-0.5">
                     <div className="font-semibold">Registration Notice</div>
                     <div>{displayError}</div>
@@ -404,7 +248,7 @@ export default function Signup() {
                     htmlFor="full-name"
                     className="block text-xs font-semibold text-[var(--color-text)]"
                   >
-                    Full Name <span className="text-rose-600 font-bold">*</span>
+                    Full Name <span className="text-rose-600 dark:text-rose-400 font-bold">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -412,29 +256,29 @@ export default function Signup() {
                       type="text"
                       autoComplete="name"
                       {...register('name')}
-                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
-                      placeholder="Full name"
+                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-150"
+                      placeholder="Alex Morgan"
                     />
                     <User className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                   </div>
                   {errors.name && (
-                    <p className="text-xs text-rose-600 flex items-center gap-1 font-medium mt-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.name.message}
+                    <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium mt-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.name.message}</span>
                     </p>
                   )}
                 </div>
 
-                {/* Field 2: University Email */}
+                {/* Field 2: University / Personal Email */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label
                       htmlFor="email"
                       className="block text-xs font-semibold text-[var(--color-text)]"
                     >
-                      Institutional or University Email <span className="text-rose-600 font-bold">*</span>
+                      Institutional or Personal Email <span className="text-rose-600 dark:text-rose-400 font-bold">*</span>
                     </label>
-                    <span className="text-[11px] text-[var(--color-brand)] font-medium">
+                    <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
                       .edu preferred
                     </span>
                   </div>
@@ -444,15 +288,15 @@ export default function Signup() {
                       type="email"
                       autoComplete="email"
                       {...register('email')}
-                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-150"
                       placeholder="name@university.edu"
                     />
                     <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                   </div>
                   {errors.email && (
-                    <p className="text-xs text-rose-600 flex items-center gap-1 font-medium mt-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.email.message}
+                    <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium mt-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.email.message}</span>
                     </p>
                   )}
                 </div>
@@ -463,7 +307,7 @@ export default function Signup() {
                     htmlFor="password"
                     className="block text-xs font-semibold text-[var(--color-text)]"
                   >
-                    Create Password <span className="text-rose-600 font-bold">*</span>
+                    Create Password <span className="text-rose-600 dark:text-rose-400 font-bold">*</span>
                   </label>
                   <div className="relative">
                     <input
@@ -471,23 +315,23 @@ export default function Signup() {
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       {...register('password')}
-                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-150"
                       placeholder="Min 8 characters"
                     />
                     <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
+                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-500"
                       aria-label="Toggle password visibility"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-rose-600 flex items-center gap-1 font-medium mt-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.password.message}
+                    <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium mt-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.password.message}</span>
                     </p>
                   )}
 
@@ -507,7 +351,7 @@ export default function Signup() {
                           passwordCriteria.score >= 1
                             ? passwordCriteria.score === 1
                               ? 'bg-rose-500'
-                              : 'bg-[var(--color-brand)]'
+                              : 'bg-indigo-600 dark:bg-indigo-500'
                             : 'bg-[var(--color-border)]'
                         }`}
                       />
@@ -516,18 +360,18 @@ export default function Signup() {
                           passwordCriteria.score >= 2
                             ? passwordCriteria.score === 2
                               ? 'bg-amber-500'
-                              : 'bg-[var(--color-brand)]'
+                              : 'bg-indigo-600 dark:bg-indigo-500'
                             : 'bg-[var(--color-border)]'
                         }`}
                       />
                       <div
                         className={`rounded-full transition-colors duration-150 ${
-                          passwordCriteria.score >= 3 ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-border)]'
+                          passwordCriteria.score >= 3 ? 'bg-indigo-600 dark:bg-indigo-500' : 'bg-[var(--color-border)]'
                         }`}
                       />
                       <div
                         className={`rounded-full transition-colors duration-150 ${
-                          passwordCriteria.score >= 4 ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-border)]'
+                          passwordCriteria.score >= 4 ? 'bg-emerald-600 dark:bg-emerald-500' : 'bg-[var(--color-border)]'
                         }`}
                       />
                     </div>
@@ -537,7 +381,7 @@ export default function Signup() {
                       <div className="flex items-center gap-1.5">
                         <Check
                           className={`w-3.5 h-3.5 ${
-                            passwordCriteria.hasLength ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]'
+                            passwordCriteria.hasLength ? 'text-indigo-600 dark:text-indigo-400' : 'text-[var(--color-text-muted)]'
                           }`}
                         />
                         <span>At least 8 characters</span>
@@ -545,7 +389,7 @@ export default function Signup() {
                       <div className="flex items-center gap-1.5">
                         <Check
                           className={`w-3.5 h-3.5 ${
-                            passwordCriteria.hasCase ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]'
+                            passwordCriteria.hasCase ? 'text-indigo-600 dark:text-indigo-400' : 'text-[var(--color-text-muted)]'
                           }`}
                         />
                         <span>Uppercase & lowercase letters</span>
@@ -553,7 +397,7 @@ export default function Signup() {
                       <div className="flex items-center gap-1.5">
                         <Check
                           className={`w-3.5 h-3.5 ${
-                            passwordCriteria.hasSymbol ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]'
+                            passwordCriteria.hasSymbol ? 'text-indigo-600 dark:text-indigo-400' : 'text-[var(--color-text-muted)]'
                           }`}
                         />
                         <span>Numeral and symbol</span>
@@ -569,10 +413,10 @@ export default function Signup() {
                       htmlFor="confirm-password"
                       className="block text-xs font-semibold text-[var(--color-text)]"
                     >
-                      Confirm Password <span className="text-rose-600 font-bold">*</span>
+                      Confirm Password <span className="text-rose-600 dark:text-rose-400 font-bold">*</span>
                     </label>
                     {passwordsMatch && (
-                      <span className="text-xs text-[var(--color-brand)] font-medium flex items-center gap-1">
+                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Passwords match
                       </span>
                     )}
@@ -583,23 +427,23 @@ export default function Signup() {
                       type={showConfirmPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       {...register('confirmPassword')}
-                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors duration-150"
                       placeholder="Repeat your password"
                     />
                     <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
+                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-indigo-500"
                       aria-label="Toggle confirm password visibility"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-xs text-rose-600 flex items-center gap-1 font-medium mt-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.confirmPassword.message}
+                    <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium mt-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.confirmPassword.message}</span>
                     </p>
                   )}
                 </div>
@@ -610,26 +454,26 @@ export default function Signup() {
                     <input
                       type="checkbox"
                       {...register('acceptTerms')}
-                      className="mt-0.5 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-brand)] focus:ring-[var(--color-brand)] cursor-pointer"
+                      className="mt-0.5 w-4 h-4 rounded border-[var(--color-border)] text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                     />
                     <span>
                       I agree to the FocusFlow Terms of Service and Privacy Policy.
                     </span>
                   </label>
                   {errors.acceptTerms && (
-                    <p className="text-xs text-rose-600 flex items-center gap-1 font-medium mt-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.acceptTerms.message}
+                    <p className="text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium mt-1">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{errors.acceptTerms.message}</span>
                     </p>
                   )}
                 </div>
 
-                {/* Primary CTA Button (Emerald Standard) */}
+                {/* Primary CTA Button */}
                 <div className="pt-2">
                   <Button
                     type="submit"
                     disabled={isLoading || isGoogleLoading}
-                    className="w-full justify-center h-12 text-sm font-semibold bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white shadow-md transition-colors duration-150 active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="w-full justify-center h-12 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white shadow-md transition-colors duration-150 active:scale-[0.99] motion-reduce:active:scale-100"
                   >
                     {isLoading ? (
                       <>
@@ -651,7 +495,7 @@ export default function Signup() {
                 Already have an academic account?{' '}
                 <Link
                   to="/login"
-                  className="font-semibold text-[var(--color-brand)] hover:underline ml-1"
+                  className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline ml-1"
                 >
                   Sign In
                 </Link>
@@ -659,7 +503,7 @@ export default function Signup() {
 
               {/* Bottom Security Audit Meta */}
               <div className="bg-[var(--color-bg-subtle)] rounded-lg p-3 flex items-center gap-2.5 text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-                <ShieldCheck className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
                 <span className="text-[11px] leading-tight">
                   Encrypted connection. Institutional email and Google sign-in supported.
                 </span>
@@ -679,25 +523,7 @@ export default function Signup() {
       </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="w-full bg-[var(--color-surface)] border-t border-[var(--color-border)] py-4">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--color-text-secondary)]">
-          <div className="flex items-center gap-2">
-            <span>© 2025 FocusFlow Systems Inc. Engineered for rigorous academic cognition.</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <Link to="/#faq" className="hover:text-[var(--color-text)] transition-colors">
-              Institutional Terms
-            </Link>
-            <Link to="/#faq" className="hover:text-[var(--color-text)] transition-colors">
-              Privacy Policy
-            </Link>
-            <span className="flex items-center gap-1.5 text-[var(--color-brand)] font-medium">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-brand)]" />
-              System Operational
-            </span>
-          </div>
-        </div>
-      </footer>
+      <AuthFooter />
     </div>
   )
 }
