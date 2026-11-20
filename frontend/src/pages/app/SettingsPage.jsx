@@ -13,6 +13,10 @@ import {
   AlertTriangle,
   Volume2,
   VolumeX,
+  Palette,
+  Sun,
+  Moon,
+  Check,
 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
@@ -25,7 +29,7 @@ import Dialog from '@/components/ui/Dialog'
 import { toast } from 'sonner'
 
 export default function SettingsPage() {
-  const { state, dispatch } = useApp()
+  const { state, dispatch, theme: currentTheme, setTheme } = useApp()
   const { user, logout, updateUser, deleteAccount } = useAuth()
   const navigate = useNavigate()
 
@@ -159,6 +163,7 @@ export default function SettingsPage() {
   // Navigation Items with distinct Academic Deep Work icons
   const navItems = [
     { id: 'profile', label: 'User Profile', icon: User },
+    { id: 'appearance', label: 'Appearance & Theme', icon: Palette },
     { id: 'academic', label: 'Academic Preferences', icon: GraduationCap },
     { id: 'study', label: 'Study & Time Blocking', icon: Clock },
     { id: 'notifications', label: 'Reminders & Alerts', icon: Bell },
@@ -589,6 +594,122 @@ export default function SettingsPage() {
                   </Button>
                 </div>
               </form>
+            </Card>
+          )}
+
+          {/* Tab: Appearance & Theme */}
+          {activeTab === 'appearance' && (
+            <Card className="p-6">
+              <div className="pb-4 mb-5 border-b border-[var(--color-border-light)]">
+                <h2 className="text-base font-bold text-[var(--color-text)]">Appearance & Theme</h2>
+                <p className="text-xs text-[var(--color-text-secondary)]">
+                  Customize the visual identity of your academic workstation. Both themes are calibrated for high legibility and reduced eyestrain.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--color-text)] mb-3">
+                    Select Interface Theme
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Light Theme Option Card */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTheme('light')
+                        toast.success('Theme set to Light Mode')
+                      }}
+                      className={cn(
+                        'flex flex-col text-left p-4 rounded-xl border-2 transition-colors cursor-pointer select-none',
+                        state.theme === 'light'
+                          ? 'border-[var(--color-scholar-emerald)] bg-[var(--color-surface)] ring-2 ring-[var(--color-scholar-emerald)]/20 shadow-sm'
+                          : 'border-[var(--color-border)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-hover)]'
+                      )}
+                    >
+                      <div className="flex items-center justify-between w-full mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-800">
+                            <Sun className="w-4 h-4 text-emerald-700" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-slate-900 block">Light Mode</span>
+                            <span className="text-[11px] text-slate-600 block">Academic Ivory</span>
+                          </div>
+                        </div>
+                        {state.theme === 'light' && (
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-scholar-emerald)] text-white flex items-center justify-center">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Micro Preview */}
+                      <div className="w-full rounded-lg bg-[#f5f6f2] border border-[#dce3dd] p-2.5 space-y-1.5 text-[11px]">
+                        <div className="flex items-center justify-between">
+                          <span className="w-16 h-2 rounded bg-slate-300 inline-block" />
+                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-medium">Active</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded bg-slate-200" />
+                        <div className="w-3/4 h-1.5 rounded bg-slate-200" />
+                      </div>
+                      <p className="mt-2.5 text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                        Soft parchment canvas with rich ink slate typography. Optimal for well-lit environments and daytime deep work.
+                      </p>
+                    </button>
+
+                    {/* Dark Theme Option Card */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTheme('dark')
+                        toast.success('Theme set to Dark Mode')
+                      }}
+                      className={cn(
+                        'flex flex-col text-left p-4 rounded-xl border-2 transition-colors cursor-pointer select-none',
+                        state.theme === 'dark'
+                          ? 'border-[var(--color-scholar-emerald)] bg-[var(--color-surface)] ring-2 ring-[var(--color-scholar-emerald)]/20 shadow-sm'
+                          : 'border-[var(--color-border)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-hover)]'
+                      )}
+                    >
+                      <div className="flex items-center justify-between w-full mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-amber-400">
+                            <Moon className="w-4 h-4 text-amber-400" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-[var(--color-text)] block">Dark Mode</span>
+                            <span className="text-[11px] text-[var(--color-text-muted)] block">Permanent Midnight</span>
+                          </div>
+                        </div>
+                        {state.theme === 'dark' && (
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-scholar-emerald)] text-white flex items-center justify-center">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Micro Preview */}
+                      <div className="w-full rounded-lg bg-[#0b0f19] border border-[#233149] p-2.5 space-y-1.5 text-[11px]">
+                        <div className="flex items-center justify-between">
+                          <span className="w-16 h-2 rounded bg-slate-700 inline-block" />
+                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-950/60 text-emerald-300 font-medium">Active</span>
+                        </div>
+                        <div className="w-full h-1.5 rounded bg-slate-800" />
+                        <div className="w-3/4 h-1.5 rounded bg-slate-800" />
+                      </div>
+                      <p className="mt-2.5 text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                        Midnight ink canvas with vibrant emerald accents. Reduced glare designed for late-night study marathons.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border-light)] text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                  <strong className="text-[var(--color-text)] font-semibold">Theme Persistence: </strong>
+                  Your theme choice is stored in local preferences and persists across browser refreshes, sessions, and public/workspace routes.
+                </div>
+              </div>
             </Card>
           )}
 
