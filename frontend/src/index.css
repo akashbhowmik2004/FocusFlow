@@ -422,48 +422,15 @@
   --card-shadow-elevated: 0 12px 28px -4px rgba(0, 0, 0, 0.6);
 }
 
-/* ── Public Theme (Fixed, Locked Academic Light) ─────────────────────── */
+/* ── Public Theme Adaptability ─────────────────────────────── */
 .public-theme {
-  --color-bg: #f8f8f5;
-  --color-canvas-base: #f8f8f5;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f5f6f2;
-  --color-bg-subtle: #eef1ec;
-  --color-bg-muted: #e4e7e1;
-  --color-border: #dce3dd;
-  --color-border-light: #e8ede8;
-  --color-border-hover: #c8d3cb;
-  --color-border-strong: #c8d3cb;
-  --color-text: #17231f;
-  --color-text-secondary: #53635b;
-  --color-text-muted: #68776f;
-  --color-brand: #087f5b;
-  --color-brand-primary: #087f5b;
-  --color-scholar-emerald: #087f5b;
-  --color-forest-deep: #123b32;
-  --color-emerald-tint: #e5f3ec;
-  --color-emerald-dark: #066348;
-  --color-emerald-subtle: #e5f3ec;
-  --color-academic-indigo: #5756a5;
-  --color-indigo-tint: #eeeefa;
-  --color-indigo-dark: #3f3e85;
-  --color-indigo-border: #d4d3f3;
-  --color-study-teal: #168a91;
-  --color-teal-tint: #e5f3f3;
-  --color-teal-dark: #0f6a70;
-  --color-teal-border: #c2e5e7;
-  --color-focus-amber: #b7791f;
-  --color-amber-tint: #fbf1de;
-  --color-amber-dark: #8c5b14;
-  --color-amber-border: #f4dcac;
-  --color-streak-amber: #b7791f;
-  --color-soft-coral: #c66a62;
-  --color-coral-tint: #f8eae7;
-  --color-coral-dark: #a14841;
-  --color-coral-border: #f2ccc6;
-  --color-ink-slate: #17231f;
-  --color-slate-core: #53635b;
+  /* Inherits full token hierarchy from :root (light) and .dark (dark) */
   color-scheme: light;
+}
+
+.dark .public-theme,
+.dark.public-theme {
+  color-scheme: dark;
 }
 
 

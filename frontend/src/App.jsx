@@ -22,24 +22,7 @@ const SettingsPage = lazy(() => import('@/pages/app/SettingsPage'))
 const FocusModePage = lazy(() => import('@/pages/app/FocusModePage'))
 
 function ThemeRouteSynchronizer() {
-  const location = useLocation()
-
-  useEffect(() => {
-    const isPublic =
-      location.pathname === '/' ||
-      location.pathname === '/login' ||
-      location.pathname === '/signup'
-
-    const root = document.documentElement
-    if (isPublic) {
-      root.classList.remove('dark')
-      root.style.colorScheme = 'light'
-    } else {
-      root.classList.add('dark')
-      root.style.colorScheme = 'dark'
-    }
-  }, [location.pathname])
-
+  // Theme class is actively synchronized with persistent user preference via AppProvider
   return null
 }
 

@@ -31,6 +31,19 @@ const normalizeSession = (session) => {
 
 const isTestEnvironment = import.meta.env.MODE === "test";
 
+const getInitialTheme = () => {
+  if (typeof window === "undefined" || isTestEnvironment) {
+    return "dark";
+  }
+  try {
+    const saved = localStorage.getItem("focusflow_theme");
+    if (saved === "light" || saved === "dark") return saved;
+  } catch {
+    // localStorage might fail in restricted environments
+  }
+  return "dark";
+};
+
 const initialState = {
   subjects:
     isTestEnvironment
@@ -43,7 +56,7 @@ const initialState = {
   sessionsError: null,
   sessionsLoading: true,
   user: null,
-  theme: "dark",
+  theme: getInitialTheme(),
   sidebarOpen: true,
   searchQuery: "",
   notifications: [],
@@ -61,6 +74,24 @@ function appReducer(state, action) {
       return { ...state, sidebarOpen: action.payload };
     case "SET_SEARCH":
       return { ...state, searchQuery: action.payload };
+    case "SET_THEME": {
+      const newTheme = action.payload === "light" ? "light" : "dark";
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("focusflow_theme", newTheme);
+        }
+      } catch {}
+      return { ...state, theme: newTheme };
+    }
+    case "TOGGLE_THEME": {
+      const nextTheme = state.theme === "dark" ? "light" : "dark";
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("focusflow_theme", nextTheme);
+        }
+      } catch {}
+      return { ...state, theme: nextTheme };
+    }
 
     // Subjects
     case "SET_SUBJECTS":
@@ -490,11 +521,35 @@ export function AppProvider({ children }) {
     };
   }, [auth?.user?.id]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const isDark = state.theme === "dark";
+    if (isDark) {
+      root.classList.add("dark");
+      root.style.colorScheme = "dark";
+    } else {
+      root.classList.remove("dark");
+      root.style.colorScheme = "light";
+    }
+  }, [state.theme]);
+
+  const setTheme = useCallback((theme) => {
+    dispatch({ type: "SET_THEME", payload: theme });
+  }, [dispatch]);
+
+  const toggleTheme = useCallback(() => {
+    dispatch({ type: "TOGGLE_THEME" });
+  }, [dispatch]);
+
   return (
     <AppContext.Provider
       value={{
         state,
         dispatch,
+        theme: state.theme,
+        setTheme,
+        toggleTheme,
         refreshActiveFocusSession,
         runFocusCommand,
       }}
@@ -510,6 +565,16 @@ export function useApp() {
     throw new Error("useApp must be used within an AppProvider");
   }
   return context;
+}
+
+export function useTheme() {
+  const { state, setTheme, toggleTheme } = useApp();
+  return {
+    theme: state.theme,
+    isDark: state.theme === "dark",
+    setTheme,
+    toggleTheme,
+  };
 }
 
 export function useSubjects() {
