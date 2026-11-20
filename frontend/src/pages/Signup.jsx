@@ -20,7 +20,9 @@ import {
   Sparkles,
   GitBranch,
   Repeat,
-  Check
+  Check,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
@@ -46,7 +48,7 @@ const signupSchema = z
 export default function Signup() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { dispatch } = useApp()
+  const { state, dispatch, toggleTheme } = useApp()
   const { signup, loginWithGoogle } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -107,10 +109,10 @@ export default function Signup() {
         colorClass = 'text-amber-600'
       } else if (score === 3) {
         label = 'Good'
-        colorClass = 'text-[var(--color-scholar-emerald)]'
+        colorClass = 'text-[var(--color-brand)]'
       } else {
         label = 'Strong'
-        colorClass = 'text-[var(--color-scholar-emerald)]'
+        colorClass = 'text-[var(--color-brand)]'
       }
     }
 
@@ -161,17 +163,17 @@ export default function Signup() {
   }
 
   return (
-    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-950 font-sans">
+    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-blue-100 selection:text-blue-950 font-sans">
       {/* ── Top Header Navigation ───────────────────────────── */}
       <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/90 backdrop-blur-xl border-b border-[var(--color-border)]">
         <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-ink-slate)] flex items-center justify-center text-white shadow-xs">
-              <GraduationCap className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white shadow-xs">
+              <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="font-bold text-lg text-[var(--color-text)] tracking-tight">FocusFlow</span>
-              <span className="text-[11px] font-semibold text-[var(--color-scholar-emerald)]">Academic</span>
+              <span className="text-[11px] font-semibold text-[var(--color-brand)]">Academic</span>
             </div>
           </Link>
 
@@ -188,9 +190,22 @@ export default function Signup() {
           </nav>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand)] cursor-pointer"
+              title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {state.theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-600" />
+              )}
+            </button>
             <Link
               to="/login"
-              className="text-xs sm:text-sm font-semibold text-[var(--color-scholar-emerald)] hover:underline"
+              className="text-xs sm:text-sm font-semibold text-[var(--color-brand)] hover:underline"
             >
               Sign In
             </Link>
@@ -205,9 +220,9 @@ export default function Signup() {
           <div className="lg:col-span-6 xl:col-span-7 flex flex-col space-y-8 lg:pr-4">
             {/* Cohort Badge & Header */}
             <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
-                <GraduationCap className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
-                <span className="text-xs font-semibold">Academic Workspace: Student Onboarding</span>
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
+                <GraduationCap className="w-3.5 h-3.5 text-[var(--color-brand)]" />
+                <span className="text-xs font-medium">Academic Workspace: Student Onboarding</span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--color-text)] tracking-tight leading-tight">
                 Create Your FocusFlow Account.
@@ -223,7 +238,7 @@ export default function Signup() {
               <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
                 <div className="space-y-2.5">
                   <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                    <GitBranch className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
+                    <GitBranch className="w-4 h-4 text-[var(--color-brand)]" />
                   </div>
                   <h2 className="text-sm font-semibold text-[var(--color-text)]">
                     Curricular Syllabus Breakdown
@@ -234,14 +249,14 @@ export default function Signup() {
                 </div>
                 <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                   <span>Syllabus Parsing</span>
-                  <span className="font-semibold text-[var(--color-scholar-emerald)]">Structured Units</span>
+                  <span className="font-semibold text-[var(--color-brand)]">Structured Units</span>
                 </div>
               </div>
 
               {/* Pillar 2 */}
               <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
                 <div className="space-y-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[var(--color-scholar-emerald)]">
+                  <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)]">
                     <Clock className="w-4 h-4" />
                   </div>
                   <h2 className="text-sm font-semibold text-[var(--color-text)]">
@@ -261,7 +276,7 @@ export default function Signup() {
               <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
                 <div className="space-y-2.5">
                   <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                    <Repeat className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
+                    <Repeat className="w-4 h-4 text-[var(--color-brand)]" />
                   </div>
                   <h2 className="text-sm font-semibold text-[var(--color-text)]">
                     Empirical Spaced Repetition
@@ -272,7 +287,7 @@ export default function Signup() {
                 </div>
                 <div className="mt-4 pt-2.5 border-t border-[var(--color-border)] flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
                   <span>Retention Target</span>
-                  <span className="font-semibold text-[var(--color-scholar-emerald)]">Spaced Repetition</span>
+                  <span className="font-semibold text-[var(--color-brand)]">Spaced Repetition</span>
                 </div>
               </div>
 
@@ -280,7 +295,7 @@ export default function Signup() {
               <div className="p-5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-sm transition-shadow">
                 <div className="space-y-2.5">
                   <div className="w-9 h-9 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-text)]">
-                    <Sparkles className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
+                    <Sparkles className="w-4 h-4 text-[var(--color-brand)]" />
                   </div>
                   <h2 className="text-sm font-semibold text-[var(--color-text)]">
                     Audited Study Telemetry
@@ -299,7 +314,7 @@ export default function Signup() {
             {/* Academic Trust Banner & Live Micro Stat */}
             <div className="p-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-border)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-scholar-emerald)]">
+                <div className="w-10 h-10 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-brand)]">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
@@ -312,12 +327,12 @@ export default function Signup() {
                 </div>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-lg bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-xs">
-                <span className="font-semibold text-[var(--color-scholar-emerald)]">Built for Structured Learning</span>
+                <span className="font-semibold text-[var(--color-brand)]">Built for Structured Learning</span>
               </div>
             </div>
 
             {/* Research Library Citation Box */}
-            <div className="p-4 rounded-xl bg-[var(--color-surface)]/60 border-l-2 border-[var(--color-scholar-emerald)] text-xs text-[var(--color-text-secondary)] italic">
+            <div className="p-4 rounded-xl bg-[var(--color-surface)]/60 border-l-2 border-[var(--color-brand)] text-xs text-[var(--color-text-secondary)] italic">
               “High-performance study habits thrive when friction between planning and execution is reduced to mathematical zero.”
             </div>
           </div>
@@ -336,7 +351,8 @@ export default function Signup() {
                   <h2 className="text-2xl font-bold text-[var(--color-text)] tracking-tight">
                     Get Started Free
                   </h2>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[var(--color-scholar-emerald)] text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                     Student Account
                   </span>
                 </div>
@@ -396,7 +412,7 @@ export default function Signup() {
                       type="text"
                       autoComplete="name"
                       {...register('name')}
-                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
                       placeholder="Full name"
                     />
                     <User className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
@@ -418,7 +434,7 @@ export default function Signup() {
                     >
                       Institutional or University Email <span className="text-rose-600 font-bold">*</span>
                     </label>
-                    <span className="text-[11px] text-[var(--color-scholar-emerald)] font-medium">
+                    <span className="text-[11px] text-[var(--color-brand)] font-medium">
                       .edu preferred
                     </span>
                   </div>
@@ -428,7 +444,7 @@ export default function Signup() {
                       type="email"
                       autoComplete="email"
                       {...register('email')}
-                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
                       placeholder="name@university.edu"
                     />
                     <Mail className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
@@ -455,14 +471,14 @@ export default function Signup() {
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       {...register('password')}
-                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
                       placeholder="Min 8 characters"
                     />
                     <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-scholar-emerald)]"
+                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
                       aria-label="Toggle password visibility"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -491,7 +507,7 @@ export default function Signup() {
                           passwordCriteria.score >= 1
                             ? passwordCriteria.score === 1
                               ? 'bg-rose-500'
-                              : 'bg-[var(--color-scholar-emerald)]'
+                              : 'bg-[var(--color-brand)]'
                             : 'bg-[var(--color-border)]'
                         }`}
                       />
@@ -500,18 +516,18 @@ export default function Signup() {
                           passwordCriteria.score >= 2
                             ? passwordCriteria.score === 2
                               ? 'bg-amber-500'
-                              : 'bg-[var(--color-scholar-emerald)]'
+                              : 'bg-[var(--color-brand)]'
                             : 'bg-[var(--color-border)]'
                         }`}
                       />
                       <div
                         className={`rounded-full transition-colors duration-150 ${
-                          passwordCriteria.score >= 3 ? 'bg-[var(--color-scholar-emerald)]' : 'bg-[var(--color-border)]'
+                          passwordCriteria.score >= 3 ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-border)]'
                         }`}
                       />
                       <div
                         className={`rounded-full transition-colors duration-150 ${
-                          passwordCriteria.score >= 4 ? 'bg-[var(--color-scholar-emerald)]' : 'bg-[var(--color-border)]'
+                          passwordCriteria.score >= 4 ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-border)]'
                         }`}
                       />
                     </div>
@@ -521,7 +537,7 @@ export default function Signup() {
                       <div className="flex items-center gap-1.5">
                         <Check
                           className={`w-3.5 h-3.5 ${
-                            passwordCriteria.hasLength ? 'text-[var(--color-scholar-emerald)]' : 'text-[var(--color-text-muted)]'
+                            passwordCriteria.hasLength ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]'
                           }`}
                         />
                         <span>At least 8 characters</span>
@@ -529,7 +545,7 @@ export default function Signup() {
                       <div className="flex items-center gap-1.5">
                         <Check
                           className={`w-3.5 h-3.5 ${
-                            passwordCriteria.hasCase ? 'text-[var(--color-scholar-emerald)]' : 'text-[var(--color-text-muted)]'
+                            passwordCriteria.hasCase ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]'
                           }`}
                         />
                         <span>Uppercase & lowercase letters</span>
@@ -537,7 +553,7 @@ export default function Signup() {
                       <div className="flex items-center gap-1.5">
                         <Check
                           className={`w-3.5 h-3.5 ${
-                            passwordCriteria.hasSymbol ? 'text-[var(--color-scholar-emerald)]' : 'text-[var(--color-text-muted)]'
+                            passwordCriteria.hasSymbol ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-muted)]'
                           }`}
                         />
                         <span>Numeral and symbol</span>
@@ -556,7 +572,7 @@ export default function Signup() {
                       Confirm Password <span className="text-rose-600 font-bold">*</span>
                     </label>
                     {passwordsMatch && (
-                      <span className="text-xs text-[var(--color-scholar-emerald)] font-medium flex items-center gap-1">
+                      <span className="text-xs text-[var(--color-brand)] font-medium flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Passwords match
                       </span>
                     )}
@@ -567,14 +583,14 @@ export default function Signup() {
                       type={showConfirmPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       {...register('confirmPassword')}
-                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pl-10 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
                       placeholder="Repeat your password"
                     />
                     <Lock className="absolute left-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-scholar-emerald)]"
+                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
                       aria-label="Toggle confirm password visibility"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -594,7 +610,7 @@ export default function Signup() {
                     <input
                       type="checkbox"
                       {...register('acceptTerms')}
-                      className="mt-0.5 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-scholar-emerald)] focus:ring-[var(--color-scholar-emerald)] cursor-pointer"
+                      className="mt-0.5 w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-brand)] focus:ring-[var(--color-brand)] cursor-pointer"
                     />
                     <span>
                       I agree to the FocusFlow Terms of Service and Privacy Policy.
@@ -613,7 +629,7 @@ export default function Signup() {
                   <Button
                     type="submit"
                     disabled={isLoading || isGoogleLoading}
-                    className="w-full justify-center h-12 text-sm font-semibold bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white shadow-md transition-colors duration-150 active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="w-full justify-center h-12 text-sm font-semibold bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white shadow-md transition-colors duration-150 active:scale-[0.99] motion-reduce:active:scale-100"
                   >
                     {isLoading ? (
                       <>
@@ -635,7 +651,7 @@ export default function Signup() {
                 Already have an academic account?{' '}
                 <Link
                   to="/login"
-                  className="font-semibold text-[var(--color-scholar-emerald)] hover:underline ml-1"
+                  className="font-semibold text-[var(--color-brand)] hover:underline ml-1"
                 >
                   Sign In
                 </Link>
@@ -643,7 +659,7 @@ export default function Signup() {
 
               {/* Bottom Security Audit Meta */}
               <div className="bg-[var(--color-bg-subtle)] rounded-lg p-3 flex items-center gap-2.5 text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-                <ShieldCheck className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
                 <span className="text-[11px] leading-tight">
                   Encrypted connection. Institutional email and Google sign-in supported.
                 </span>
@@ -675,8 +691,8 @@ export default function Signup() {
             <Link to="/#faq" className="hover:text-[var(--color-text)] transition-colors">
               Privacy Policy
             </Link>
-            <span className="flex items-center gap-1.5 text-[var(--color-scholar-emerald)] font-medium">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)]" />
+            <span className="flex items-center gap-1.5 text-[var(--color-brand)] font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-brand)]" />
               System Operational
             </span>
           </div>

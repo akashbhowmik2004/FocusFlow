@@ -120,7 +120,7 @@ export default function RevisionQueue({
           <h2 className="text-sm sm:text-base font-bold text-[var(--color-text)] tracking-tight">
             Today’s Revision Queue
           </h2>
-          <span className="font-mono tabular-nums text-xs px-2 py-0.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-bold">
+          <span className="font-mono tabular-nums text-xs px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] font-medium">
             {totalFilteredCount}
           </span>
         </div>
@@ -168,10 +168,10 @@ export default function RevisionQueue({
               <span>{tab.label}</span>
               <span
                 className={cn(
-                  'px-1.5 py-0.2 rounded-full font-mono tabular-nums text-[10px] font-bold',
+                  'px-1.5 py-0.5 rounded font-mono tabular-nums text-[10px] font-semibold',
                   isSelected
                     ? 'bg-white/20 text-white'
-                    : 'bg-[var(--color-bg-muted)] text-[var(--color-text-muted)]'
+                    : 'bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)]'
                 )}
               >
                 {tab.count}

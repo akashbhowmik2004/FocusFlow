@@ -32,7 +32,7 @@ export default function DailyPacingDial({
   const isTargetAchieved = actualMinutes >= dailyTargetMinutes
 
   return (
-    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/30 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         {/* Header Row */}
         <div className="flex items-center justify-between mb-4">
@@ -45,11 +45,13 @@ export default function DailyPacingDial({
             </h3>
           </div>
           {hasOnlyUntrackedSessions ? (
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-tabular bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium font-tabular bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
               Untracked Timer
             </span>
           ) : (
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-tabular bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-scholar-emerald)] border border-emerald-200 dark:border-emerald-800/60">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium font-tabular bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
               {rawPercent > 100 ? `Goal Exceeded (${rawPercent}%)` : `${rawPercent}% Completed`}
             </span>
           )}
@@ -78,7 +80,7 @@ export default function DailyPacingDial({
                 cy="50"
                 r="40"
                 fill="transparent"
-                className="text-[var(--color-scholar-emerald)] stroke-current transition-[stroke-dashoffset] duration-500 ease-out"
+                className="text-[var(--color-brand)] stroke-current transition-[stroke-dashoffset] duration-500 ease-out"
                 strokeWidth="7"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}

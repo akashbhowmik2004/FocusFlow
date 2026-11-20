@@ -96,30 +96,23 @@ export default function SubjectOverviewCard({
                 No exam date set
               </span>
             ) : countdown.status === 'completed' ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-                <CheckCircle2 className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
                 <span>Exam completed</span>
               </span>
             ) : countdown.status === 'today' ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]">
-                <Timer className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
                 <span>Exam today</span>
               </span>
             ) : countdown.status === 'tomorrow' ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]">
-                <Timer className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
                 <span>1 day left</span>
               </span>
             ) : (
-              <span
-                className={cn(
-                  'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold',
-                  countdown.isUrgent
-                    ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
-                    : 'bg-[var(--color-warning-light)] text-[var(--color-warning-text)] border border-[var(--color-warning-border)]'
-                )}
-              >
-                <Timer className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${countdown.isUrgent ? 'bg-rose-500' : 'bg-amber-500'}`} />
                 <span>{countdown.label}</span>
               </span>
             )}
@@ -147,10 +140,10 @@ export default function SubjectOverviewCard({
             {/* Spaced Recall Badge */}
             {subjectRevisionMeta.dueCount > 0 && (
               <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800 shrink-0"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] shrink-0"
                 title={`${subjectRevisionMeta.dueCount} topics due for spaced revision recall`}
               >
-                <RotateCw className="w-3 h-3" />
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                 <span>{subjectRevisionMeta.dueCount} due</span>
               </span>
             )}

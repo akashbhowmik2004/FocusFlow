@@ -31,13 +31,13 @@ export default function RecommendedNextFocus({
     const isPaused = activeSession.status === 'paused'
 
     return (
-      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/30 to-[var(--color-surface)] dark:from-emerald-950/25 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Top Badging Row */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-scholar-emerald)] border border-emerald-200 dark:border-emerald-800/60">
-                <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)] motion-safe:animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-scholar-emerald)] motion-safe:animate-pulse shrink-0" />
                 {isPaused ? 'Focus Session Paused' : 'Focus Session in Progress'}
               </span>
               <span className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1">
@@ -76,7 +76,7 @@ export default function RecommendedNextFocus({
               onClick={() =>
                 onResumeFocus(activeSession.id, activeSession.title, activeSession.status)
               }
-              className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
+              className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>Resume Focus Block</span>
@@ -88,7 +88,7 @@ export default function RecommendedNextFocus({
             </Link>
           </div>
           <span className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
             Distraction Shield Active
           </span>
         </div>
@@ -103,12 +103,13 @@ export default function RecommendedNextFocus({
     const durationMinutes = getPlannedDurationMinutes(nextSession)
 
     return (
-      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Top Badging Row */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-scholar-emerald)] border border-emerald-200 dark:border-emerald-800/60">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
                 Recommended Next
               </span>
               <span className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1 font-tabular">
@@ -148,7 +149,7 @@ export default function RecommendedNextFocus({
           <div className="flex items-center gap-2.5">
             <Button
               onClick={() => onStartFocus(nextSession.id, nextSession.title)}
-              className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
+              className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
             >
               <Play className="w-4 h-4 fill-current" />
               <span>Launch Focus Block</span>
@@ -163,7 +164,7 @@ export default function RecommendedNextFocus({
             </Button>
           </div>
           <span className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
+            <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
             Recommended method: {durationMinutes}m Focused Block
           </span>
         </div>
@@ -174,13 +175,13 @@ export default function RecommendedNextFocus({
   // Case 3: Overdue or Due-Today Revision Item (No upcoming sessions)
   if (overdueRevision) {
     return (
-      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
+      <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Top Badging Row */}
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
-                <Repeat className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                <Repeat className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 Spaced Recall Due
               </span>
               <span className="text-xs text-[var(--color-text-secondary)]">
@@ -217,7 +218,7 @@ export default function RecommendedNextFocus({
         <div className="pt-4 border-t border-[var(--color-border-light)] flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <Link to="/app/revision">
-              <Button className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs">
+              <Button className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs">
                 <span>Start Spaced Review</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
@@ -246,11 +247,11 @@ export default function RecommendedNextFocus({
     const remainingTargetMinutes = Math.max(0, dailyTargetMinutes - actualMinutes)
 
     return (
-      <section className="bg-gradient-to-b from-[var(--color-emerald-tint)]/20 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)] rounded-2xl border border-emerald-300/60 dark:border-emerald-800/60 shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+      <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-[var(--color-scholar-emerald)] border border-emerald-200 dark:border-emerald-800/60">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               {isTargetAchieved
                 ? 'Daily Study Plan & Goal Achieved'
                 : 'Daily Scheduled Plan Executed'}
@@ -274,7 +275,7 @@ export default function RecommendedNextFocus({
           <div className="flex items-center gap-2.5">
             <Button
               onClick={onAddSession}
-              className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
+              className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-dark)] text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
             >
               <span>{isTargetAchieved ? 'Schedule for Tomorrow' : 'Schedule Another Block'}</span>
             </Button>
@@ -296,10 +297,10 @@ export default function RecommendedNextFocus({
 
   // Case 5: Empty Schedule Today
   return (
-    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/35 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
             <Calendar className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
             Daily Planning
           </span>
@@ -318,7 +319,7 @@ export default function RecommendedNextFocus({
         <div className="flex items-center gap-2.5">
           <Button
             onClick={onAddSession}
-            className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
+            className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white font-semibold text-xs sm:text-sm gap-2 h-10 px-5 shadow-xs"
           >
             <span>Schedule First Session</span>
           </Button>

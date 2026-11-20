@@ -114,8 +114,8 @@ export default function ActiveRecallDeck({
           </span>
         </div>
 
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          <Sparkles className="w-3 h-3 text-emerald-600" />
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+          <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
           <span>Active Calibration</span>
         </span>
       </div>
@@ -198,10 +198,10 @@ export default function ActiveRecallDeck({
                 iconUnselected: 'text-[var(--color-study-teal)]',
               },
               easy: {
-                selected: 'border-[var(--color-scholar-emerald)] bg-[var(--color-scholar-emerald)] text-white shadow-xs',
-                unselected: 'border-emerald-300/40 bg-[var(--color-surface)] text-[var(--color-text)] hover:border-[var(--color-scholar-emerald)]/40 hover:bg-[var(--color-emerald-tint)]/30',
+                selected: 'border-[var(--color-brand)] bg-[var(--color-brand)] text-white shadow-xs',
+                unselected: 'border-[var(--color-brand)]/30 bg-[var(--color-surface)] text-[var(--color-text)] hover:border-[var(--color-brand)]/50 hover:bg-[var(--color-brand-muted)]/30',
                 iconSelected: 'text-white',
-                iconUnselected: 'text-[var(--color-scholar-emerald)]',
+                iconUnselected: 'text-[var(--color-brand)]',
               },
             }
             const theme = ratingThemes[rating.id] || ratingThemes.good
@@ -213,7 +213,7 @@ export default function ActiveRecallDeck({
                 onClick={() => setSelectedRating(rating.id)}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 sm:p-2.5 rounded-lg border transition-colors cursor-pointer select-none text-center',
-                  'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)] active:scale-95',
+                  'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-95',
                   isSelected ? theme.selected : theme.unselected
                 )}
                 aria-pressed={isSelected}

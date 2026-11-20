@@ -65,11 +65,11 @@ export default function RevisionTopicCard({
       <div className="space-y-1.5 min-w-0 flex-1 pl-1.5">
         <div className="flex items-center gap-2 flex-wrap">
           {/* Subject badge */}
-          <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold text-white shadow-2xs shrink-0"
-            style={{ backgroundColor: topic.subjectColor || 'var(--color-ink-slate)' }}
-          >
-            <BookOpen className="w-3 h-3" />
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] shrink-0">
+            <span
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{ backgroundColor: topic.subjectColor || 'var(--color-brand)' }}
+            />
             <span>{topic.subjectCode || topic.subjectName}</span>
           </span>
 
@@ -88,29 +88,29 @@ export default function RevisionTopicCard({
 
           {/* Urgency / Scheduled Date Badge */}
           {isOverdue && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
-              <AlertTriangle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
               <span>{relativeMeta?.text || 'Overdue'}</span>
             </span>
           )}
 
           {isDueToday && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-              <Clock className="w-3 h-3 text-amber-600 dark:text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
               <span>Due Today</span>
             </span>
           )}
 
           {!isOverdue && !isDueToday && topic.nextRevision && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-              <Calendar className="w-3 h-3 text-slate-500" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
               <span>{relativeMeta?.text || formatDate(topic.nextRevision, 'MMM d')}</span>
             </span>
           )}
 
           {isUnscheduled && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-              <HelpCircle className="w-3 h-3 text-slate-400" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 shrink-0" />
               <span>Not scheduled</span>
             </span>
           )}

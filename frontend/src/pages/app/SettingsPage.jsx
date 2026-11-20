@@ -623,32 +623,32 @@ export default function SettingsPage() {
                       className={cn(
                         'flex flex-col text-left p-4 rounded-xl border-2 transition-colors cursor-pointer select-none',
                         state.theme === 'light'
-                          ? 'border-[var(--color-scholar-emerald)] bg-[var(--color-surface)] ring-2 ring-[var(--color-scholar-emerald)]/20 shadow-sm'
+                          ? 'border-[var(--color-brand)] bg-[var(--color-surface)] ring-2 ring-[var(--color-brand)]/20 shadow-sm'
                           : 'border-[var(--color-border)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-hover)]'
                       )}
                     >
                       <div className="flex items-center justify-between w-full mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-800">
-                            <Sun className="w-4 h-4 text-emerald-700" />
+                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-800">
+                            <Sun className="w-4 h-4 text-blue-700" />
                           </div>
                           <div>
                             <span className="text-sm font-bold text-slate-900 block">Light Mode</span>
-                            <span className="text-[11px] text-slate-600 block">Academic Ivory</span>
+                            <span className="text-[11px] text-slate-600 block">Editorial Ivory</span>
                           </div>
                         </div>
                         {state.theme === 'light' && (
-                          <span className="w-5 h-5 rounded-full bg-[var(--color-scholar-emerald)] text-white flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </span>
                         )}
                       </div>
 
                       {/* Micro Preview */}
-                      <div className="w-full rounded-lg bg-[#f5f6f2] border border-[#dce3dd] p-2.5 space-y-1.5 text-[11px]">
+                      <div className="w-full rounded-lg bg-[#f8fafc] border border-[#cbd5e1] p-2.5 space-y-1.5 text-[11px]">
                         <div className="flex items-center justify-between">
                           <span className="w-16 h-2 rounded bg-slate-300 inline-block" />
-                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-medium">Active</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-200 text-slate-800 font-medium">Active</span>
                         </div>
                         <div className="w-full h-1.5 rounded bg-slate-200" />
                         <div className="w-3/4 h-1.5 rounded bg-slate-200" />
@@ -668,7 +668,7 @@ export default function SettingsPage() {
                       className={cn(
                         'flex flex-col text-left p-4 rounded-xl border-2 transition-colors cursor-pointer select-none',
                         state.theme === 'dark'
-                          ? 'border-[var(--color-scholar-emerald)] bg-[var(--color-surface)] ring-2 ring-[var(--color-scholar-emerald)]/20 shadow-sm'
+                          ? 'border-[var(--color-brand)] bg-[var(--color-surface)] ring-2 ring-[var(--color-brand)]/20 shadow-sm'
                           : 'border-[var(--color-border)] bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-hover)]'
                       )}
                     >
@@ -679,11 +679,11 @@ export default function SettingsPage() {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-[var(--color-text)] block">Dark Mode</span>
-                            <span className="text-[11px] text-[var(--color-text-muted)] block">Permanent Midnight</span>
+                            <span className="text-[11px] text-[var(--color-text-muted)] block">Midnight Obsidian</span>
                           </div>
                         </div>
                         {state.theme === 'dark' && (
-                          <span className="w-5 h-5 rounded-full bg-[var(--color-scholar-emerald)] text-white flex items-center justify-center">
+                          <span className="w-5 h-5 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </span>
                         )}
@@ -693,7 +693,7 @@ export default function SettingsPage() {
                       <div className="w-full rounded-lg bg-[#0b0f19] border border-[#233149] p-2.5 space-y-1.5 text-[11px]">
                         <div className="flex items-center justify-between">
                           <span className="w-16 h-2 rounded bg-slate-700 inline-block" />
-                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-950/60 text-emerald-300 font-medium">Active</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-200 font-medium">Active</span>
                         </div>
                         <div className="w-full h-1.5 rounded bg-slate-800" />
                         <div className="w-3/4 h-1.5 rounded bg-slate-800" />

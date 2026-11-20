@@ -31,8 +31,8 @@ export default function RevisionHeader({
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
               Spaced Repetition & Revision Center
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 motion-safe:animate-pulse shrink-0" />
               <span>SRS Engine • Spaced Repetition Active</span>
             </span>
           </div>

@@ -91,9 +91,9 @@ export default function PlannerWeekView({
               className={cn(
                 'p-2 sm:p-2.5 flex flex-col items-center justify-between border-r last:border-r-0 border-[var(--color-border)]/60 cursor-pointer transition-colors',
                 isSelected
-                  ? 'bg-[var(--color-emerald-tint)]/40 ring-2 ring-inset ring-[var(--color-scholar-emerald)]'
+                  ? 'bg-[var(--color-brand-muted)]/50 ring-2 ring-inset ring-[var(--color-brand)]'
                   : 'hover:bg-[var(--color-surface)]',
-                isDayToday && !isSelected && 'bg-emerald-50/40 dark:bg-emerald-950/20'
+                isDayToday && !isSelected && 'bg-[var(--color-brand-muted)]/20'
               )}
             >
               <div className="flex flex-col items-center">
@@ -101,7 +101,7 @@ export default function PlannerWeekView({
                   className={cn(
                     'text-[11px] font-medium',
                     isDayToday || isSelected
-                      ? 'text-[var(--color-scholar-emerald)] font-bold'
+                      ? 'text-[var(--color-brand)] font-bold'
                       : 'text-[var(--color-text-secondary)]'
                   )}
                 >
@@ -111,9 +111,9 @@ export default function PlannerWeekView({
                   className={cn(
                     'w-7 h-7 flex items-center justify-center rounded-full text-sm font-extrabold mt-0.5',
                     isDayToday
-                      ? 'bg-[var(--color-scholar-emerald)] text-white shadow-xs'
+                      ? 'bg-[var(--color-brand)] text-white shadow-xs'
                       : isSelected
-                      ? 'bg-[var(--color-scholar-emerald)]/15 text-[var(--color-scholar-emerald)] font-bold'
+                      ? 'bg-[var(--color-brand-muted)] text-[var(--color-brand)] font-bold'
                       : 'text-[var(--color-text)]'
                   )}
                 >
@@ -128,7 +128,7 @@ export default function PlannerWeekView({
                     className={cn(
                       'inline-block px-1.5 py-0.2 rounded text-[10px] font-semibold',
                       isDayToday || isSelected
-                        ? 'bg-emerald-500/15 text-[var(--color-scholar-emerald)]'
+                        ? 'bg-[var(--color-brand-muted)] text-[var(--color-brand)]'
                         : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border border-[var(--color-border-light)]'
                     )}
                   >
@@ -177,8 +177,8 @@ export default function PlannerWeekView({
               onClick={() => onSelectDate(day)}
               className={cn(
                 'relative col-span-1 border-r last:border-r-0 border-[var(--color-border)]/60 flex flex-col',
-                isSelected && 'bg-emerald-500/[0.04]',
-                isDayToday && 'bg-emerald-500/[0.02]'
+                isSelected && 'bg-[var(--color-brand-muted)]/15',
+                isDayToday && 'bg-[var(--color-brand-muted)]/10'
               )}
             >
               {/* Horizontal Slot Lines */}
@@ -230,33 +230,35 @@ export default function PlannerWeekView({
                     }}
                     className={cn(
                       'absolute p-1.5 sm:p-2 rounded-lg border transition-colors cursor-pointer select-none overflow-hidden flex flex-col justify-between shadow-xs',
-                      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)]',
+                      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
                       isCompleted
-                        ? 'bg-[var(--color-emerald-tint)]/40 border-emerald-300/70 dark:border-emerald-800/60'
+                        ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-85'
                         : isCancelled
-                        ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-60'
+                        ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-50'
                         : isLive
-                        ? 'bg-[var(--color-emerald-tint)] dark:bg-emerald-950/60 border-[var(--color-scholar-emerald)] ring-2 ring-[var(--color-scholar-emerald)]/30 z-10'
+                        ? 'bg-[var(--color-brand-muted)] border-[var(--color-brand)] ring-2 ring-[var(--color-brand)]/30 z-10'
                         : isPaused
                         ? 'bg-[var(--color-amber-tint)] dark:bg-amber-950/50 border-[var(--color-focus-amber)] z-10'
-                        : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-scholar-emerald)]/50 hover:shadow-xs'
+                        : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-brand)]/50 hover:shadow-xs'
                     )}
                   >
                     {/* Top Subject Badge & Status Icon */}
                     <div className="flex items-start justify-between gap-1 min-w-0">
                       {subject ? (
-                        <span
-                          className="px-1 py-0.2 rounded text-[9px] font-bold text-white truncate max-w-[80%]"
-                          style={{
-                            backgroundColor:
-                              subject.color || 'var(--color-brand)',
-                          }}
-                        >
-                          {subject.code || subject.name}
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] truncate max-w-[85%]">
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{
+                              backgroundColor:
+                                subject.color || 'var(--color-brand)',
+                            }}
+                          />
+                          <span className="truncate">{subject.code || subject.name}</span>
                         </span>
                       ) : (
-                        <span className="px-1 py-0.2 rounded text-[9px] font-bold bg-[var(--color-brand)] text-white truncate">
-                          Study
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] truncate">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
+                          <span>Study</span>
                         </span>
                       )}
 
@@ -305,7 +307,7 @@ export default function PlannerWeekView({
       {weekSessions.length === 0 && (
         <div className="p-6 text-center border-t border-[var(--color-border-light)] bg-[var(--color-bg-subtle)]/40">
           <div className="max-w-md mx-auto flex items-center justify-center gap-2 text-xs text-[var(--color-text-muted)]">
-            <Calendar className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0" />
+            <Calendar className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
             <span>
               No study blocks booked for this week. Click any day column or{' '}
               <strong>Create Study Session</strong> above to plan your schedule.

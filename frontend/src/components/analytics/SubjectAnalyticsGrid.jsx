@@ -84,14 +84,8 @@ export default function SubjectAnalyticsGrid({
 
                   {/* Exam Countdown Badge */}
                   {examInfo.isValid ? (
-                    <span
-                      className={`px-2 py-0.5 rounded text-[11px] font-semibold flex items-center gap-1 tabular-nums ${
-                        examInfo.isUrgent
-                          ? 'bg-[var(--color-error-light)] text-[var(--color-error-text)] border border-[var(--color-error-border)]'
-                          : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border-light)]'
-                      }`}
-                    >
-                      <Calendar className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] tabular-nums">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${examInfo.isUrgent ? 'bg-rose-500' : 'bg-amber-500'}`} />
                       {examInfo.label}
                     </span>
                   ) : (
@@ -111,7 +105,7 @@ export default function SubjectAnalyticsGrid({
                   <span className="text-2xl font-extrabold text-[var(--color-text)] font-tabular tabular-nums">
                     {formatDuration(actualMins)}
                   </span>
-                  <span className="text-xs font-semibold text-[var(--color-scholar-emerald)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded border border-[var(--color-border-light)] tabular-nums ml-auto">
+                  <span className="text-xs font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-border)] tabular-nums ml-auto">
                     {sharePct}% share
                   </span>
                 </div>

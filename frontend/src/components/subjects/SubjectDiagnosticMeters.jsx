@@ -99,31 +99,31 @@ export default memo(function SubjectDiagnosticMeters({
         </div>
 
         {/* Legend Badges */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--color-border-light)] text-[11px] font-medium">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-emerald-tint)] text-[var(--color-emerald-dark)] dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-800/40">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)]" />
-            <span className="font-mono tabular-nums font-bold">{completedTopics}</span> Completed · <span className="font-mono tabular-nums">{completionPercentage}%</span>
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[var(--color-border-light)] text-xs font-medium">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <span className="font-mono tabular-nums font-semibold">{completedTopics}</span> Completed · <span className="font-mono tabular-nums">{completionPercentage}%</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-teal-tint)] text-[var(--color-study-teal)] border border-[var(--color-teal-border)]/60">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-study-teal)]" />
-            <span className="font-mono tabular-nums font-bold">{inProgressTopics}</span> In Progress
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+            <span className="font-mono tabular-nums font-semibold">{inProgressTopics}</span> In Progress
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-            <span className="w-2 h-2 rounded-full bg-[var(--color-text-muted)]" />
-            <span className="font-mono tabular-nums font-bold">{notStartedTopics}</span> Not Started
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
+            <span className="font-mono tabular-nums font-semibold">{notStartedTopics}</span> Not Started
           </span>
         </div>
       </div>
 
       {/* 2. Spaced Revision & Study Horizon Diagnostics (5 cols) */}
-      <div className="lg:col-span-5 rounded-xl border border-[var(--color-indigo-border)]/70 bg-gradient-to-b from-[var(--color-indigo-tint)]/25 to-[var(--color-surface)] dark:from-indigo-950/20 dark:to-[var(--color-surface)] p-4 sm:p-5 flex flex-col justify-between shadow-xs transition-colors hover:border-[var(--color-academic-indigo)]/60">
+      <div className="lg:col-span-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5 flex flex-col justify-between shadow-xs transition-colors hover:border-[var(--color-border-hover)]">
         <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
               Spaced Revision Queue
             </span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[var(--color-indigo-tint)] text-[var(--color-indigo-dark)] dark:text-indigo-300 border border-[var(--color-indigo-border)] text-[11px] font-bold">
-              <Sparkles className="w-3 h-3" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] text-xs font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--color-brand)]" />
               <span>SM-2 Memory Sync</span>
             </span>
           </div>

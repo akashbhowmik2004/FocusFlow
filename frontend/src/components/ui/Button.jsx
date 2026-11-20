@@ -4,11 +4,13 @@ import { forwardRef } from 'react'
 const Button = forwardRef(({ className, variant = 'default', size = 'default', children, ...props }, ref) => {
   const variants = {
     default:
-      'bg-[var(--color-ink-slate)] text-white hover:bg-slate-800 active:bg-[var(--color-ink-slate)] shadow-sm dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200',
+      'bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)] active:bg-blue-800 shadow-xs',
+    primary:
+      'bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)] active:bg-blue-800 shadow-xs',
     scholar:
-      'bg-[var(--color-scholar-emerald)] text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm',
+      'bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)] active:bg-blue-800 shadow-xs',
     focus:
-      'bg-[var(--color-scholar-emerald)] text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm',
+      'bg-[var(--color-brand)] text-white hover:bg-[var(--color-brand-hover)] active:bg-blue-800 shadow-xs',
     secondary:
       'bg-[var(--color-surface)] text-[var(--color-text)] border border-[var(--color-border)] hover:bg-[var(--color-bg-subtle)] hover:border-[var(--color-border-hover)] shadow-xs',
     outline:

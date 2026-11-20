@@ -15,7 +15,9 @@ import {
   Flame,
   Clock,
   AlertCircle,
-  Repeat
+  Repeat,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Button from '@/components/ui/Button'
@@ -32,7 +34,7 @@ const loginSchema = z.object({
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { dispatch } = useApp()
+  const { state, dispatch, toggleTheme } = useApp()
   const { login, loginWithGoogle } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -106,17 +108,17 @@ export default function Login() {
   }
 
   return (
-    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-emerald-100 selection:text-emerald-950 font-sans">
+    <div className="public-theme min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col justify-between selection:bg-blue-100 selection:text-blue-950 font-sans">
       {/* ── Top Header Navigation ───────────────────────────── */}
       <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)]/90 backdrop-blur-xl border-b border-[var(--color-border)]">
         <div className="h-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-ink-slate)] flex items-center justify-center text-white shadow-xs">
-              <GraduationCap className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white shadow-xs">
+              <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="font-bold text-lg text-[var(--color-text)] tracking-tight">FocusFlow</span>
-              <span className="text-[11px] font-semibold text-[var(--color-scholar-emerald)]">Academic</span>
+              <span className="text-[11px] font-semibold text-[var(--color-brand)]">Academic</span>
             </div>
           </Link>
 
@@ -133,9 +135,22 @@ export default function Login() {
           </nav>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand)] cursor-pointer"
+              title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {state.theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-600" />
+              )}
+            </button>
             <Link
               to="/signup"
-              className="text-xs sm:text-sm font-semibold text-[var(--color-scholar-emerald)] hover:underline"
+              className="text-xs sm:text-sm font-semibold text-[var(--color-brand)] hover:underline"
             >
               Create Account
             </Link>
@@ -151,9 +166,9 @@ export default function Login() {
             <div className="space-y-6">
               {/* Institutional Badge & Brand Identifier */}
               <div className="flex items-center gap-2.5 flex-wrap">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
-                  <GraduationCap className="w-3.5 h-3.5 text-[var(--color-scholar-emerald)]" />
-                  <span className="text-xs font-semibold">Academic Productivity Workspace</span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] shadow-xs">
+                  <GraduationCap className="w-3.5 h-3.5 text-[var(--color-brand)]" />
+                  <span className="text-xs font-medium">Academic Productivity Workspace</span>
                 </div>
               </div>
 
@@ -167,30 +182,30 @@ export default function Login() {
                 </p>
               </div>
 
-              {/* Micro In-App Product Showcase Card */}
-              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm p-6 space-y-5">
+              {/* Micro In-App Product Showcase Dossier (Single containment layer) */}
+              <div className="bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-xs divide-y divide-[var(--color-border-light)] overflow-hidden">
                 {/* Illustrative Workspace Header Row */}
-                <div className="flex items-center justify-between">
+                <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center font-bold text-xs text-[var(--color-text)]">
+                    <div className="w-9 h-9 rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] flex items-center justify-center font-bold text-xs text-[var(--color-text)] font-tabular">
                       FF
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-[var(--color-text)]">Study Routine Overview</div>
-                      <div className="text-xs text-[var(--color-text-secondary)]">Sample Academic Workspace (Illustrative Preview)</div>
+                      <div className="text-xs text-[var(--color-text-secondary)]">Sample Academic Workspace</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 shadow-xs">
-                    <Flame className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="text-xs font-bold">Study Consistency</span>
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)] text-xs font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                    <span>Study Consistency</span>
                   </div>
                 </div>
 
-                {/* Focus Module Preview */}
-                <div className="bg-[var(--color-bg-subtle)] rounded-lg p-4 space-y-2 border border-[var(--color-border)]">
+                {/* Focus Module Row */}
+                <div className="p-4 space-y-2.5 bg-[var(--color-surface-hover)]/30">
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[11px] text-[var(--color-text)] font-semibold font-tabular">
-                      PSYC 310: Sample Subject Unit
+                      PSYC 310: Cognitive Neuroscience
                     </span>
                     <span className="text-xs text-[var(--color-text-secondary)] flex items-center gap-1 font-tabular">
                       <Clock className="w-3.5 h-3.5 text-[var(--color-text-muted)]" /> 45m Block Preview
@@ -200,22 +215,22 @@ export default function Login() {
                     Synaptic Plasticity: Long-Term Potentiation Pathways
                   </div>
                   <div className="w-full bg-[var(--color-border)] rounded-full h-1.5 overflow-hidden">
-                    <div className="bg-[var(--color-scholar-emerald)] h-1.5 rounded-full w-3/4" />
+                    <div className="bg-[var(--color-brand)] h-1.5 rounded-full w-3/4" />
                   </div>
                   <div className="flex justify-between items-center text-[var(--color-text-secondary)] text-xs pt-0.5">
                     <span>Phase: Active Study Block</span>
-                    <span className="font-semibold text-[var(--color-scholar-emerald)]">In Progress</span>
+                    <span className="font-semibold text-[var(--color-brand)]">In Progress</span>
                   </div>
                 </div>
 
                 {/* Spaced Repetition Meta Strip */}
-                <div className="flex items-center justify-between pt-1">
+                <div className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Repeat className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
+                    <Repeat className="w-4 h-4 text-[var(--color-brand)]" />
                     <span className="text-xs text-[var(--color-text)] font-medium">Scheduled Topic Reviews</span>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] text-xs border border-[var(--color-border)]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-scholar-emerald)]" />
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] text-xs font-medium border border-[var(--color-border)] font-tabular">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
                     <span>SM-2 Spaced Retrieval</span>
                   </div>
                 </div>
@@ -224,7 +239,7 @@ export default function Login() {
 
             {/* Academic Principle Quotation & Editorial Anchor */}
             <div className="space-y-4 pt-2">
-              <blockquote className="text-sm text-[var(--color-text-secondary)] italic border-l-2 border-[var(--color-scholar-emerald)] pl-4 bg-[var(--color-surface)]/60 py-3 rounded-r-lg">
+              <blockquote className="text-sm text-[var(--color-text-secondary)] italic border-l-2 border-[var(--color-brand)] pl-4 bg-[var(--color-surface)]/60 py-3 rounded-r-lg">
                 “Deep work is the ability to focus without distraction on a cognitively demanding task. It optimizes retention, synthesis, and genuine mastery.”
               </blockquote>
               <div className="flex items-center justify-between text-[var(--color-text-secondary)] text-xs">
@@ -307,7 +322,7 @@ export default function Login() {
                       id="email-field"
                       type="email"
                       {...register('email')}
-                      className="w-full h-11 px-3.5 pr-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pr-10 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
                       placeholder="name@university.edu"
                     />
                     <Mail className="absolute right-3.5 top-3 w-4 h-4 text-[var(--color-text-muted)] pointer-events-none" />
@@ -332,7 +347,7 @@ export default function Login() {
                     <a
                       href="#forgot"
                       onClick={handleForgotPassword}
-                      className="text-xs text-[var(--color-scholar-emerald)] hover:underline font-medium"
+                      className="text-xs text-[var(--color-brand)] hover:underline font-medium"
                     >
                       Forgot password?
                     </a>
@@ -342,13 +357,13 @@ export default function Login() {
                       id="password-field"
                       type={showPassword ? 'text' : 'password'}
                       {...register('password')}
-                      className="w-full h-11 px-3.5 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)] focus:border-transparent transition-colors"
+                      className="w-full h-11 px-3.5 pr-11 rounded-lg bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] shadow-xs placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)] focus:border-transparent transition-colors"
                       placeholder="••••••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-scholar-emerald)]"
+                      className="absolute right-3 top-2.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1 rounded-md transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--color-brand)]"
                       aria-label="Toggle password visibility"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -368,7 +383,7 @@ export default function Login() {
                     <input
                       type="checkbox"
                       {...register('rememberMe')}
-                      className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-scholar-emerald)] focus:ring-[var(--color-scholar-emerald)] cursor-pointer"
+                      className="w-4 h-4 rounded border-[var(--color-border)] text-[var(--color-brand)] focus:ring-[var(--color-brand)] cursor-pointer"
                     />
                     <span>Remember me on this workstation</span>
                   </label>
@@ -379,7 +394,7 @@ export default function Login() {
                   <Button
                     type="submit"
                     disabled={isLoading || isGoogleLoading}
-                    className="w-full justify-center h-12 text-sm font-semibold bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white shadow-md transition-colors duration-150 active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="w-full justify-center h-12 text-sm font-semibold bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white shadow-md transition-colors duration-150 active:scale-[0.99] motion-reduce:active:scale-100"
                   >
                     {isLoading ? (
                       <>
@@ -401,7 +416,7 @@ export default function Login() {
                 Don't have an institutional account?{' '}
                 <Link
                   to="/signup"
-                  className="font-semibold text-[var(--color-scholar-emerald)] hover:underline ml-1"
+                  className="font-semibold text-[var(--color-brand)] hover:underline ml-1"
                 >
                   Create an account
                 </Link>
@@ -409,7 +424,7 @@ export default function Login() {
 
               {/* Bottom Security Audit Meta */}
               <div className="bg-[var(--color-bg-subtle)] rounded-lg p-3 flex items-center gap-2.5 text-[var(--color-text-secondary)] border border-[var(--color-border)]">
-                <Lock className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0" />
+                <Lock className="w-4 h-4 text-[var(--color-brand)] shrink-0" />
                 <span className="text-[11px] leading-tight">
                   Encrypted connection. Institutional email and Google sign-in supported.
                 </span>
@@ -441,8 +456,8 @@ export default function Login() {
             <Link to="/#faq" className="hover:text-[var(--color-text)] transition-colors">
               Privacy Policy
             </Link>
-            <span className="flex items-center gap-1.5 text-[var(--color-scholar-emerald)] font-medium">
-              <span className="w-2 h-2 rounded-full bg-[var(--color-scholar-emerald)]" />
+            <span className="flex items-center gap-1.5 text-[var(--color-brand)] font-medium">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-brand)]" />
               System Operational
             </span>
           </div>

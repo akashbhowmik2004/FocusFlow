@@ -213,11 +213,11 @@ export default function RevisionAnalyticsCard({
 
               {/* Overdue Alert Badge */}
               {overdueCount > 0 ? (
-                <div className="p-3 bg-[var(--color-error-light)]/50 rounded-lg border border-[var(--color-error-border)] flex items-center justify-between">
+                <div className="p-3 bg-[var(--color-bg-subtle)] rounded-lg border border-[var(--color-border)] flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-[var(--color-error)] shrink-0" />
                     <div className="flex flex-col text-xs">
-                      <span className="font-bold text-[var(--color-error-text)] tabular-nums">
+                      <span className="font-bold text-[var(--color-text)] tabular-nums flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
                         {overdueCount} Topic{overdueCount > 1 ? 's' : ''} Overdue
                       </span>
                       <span className="text-[11px] text-[var(--color-text-secondary)]">
@@ -290,14 +290,14 @@ export default function RevisionAnalyticsCard({
               <tbody className="divide-y divide-[var(--card-border-subtle)]">
                 {historyRecords.slice(0, 10).map((record) => {
                   const rating = (record.rating || 'GOOD').toUpperCase()
-                  const ratingBadgeClass =
+                  const ratingDot =
                     rating === 'EASY'
-                      ? 'bg-[var(--color-scholar-emerald)]/10 text-[var(--color-scholar-emerald)] border-[var(--color-scholar-emerald)]/20'
+                      ? 'bg-emerald-500'
                       : rating === 'GOOD'
-                      ? 'bg-[var(--color-brand)]/10 text-[var(--color-brand)] border-[var(--color-brand)]/20'
+                      ? 'bg-blue-500'
                       : rating === 'HARD'
-                      ? 'bg-[var(--color-streak-amber)]/10 text-[var(--color-streak-amber)] border-[var(--color-streak-amber)]/20'
-                      : 'bg-[var(--color-error)]/10 text-[var(--color-error)] border-[var(--color-error)]/20'
+                      ? 'bg-amber-500'
+                      : 'bg-rose-500'
 
                   const dateVal = record.reviewedAt || record.createdAt
                   const dateStr = dateVal ? format(new Date(dateVal), 'MMM d, yyyy') : '—'
@@ -317,8 +317,9 @@ export default function RevisionAnalyticsCard({
                         </span>
                       </td>
                       <td className="py-2.5 px-3">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold border ${ratingBadgeClass}`}>
-                          {rating}
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${ratingDot}`} />
+                          <span>{rating}</span>
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-right font-tabular tabular-nums text-[var(--color-text)] font-semibold">

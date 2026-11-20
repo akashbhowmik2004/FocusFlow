@@ -11,17 +11,15 @@
     <script>
       (function() {
         try {
-          var path = window.location.pathname;
-          var isPublic = path === '/' || path === '/login' || path === '/signup';
-          if (!isPublic) {
+          var saved = localStorage.getItem('focusflow_theme');
+          var isDark = saved ? saved === 'dark' : true;
+          if (isDark) {
             document.documentElement.classList.add('dark');
             document.documentElement.style.colorScheme = 'dark';
           } else {
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
           }
-          // Clean up obsolete localStorage theme keys to avoid stale state
-          localStorage.removeItem('focusflow_theme');
         } catch (e) {}
       })();
     </script>

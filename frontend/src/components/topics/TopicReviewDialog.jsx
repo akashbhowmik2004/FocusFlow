@@ -79,11 +79,11 @@ export default function TopicReviewDialog({
         <div className="pb-4 border-b border-[var(--color-border-light)]">
           <div className="flex items-center gap-2 flex-wrap mb-2">
             {subject && (
-              <span
-                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold text-white shadow-xs"
-                style={{ backgroundColor: subject.color || 'var(--color-brand)' }}
-              >
-                <BookOpen className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)]">
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: subject.color || 'var(--color-brand)' }}
+                />
                 <span>{subject.code || subject.name}</span>
               </span>
             )}

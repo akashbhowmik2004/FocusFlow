@@ -179,31 +179,31 @@ export const StatCard = memo(function StatCard({
       accent: 'var(--color-academic-indigo)',
       border: 'border-[var(--color-indigo-border)]/60 hover:border-[var(--color-academic-indigo)]/60',
       iconBox: 'bg-[var(--color-indigo-tint)] text-[var(--color-academic-indigo)] border border-[var(--color-indigo-border)]/70',
-      surface: 'bg-gradient-to-b from-[var(--color-indigo-tint)]/25 to-[var(--color-surface)] dark:from-indigo-950/20 dark:to-[var(--color-surface)]',
+      surface: 'bg-[var(--color-surface)]',
     },
     emerald: {
       accent: 'var(--color-scholar-emerald)',
-      border: 'border-emerald-200/60 dark:border-emerald-900/60 hover:border-[var(--color-scholar-emerald)]/60',
-      iconBox: 'bg-[var(--color-emerald-tint)] text-[var(--color-scholar-emerald)] border border-emerald-300/40 dark:border-emerald-800/60',
-      surface: 'bg-gradient-to-b from-[var(--color-emerald-tint)]/25 to-[var(--color-surface)] dark:from-emerald-950/20 dark:to-[var(--color-surface)]',
+      border: 'border-blue-200/60 dark:border-blue-900/60 hover:border-[var(--color-brand)]/60',
+      iconBox: 'bg-[var(--color-emerald-tint)] text-[var(--color-brand)] border border-blue-300/40 dark:border-blue-800/60',
+      surface: 'bg-[var(--color-surface)]',
     },
     teal: {
       accent: 'var(--color-study-teal)',
       border: 'border-[var(--color-teal-border)]/60 hover:border-[var(--color-study-teal)]/60',
       iconBox: 'bg-[var(--color-teal-tint)] text-[var(--color-study-teal)] border border-[var(--color-teal-border)]/70',
-      surface: 'bg-gradient-to-b from-[var(--color-teal-tint)]/25 to-[var(--color-surface)] dark:from-teal-950/20 dark:to-[var(--color-surface)]',
+      surface: 'bg-[var(--color-surface)]',
     },
     amber: {
       accent: 'var(--color-focus-amber)',
       border: 'border-[var(--color-amber-border)]/60 hover:border-[var(--color-focus-amber)]/60',
       iconBox: 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border border-[var(--color-amber-border)]/70',
-      surface: 'bg-gradient-to-b from-[var(--color-amber-tint)]/25 to-[var(--color-surface)] dark:from-amber-950/20 dark:to-[var(--color-surface)]',
+      surface: 'bg-[var(--color-surface)]',
     },
     coral: {
       accent: 'var(--color-soft-coral)',
       border: 'border-[var(--color-coral-border)]/60 hover:border-[var(--color-soft-coral)]/60',
       iconBox: 'bg-[var(--color-coral-tint)] text-[var(--color-soft-coral)] border border-[var(--color-coral-border)]/70',
-      surface: 'bg-gradient-to-b from-[var(--color-coral-tint)]/25 to-[var(--color-surface)] dark:from-rose-950/20 dark:to-[var(--color-surface)]',
+      surface: 'bg-[var(--color-surface)]',
     },
     default: {
       accent: undefined,
@@ -636,23 +636,25 @@ export const SessionCard = memo(function SessionCard({
 
             {/* Subject Code Badge */}
             {subject && (
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md text-white shrink-0 tracking-wide"
-                style={{ backgroundColor: subject.color }}
-              >
-                {subject.code || subject.name}
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] shrink-0">
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: subject.color }}
+                />
+                <span>{subject.code || subject.name}</span>
               </span>
             )}
 
             {/* Live Status Badge */}
             {isCurrentLive && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 px-2 py-0.5 rounded-full font-tabular">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded-md font-tabular">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] animate-pulse shrink-0" />
                 Live Now
               </span>
             )}
             {session.status === 'paused' && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 px-2 py-0.5 rounded-md font-tabular">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded-md font-tabular">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                 Paused
               </span>
             )}

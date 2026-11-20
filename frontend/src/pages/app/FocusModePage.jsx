@@ -176,8 +176,8 @@ export default function FocusModePage() {
               {session.title}
             </h1>
             <div className="mt-2.5 flex items-center gap-2 text-xs text-[var(--color-text-secondary)]">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand-subtle)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand)]" />
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--color-bg-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--color-text)] border border-[var(--color-border)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
                 {isTerminal ? 'Session finished' : session.status === 'paused' ? 'Paused' : 'In focus'}
               </span>
               <span>·</span>

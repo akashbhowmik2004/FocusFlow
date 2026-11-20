@@ -354,14 +354,14 @@ export default function Onboarding() {
       <header className="sticky top-0 z-40 w-full bg-[var(--color-surface)] border-b border-[var(--color-border)]">
         <div className="h-16 max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-ink-slate)] flex items-center justify-center text-white shadow-xs">
-              <GraduationCap className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--color-brand)] flex items-center justify-center text-white shadow-xs">
+              <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div>
               <span className="font-bold text-base tracking-tight text-[var(--color-text)]">
                 FocusFlow
               </span>
-              <span className="ml-2 text-xs font-semibold text-[var(--color-scholar-emerald)]">
+              <span className="ml-2 text-xs font-semibold text-[var(--color-brand)]">
                 Academic Onboarding
               </span>
             </div>
@@ -377,7 +377,7 @@ export default function Onboarding() {
         {/* Linear Progress Bar */}
         <div className="w-full h-1 bg-[var(--color-border)] overflow-hidden">
           <motion.div
-            className="h-full bg-[var(--color-scholar-emerald)]"
+            className="h-full bg-[var(--color-brand)]"
             initial={{ width: 0 }}
             animate={{ width: `${(step / 5) * 100}%` }}
             transition={{ duration: 0.2 }}
@@ -389,8 +389,8 @@ export default function Onboarding() {
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col justify-center">
         {/* Step Indicator Header */}
         <div className="mb-8">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)] mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-scholar-emerald)]" />
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
             Academic setup
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
@@ -425,7 +425,7 @@ export default function Onboarding() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Alex Rivera"
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                     />
                   </div>
                 </div>
@@ -446,7 +446,7 @@ export default function Onboarding() {
                       placeholder="e.g. Stanford University, MIT, Oxford"
                       className={`w-full pl-10 pr-3.5 py-2.5 rounded-xl border ${
                         errors.institution ? 'border-rose-500 ring-1 ring-rose-500' : 'border-[var(--color-border)]'
-                      } bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]`}
+                      } bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]`}
                     />
                   </div>
                   {errors.institution && (
@@ -463,7 +463,7 @@ export default function Onboarding() {
                     value={degree}
                     onChange={(e) => setDegree(e.target.value)}
                     placeholder="e.g. B.S. Computer Science"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   />
                 </div>
 
@@ -476,7 +476,7 @@ export default function Onboarding() {
                     value={department}
                     onChange={(e) => setDepartment(e.target.value)}
                     placeholder="e.g. School of Engineering"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   />
                 </div>
 
@@ -487,7 +487,7 @@ export default function Onboarding() {
                   <select
                     value={academicYear}
                     onChange={(e) => setAcademicYear(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   >
                     <option value={1}>1st Year (Freshman)</option>
                     <option value={2}>2nd Year (Sophomore)</option>
@@ -505,7 +505,7 @@ export default function Onboarding() {
                   <select
                     value={currentSemester}
                     onChange={(e) => setCurrentSemester(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((s) => (
                       <option key={s} value={s}>
@@ -538,7 +538,7 @@ export default function Onboarding() {
                     value={academicSession}
                     onChange={(e) => setAcademicSession(e.target.value)}
                     placeholder="e.g. 2026-2027"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   />
                 </div>
 
@@ -552,7 +552,7 @@ export default function Onboarding() {
                     max={2035}
                     value={expectedGraduationYear}
                     onChange={(e) => setExpectedGraduationYear(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   />
                 </div>
 
@@ -566,7 +566,7 @@ export default function Onboarding() {
                       type="date"
                       value={semesterStartDate}
                       onChange={(e) => setSemesterStartDate(e.target.value)}
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                     />
                   </div>
                   <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
@@ -584,7 +584,7 @@ export default function Onboarding() {
                       type="date"
                       value={semesterEndDate}
                       onChange={(e) => setSemesterEndDate(e.target.value)}
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                     />
                   </div>
                 </div>
@@ -613,7 +613,7 @@ export default function Onboarding() {
                     value={studyGoal}
                     onChange={(e) => setStudyGoal(e.target.value)}
                     placeholder="e.g. Master Operating Systems, maintain 3.9 CGPA"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                   />
                 </div>
               </div>
@@ -629,7 +629,7 @@ export default function Onboarding() {
                   max={10}
                   value={targetCgpa}
                   onChange={(e) => setTargetCgpa(Number(e.target.value))}
-                  className="w-36 px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                  className="w-36 px-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                 />
               </div>
 
@@ -676,7 +676,7 @@ export default function Onboarding() {
                   value={customGoal}
                   onChange={(e) => setCustomGoal(e.target.value)}
                   placeholder="e.g. Build disciplined habits, prioritize deep focus over frantic last-minute cramming."
-                  className="w-full px-3.5 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                  className="w-full px-3.5 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                 />
               </div>
             </motion.div>
@@ -730,7 +730,7 @@ export default function Onboarding() {
                       type="time"
                       value={preferredStartTime}
                       onChange={(e) => setPreferredStartTime(e.target.value)}
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                     />
                   </div>
                 </div>
@@ -745,7 +745,7 @@ export default function Onboarding() {
                       type="time"
                       value={preferredEndTime}
                       onChange={(e) => setPreferredEndTime(e.target.value)}
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-scholar-emerald)]"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]"
                     />
                   </div>
                 </div>
@@ -875,14 +875,14 @@ export default function Onboarding() {
                       placeholder="Subject name (e.g. Database Systems)"
                       value={newSubName}
                       onChange={(e) => setNewSubName(e.target.value)}
-                      className="sm:col-span-2 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-scholar-emerald)]"
+                      className="sm:col-span-2 px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
                     />
                     <input
                       type="text"
                       placeholder="Code (e.g. CS 320)"
                       value={newSubCode}
                       onChange={(e) => setNewSubCode(e.target.value)}
-                      className="px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-scholar-emerald)]"
+                      className="px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-xs text-[var(--color-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
                     />
                   </div>
                   <div className="flex items-center justify-between gap-3 pt-1">
@@ -948,7 +948,7 @@ export default function Onboarding() {
                 <Button
                   type="button"
                   onClick={handleNextStep}
-                  className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white text-xs px-5"
+                  className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-xs px-5 shadow-xs"
                 >
                   Continue <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
@@ -958,7 +958,7 @@ export default function Onboarding() {
                 type="button"
                 onClick={handleFinish}
                 disabled={isSubmitting}
-                className="bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white text-xs px-6 shadow-sm"
+                className="bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white text-xs px-6 shadow-xs"
               >
                 {isSubmitting ? (
                   'Configuring workspace...'

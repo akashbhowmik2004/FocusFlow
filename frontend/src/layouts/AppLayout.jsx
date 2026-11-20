@@ -12,8 +12,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  PanelLeft,
-  PanelLeftClose,
   Play,
   RotateCcw,
   Search,
@@ -23,6 +21,8 @@ import {
   User,
   X,
   Zap,
+  Clock,
+  Compass,
 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 import { useAuth } from '@/context/AuthContext'
@@ -31,74 +31,28 @@ import { getRevisionSummary } from '@/lib/revisionSummary'
 import { getActiveStudyStreak } from '@/lib/analytics'
 import { toast } from 'sonner'
 
-const primaryNavigation = [
-  { label: 'Overview', description: 'Your academic pulse', path: '/app/dashboard', icon: LayoutDashboard },
-  { label: 'My Day', description: 'Execute today\u2019s plan', path: '/app/day', icon: CheckCircle2 },
-  { label: 'Planner', description: 'Shape your schedule', path: '/app/planner', icon: CalendarDays },
-]
-
-const learningNavigation = [
-  { label: 'Subjects', description: 'Syllabus and topics', path: '/app/subjects', icon: BookOpen },
-  { label: 'Revision Center', description: 'Remember what you learn', path: '/app/revision', icon: RotateCcw },
-  { label: 'Insights', description: 'Progress and patterns', path: '/app/progress', icon: BarChart3 },
+const navItems = [
+  { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+  { label: 'My Day', path: '/app/day', icon: CheckCircle2 },
+  { label: 'Planner', path: '/app/planner', icon: CalendarDays },
+  { label: 'Subjects', path: '/app/subjects', icon: BookOpen },
+  { label: 'Revision', path: '/app/revision', icon: RotateCcw },
+  { label: 'Analytics', path: '/app/progress', icon: BarChart3 },
+  { label: 'Focus Timer', path: '/app/focus', icon: Clock },
+  { label: 'Settings', path: '/app/settings', icon: Settings },
 ]
 
 function isCurrentPath(pathname, path) {
-  if (path === '/app/progress' && pathname.startsWith('/app/insights')) return true
-  return pathname === path || (path !== '/app/dashboard' && pathname.startsWith(path))
-}
-
-function Navigation({ items, pathname, collapsed, onNavigate }) {
-  return (
-    <div className="space-y-1">
-      {items.map((item) => {
-        const active = isCurrentPath(pathname, item.path)
-        const Icon = item.icon
-        return (
-          <Link
-            key={item.path}
-            to={item.path}
-            onClick={onNavigate}
-            title={collapsed ? item.label : undefined}
-            className={cn(
-              'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
-              collapsed && 'justify-center px-0',
-              active
-                ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
-                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
-            )}
-          >
-            <Icon
-              className={cn(
-                'h-[18px] w-[18px] shrink-0',
-                active
-                  ? 'text-white'
-                  : 'text-[var(--color-text-muted)] group-hover:text-[var(--color-text)]',
-              )}
-            />
-            {!collapsed && (
-              <span className="min-w-0">
-                <span className="block truncate font-medium">{item.label}</span>
-                <span
-                  className={cn(
-                    'mt-0.5 block truncate text-[10px]',
-                    active ? 'text-emerald-100 dark:text-indigo-100 font-medium' : 'text-[var(--color-text-muted)]',
-                  )}
-                >
-                  {item.description}
-                </span>
-              </span>
-            )}
-          </Link>
-        )
-      })}
-    </div>
-  )
+  if (path === '/app/progress' && (pathname.startsWith('/app/progress') || pathname.startsWith('/app/insights') || pathname.startsWith('/app/analytics'))) return true
+  if (path === '/app/focus' && pathname.startsWith('/app/focus')) return true
+  if (path === '/app/settings' && pathname.startsWith('/app/settings')) return true
+  if (path === '/app/dashboard') return pathname === '/app/dashboard'
+  return pathname === path || pathname.startsWith(path)
 }
 
 export default function AppLayout() {
   const { state, dispatch, toggleTheme } = useApp()
-  const { logout, isAuthenticated } = useAuth()
+  const { logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const shouldReduceMotion = useReducedMotion()
@@ -148,570 +102,469 @@ export default function AppLayout() {
       const start = new Date(state.user.semesterStartDate)
       if (!isNaN(start.getTime())) {
         const diffMs = Date.now() - start.getTime()
-        if (diffMs >= 0) {
-          const week = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1
-          return `${semStr} · Week ${week}`
-        }
+        const weekNum = Math.max(1, Math.ceil(diffMs / (7 * 24 * 60 * 60 * 1000)))
+        return `${semStr} · Wk ${weekNum}`
       }
     }
     return semStr
   }, [state.user?.currentSemester, state.user?.semesterStartDate])
 
-  const pageTitle = location.pathname.includes('/day')
-    ? 'My Day'
-    : location.pathname.includes('/planner')
-      ? 'Planner'
-      : location.pathname.includes('/subjects/')
-        ? 'Subject details'
-        : location.pathname.includes('/subjects')
-          ? 'Subjects'
-          : location.pathname.includes('/revision')
-            ? 'Revision Center'
-            : location.pathname.includes('/progress') || location.pathname.includes('/insights')
-              ? 'Insights'
-              : location.pathname.includes('/settings')
-                ? 'Settings'
-                : 'Overview'
+  const pageTitle = useMemo(() => {
+    const path = location.pathname
+    if (path.startsWith('/app/dashboard')) return 'Overview'
+    if (path.startsWith('/app/day')) return 'My Day'
+    if (path.startsWith('/app/planner')) return 'Academic Timetable'
+    if (path.startsWith('/app/subjects/')) return 'Course Syllabus'
+    if (path.startsWith('/app/subjects')) return 'Subject Library'
+    if (path.startsWith('/app/revision')) return 'Revision Center'
+    if (path.startsWith('/app/progress') || path.startsWith('/app/insights')) return 'Telemetry & Insights'
+    if (path.startsWith('/app/settings')) return 'Preferences'
+    return 'Workspace'
+  }, [location.pathname])
 
+  // Click outside listener for dropdowns
   useEffect(() => {
-    const closeMenus = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target))
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setUserMenuOpen(false)
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target))
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
         setNotificationsOpen(false)
-    }
-    document.addEventListener('mousedown', closeMenus)
-    return () => document.removeEventListener('mousedown', closeMenus)
-  }, [])
-
-  useEffect(() => {
-    const handleShortcut = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault()
-        setSearchOpen(true)
       }
     }
-    document.addEventListener('keydown', handleShortcut)
-    return () => document.removeEventListener('keydown', handleShortcut)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Keyboard shortcut listener for ⌘K search
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+        event.preventDefault()
+        setSearchOpen((open) => !open)
+      }
+      if (event.key === 'Escape' && searchOpen) {
+        setSearchOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [searchOpen])
+
   const handleSignOut = async () => {
+    setUserMenuOpen(false)
     await logout()
     navigate('/login')
     toast.success('Signed out successfully')
   }
 
-  // ── Sidebar content (shared between desktop and mobile drawer) ──────────────
-  const sidebar = (mobile = false) => (
-    <div className={cn('flex h-full flex-col', mobile ? 'p-4' : '')}>
-      {/* Logo + collapse button */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-1 pb-4">
-        <Link
-          to="/app/dashboard"
-          className={cn('flex items-center gap-2.5', state.sidebarOpen || mobile ? '' : 'mx-auto')}
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-ink-slate)] text-white shadow-sm dark:bg-slate-100 dark:text-slate-900">
-            <Zap className="h-4 w-4 fill-current" />
-          </span>
-          {(state.sidebarOpen || mobile) && (
-            <span>
-              <span className="block text-[15px] font-semibold tracking-tight text-[var(--color-text)]">
-                FocusFlow
-              </span>
-              <span className="block text-xs font-normal text-[var(--color-text-muted)]">
-                Academic Core
-              </span>
-            </span>
-          )}
-        </Link>
-        {mobile ? (
-          <button
-            onClick={() => setMobileMenuOpen(false)}
-            className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]"
-            aria-label="Close menu"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        ) : state.sidebarOpen ? (
-          <button
-            onClick={() => dispatch({ type: 'TOGGLE_SIDEBAR' })}
-            className="rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]"
-            title="Collapse sidebar"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </button>
-        ) : null}
-      </div>
-
-      {/* Navigation links */}
-      <div className="flex-1 space-y-6 overflow-y-auto py-5">
-        {(state.sidebarOpen || mobile) && (
-          <p className="px-3 pb-1 text-xs font-semibold text-[var(--color-text-muted)]">
-            Plan
-          </p>
-        )}
-        <Navigation
-          items={primaryNavigation}
-          pathname={location.pathname}
-          collapsed={!mobile && !state.sidebarOpen}
-          onNavigate={() => mobile && setMobileMenuOpen(false)}
-        />
-
-        {(state.sidebarOpen || mobile) && (
-          <p className="px-3 pb-1 pt-3 text-xs font-semibold text-[var(--color-text-muted)]">
-            Learn
-          </p>
-        )}
-        <Navigation
-          items={learningNavigation}
-          pathname={location.pathname}
-          collapsed={!mobile && !state.sidebarOpen}
-          onNavigate={() => mobile && setMobileMenuOpen(false)}
-        />
-
-        {/* Quick-access subjects list (desktop expanded only) */}
-        {!mobile && state.sidebarOpen && state.subjects.length > 0 && (
-          <div className="border-t border-[var(--color-border-light)] pt-4">
-            <div className="flex items-center justify-between px-3 pb-2">
-              <span className="text-xs font-semibold text-[var(--color-text-muted)]">
-                Your subjects
-              </span>
-              <Link to="/app/subjects" className="text-xs font-medium text-[var(--color-brand)] hover:underline">
-                View all
-              </Link>
-            </div>
-            <div className="space-y-0.5">
-              {state.subjects.slice(0, 4).map((subject) => (
-                <Link
-                  key={subject.id}
-                  to={`/app/subjects/${subject.id}`}
-                  onClick={() => mobile && setMobileMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-xs text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] transition-colors"
-                >
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: subject.color }}
-                  />
-                  <span className="truncate">{subject.name}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Focus Mode Quick Launcher */}
-      <div className="pt-2 pb-3 px-1 border-t border-[var(--color-border-light)]">
-        <button
-          type="button"
-          onClick={() => {
-            if (mobile) setMobileMenuOpen(false)
-            navigate('/app/focus')
-          }}
-          title={!mobile && !state.sidebarOpen ? 'Focus Mode' : undefined}
-          className={cn(
-            'w-full flex items-center gap-2 rounded-lg py-2.5 px-3 font-medium text-sm text-white bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 active:bg-emerald-800 shadow-sm transition-colors active:scale-[0.98] motion-reduce:active:scale-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-scholar-emerald)]',
-            !mobile && !state.sidebarOpen ? 'justify-center px-0' : 'justify-center'
-          )}
-        >
-          <Play className="h-4 w-4 fill-current shrink-0" />
-          {(state.sidebarOpen || mobile) && (
-            <span>{state.activeSession ? 'Resume Focus Session' : 'Start Focus Session'}</span>
-          )}
-        </button>
-      </div>
-
-      {/* Footer: settings + user card */}
-      <div className="space-y-2 border-t border-[var(--color-border-light)] pt-3">
-        <Link
-          to="/app/settings"
-          onClick={() => mobile && setMobileMenuOpen(false)}
-          className={cn(
-            'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
-            !mobile && !state.sidebarOpen && 'justify-center px-0',
-            location.pathname.startsWith('/app/settings')
-              ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
-              : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]'
-          )}
-          title={!mobile && !state.sidebarOpen ? 'Settings' : undefined}
-        >
-          <Settings className={cn('h-[18px] w-[18px] shrink-0', location.pathname.startsWith('/app/settings') ? 'text-white' : 'text-[var(--color-text-muted)]')} />
-          {(state.sidebarOpen || mobile) && <span>Settings</span>}
-        </Link>
-        {(state.sidebarOpen || mobile) && (
-          <div className="flex items-center gap-2.5 rounded-xl border border-[var(--color-border-light)] bg-[var(--color-bg-subtle)] p-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-ink-slate)] text-xs font-semibold text-white dark:bg-slate-700">
-              {getInitials(state.user?.name || 'User')}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-scholar-emerald)] shrink-0" aria-hidden="true" />
-                <p className="truncate text-xs font-semibold text-[var(--color-text)]">
-                  {state.user?.name || 'Student'}
-                </p>
-              </div>
-              <p className="truncate text-[11px] text-[var(--color-text-muted)]">
-                {state.user?.studyGoal || 'Academic focus'}
-              </p>
-            </div>
-            <button
-              onClick={handleSignOut}
-              className="rounded-lg p-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-rose-500 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-500 cursor-pointer"
-              title="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] overflow-x-clip">
-      {/* Mobile top bar */}
-      <div className="flex h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:hidden">
-        <button
-          onClick={() => setMobileMenuOpen(true)}
-          className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
-          aria-label="Open menu"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-        <Link to="/app/dashboard" className="flex items-center gap-2 font-semibold">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-ink-slate)] text-white dark:bg-slate-100 dark:text-slate-900">
-            <Zap className="h-4 w-4 fill-current" />
-          </span>
-          <span className="text-sm font-semibold">FocusFlow</span>
-        </Link>
-        <button
-          onClick={toggleTheme}
-          className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
-          title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {state.theme === 'dark' ? (
-            <Sun className="h-4 w-4 text-amber-400" />
-          ) : (
-            <Moon className="h-4 w-4 text-slate-600" />
-          )}
-        </button>
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col md:flex-row overflow-x-clip selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-950 dark:selection:text-blue-200">
+      {/* ── MOBILE TOP BAR ────────────────────────────────────── */}
+      <div className="flex h-14 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 md:hidden sticky top-0 z-40 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand)] cursor-pointer"
+            aria-label="Open navigation menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <Link to="/app/dashboard" className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-brand)] text-white font-bold text-xs shadow-xs">
+              FF
+            </span>
+            <span className="text-sm font-bold tracking-tight text-[var(--color-text)]">FocusFlow</span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-brand)] cursor-pointer"
+            title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {state.theme === 'dark' ? (
+              <Sun className="h-4 w-4 text-amber-400" />
+            ) : (
+              <Moon className="h-4 w-4 text-slate-600" />
+            )}
+          </button>
+          <button
+            onClick={() => navigate('/app/focus')}
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand)] text-white shadow-xs"
+            title="Focus Mode"
+          >
+            <Play className="h-3.5 w-3.5 fill-current" />
+          </button>
+        </div>
       </div>
 
-      {/* Mobile navigation drawer */}
+      {/* ── MOBILE SLIDING DRAWER ─────────────────────────────── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
-            <motion.button
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm cursor-default"
-              aria-label="Close navigation"
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs cursor-default"
             />
             <motion.aside
-              initial={shouldReduceMotion ? { opacity: 0 } : { x: -320 }}
-              animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
-              exit={shouldReduceMotion ? { opacity: 0 } : { x: -320 }}
-              transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-              className="relative z-10 h-full w-[min(84vw,320px)] bg-[var(--color-surface)] shadow-2xl"
+              initial={{ x: -280 }}
+              animate={{ x: 0 }}
+              exit={{ x: -280 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+              className="relative z-10 h-full w-72 bg-[var(--color-surface)] border-r border-[var(--color-border)] p-5 flex flex-col justify-between shadow-2xl"
             >
-              {sidebar(true)}
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border)]">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand)] text-white font-bold text-xs shadow-xs">
+                      FF
+                    </span>
+                    <div>
+                      <span className="block text-sm font-bold tracking-tight text-[var(--color-text)]">FocusFlow</span>
+                      <span className="block text-[11px] text-[var(--color-text-muted)]">Academic Workspace</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1.5 rounded-lg text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)]"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <nav className="space-y-1">
+                  {navItems.map((item) => {
+                    const active = isCurrentPath(location.pathname, item.path)
+                    const Icon = item.icon
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                          active
+                            ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
+                            : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={cn('h-4 w-4', active ? 'text-white' : 'text-[var(--color-text-muted)]')} />
+                          <span>{item.label}</span>
+                        </div>
+                        <span className={cn('text-[10px] uppercase font-bold tracking-wider', active ? 'text-blue-100' : 'text-[var(--color-text-muted)]')}>
+                          {item.tag}
+                        </span>
+                      </Link>
+                    )
+                  })}
+                </nav>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
+                <Link
+                  to="/app/settings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                >
+                  <Settings className="h-4 w-4 text-[var(--color-text-muted)]" />
+                  <span>Preferences</span>
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign out</span>
+                </button>
+              </div>
             </motion.aside>
           </div>
         )}
       </AnimatePresence>
 
-      {/* Main layout: sidebar + content */}
-      <div className="flex min-h-[calc(100vh-4rem)] md:min-h-screen">
-        {/* Desktop sidebar */}
-        <aside
-          className={cn(
-            'sticky top-0 hidden h-screen shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-colors duration-150 motion-reduce:transition-none md:block',
-            state.sidebarOpen ? 'w-64' : 'w-[76px]',
-          )}
-        >
-          {sidebar()}
-        </aside>
+      {/* ── DESKTOP NAVIGATION SIDEBAR (FocusFlow Concept Navigation) ────── */}
+      <aside className="hidden md:flex flex-col justify-between w-64 shrink-0 border-r border-slate-200/80 bg-white dark:bg-[#0C111D] dark:border-slate-800/80 p-5 sticky top-0 h-screen z-30 select-none">
+        {/* Top: Logo & Navigation List */}
+        <div className="flex flex-col gap-6">
+          <Link
+            to="/app/dashboard"
+            className="flex items-center gap-3 px-2 group"
+            title="FocusFlow Home"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-xs group-hover:scale-105 transition-transform">
+              <span className="font-extrabold text-sm tracking-tight">FF</span>
+            </div>
+            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+              FocusFlow
+            </span>
+          </Link>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          {/* Desktop header */}
-          <header className="sticky top-0 z-20 hidden h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)]/95 px-6 backdrop-blur-md md:flex">
-            {/* Left: sidebar expand toggle + workspace title + academic tags */}
-            <div className="flex items-center gap-3">
+          {/* Core Navigation Items */}
+          <nav className="flex flex-col gap-1" aria-label="Main Navigation">
+            {navItems.map((item) => {
+              const active = isCurrentPath(location.pathname, item.path)
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150',
+                    active
+                      ? 'bg-indigo-50 text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 font-semibold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50',
+                  )}
+                  title={item.label}
+                >
+                  <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500')} />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+
+        {/* Bottom Motivation Card: "Stay Consistent!" */}
+        <div className="pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
+          <div className="rounded-2xl bg-gradient-to-br from-indigo-50/70 to-blue-50/40 dark:from-slate-800/70 dark:to-slate-800/30 border border-indigo-100/60 dark:border-slate-700/60 p-3.5 flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+              <Zap className="h-4 w-4 fill-current" />
+            </div>
+            <div>
+              <span className="block text-xs font-bold text-slate-800 dark:text-slate-100">
+                Stay Consistent!
+              </span>
+              <span className="block text-[11px] text-slate-500 dark:text-slate-400">
+                {activeStreak > 0 ? `${activeStreak}d streak active` : "You're doing great 💪"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      {/* ── MAIN WORKSPACE VIEWPORT & CONTEXTUAL TOP BAR ───────── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Contextual Desktop Header Command Bar */}
+        <header className="hidden md:flex h-16 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/80 dark:bg-[#0C111D]/80 dark:border-slate-800/80 px-6 sticky top-0 z-20 backdrop-blur-md gap-4">
+          {/* Left: Search Bar from Concept */}
+          <div className="flex-1 max-w-xl">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2.5 w-full px-4 py-2 rounded-xl border border-slate-200/80 bg-slate-100/80 dark:border-slate-800 dark:bg-slate-900/80 hover:border-slate-300 dark:hover:border-slate-700 text-sm text-slate-400 dark:text-slate-500 transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 cursor-pointer"
+            >
+              <Search className="h-4 w-4 text-slate-400" />
+              <span className="truncate">Search anything...</span>
+              <kbd className="ml-auto flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[10px] font-mono text-slate-400">
+                <Command className="h-2.5 w-2.5" />K
+              </kbd>
+            </button>
+          </div>
+
+          {/* Right: Theme Toggle, Notifications, User Profile Avatar */}
+          <div className="flex items-center gap-3">
+            {/* Notifications Dropdown */}
+            <div ref={notificationsRef} className="relative">
               <button
-                onClick={() => !state.sidebarOpen && dispatch({ type: 'TOGGLE_SIDEBAR' })}
-                className={cn(
-                  'rounded-lg p-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-subtle)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)]',
-                  state.sidebarOpen && 'invisible',
-                )}
-                aria-label="Expand sidebar"
+                onClick={() => setNotificationsOpen((o) => !o)}
+                className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 cursor-pointer"
+                title="Notifications"
+                aria-label="Notifications"
               >
-                <PanelLeft className="h-4 w-4" />
+                <Bell className="h-4 w-4" />
+                {dueCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
+                )}
               </button>
-              <div>
-                <p className="text-xs font-semibold text-[var(--color-text-muted)]">
-                  Workspace
-                </p>
-                <h1 className="text-sm font-semibold">{pageTitle}</h1>
-              </div>
 
-              {/* Academic Term & Streak Indicators */}
-              <div className="hidden lg:flex items-center gap-2 ml-4 pl-4 border-l border-[var(--color-border-light)]">
-                {semesterBadgeText ? (
-                  <span className="inline-flex items-center rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-0.5 text-xs font-medium text-[var(--color-text-secondary)] font-tabular">
-                    {semesterBadgeText}
-                  </span>
-                ) : (
-                  <Link
-                    to="/app/settings"
-                    className="inline-flex items-center rounded-full bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-3 py-0.5 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-scholar-emerald)] hover:border-[var(--color-scholar-emerald)] transition-colors font-tabular"
-                    title="Configure current semester and dates in Settings"
-                  >
-                    Set up semester
-                  </Link>
-                )}
-
-                {activeStreak > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 px-2.5 py-0.5 text-xs font-medium font-tabular">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-streak-amber)]" aria-hidden="true" />
-                    {activeStreak}d Streak
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)] border border-[var(--color-border)] px-2.5 py-0.5 text-xs font-medium font-tabular">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true" />
-                    0d Streak
-                  </span>
-                )}
-              </div>
+              {notificationsOpen && (
+                <div className="absolute right-0 mt-2 w-72 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-2xl z-50">
+                  <p className="border-b border-slate-200 dark:border-slate-800 px-1 pb-2 text-xs font-bold text-slate-900 dark:text-white">
+                    Pending Spaced Reviews
+                  </p>
+                  {dueCount > 0 ? (
+                    <Link
+                      to="/app/revision"
+                      onClick={() => setNotificationsOpen(false)}
+                      className="mt-2 flex items-start gap-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <RotateCcw className="mt-0.5 h-4 w-4 text-amber-500 shrink-0" />
+                      <div>
+                        <p className="text-xs font-semibold text-slate-900 dark:text-white">
+                          {dueCount} topic {dueCount === 1 ? 'review' : 'reviews'} due today
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Reinforce retention through active recall now.
+                        </p>
+                      </div>
+                    </Link>
+                  ) : (
+                    <p className="py-4 text-center text-xs text-slate-500 dark:text-slate-400">
+                      Your memory decay queue is all clear.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Right: search, theme toggle, notifications, user menu */}
-            <div className="flex items-center gap-2">
-              {/* Search trigger */}
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 cursor-pointer"
+              title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {state.theme === 'dark' ? (
+                <Sun className="h-4 w-4 text-amber-400" />
+              ) : (
+                <Moon className="h-4 w-4 text-slate-600" />
+              )}
+            </button>
+
+            {/* User Profile Avatar Popover */}
+            <div ref={userMenuRef} className="relative">
               <button
-                onClick={() => setSearchOpen(true)}
-                className="flex w-56 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-1.5 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-border-hover)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
+                onClick={() => setUserMenuOpen((open) => !open)}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white dark:bg-slate-100 dark:text-slate-900 ring-2 ring-transparent hover:ring-blue-500 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-blue-500"
+                title="User profile"
               >
-                <Search className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-                <span className="truncate">Search modules, notes...</span>
-                <kbd className="ml-auto flex items-center gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--color-text-muted)]">
-                  <Command className="h-2.5 w-2.5" />K
-                </kbd>
+                {getInitials(state.user?.name || 'User')}
               </button>
 
-              {/* Theme Toggle Button */}
-              <button
-                onClick={toggleTheme}
-                className="rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
-                title={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                aria-label={state.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {state.theme === 'dark' ? (
-                  <Sun className="h-4 w-4 text-amber-400" />
-                ) : (
-                  <Moon className="h-4 w-4 text-slate-600" />
-                )}
-              </button>
-
-              {/* Notifications */}
-              <div ref={notificationsRef} className="relative">
-                <button
-                  onClick={() => setNotificationsOpen((open) => !open)}
-                  className="relative rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
-                  title="Notifications"
-                >
-                  <Bell className="h-4 w-4" />
-                  {dueCount > 0 && (
-                    <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-rose-500 ring-2 ring-[var(--color-surface)]" />
-                  )}
-                </button>
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-72 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-3 shadow-xl z-50">
-                    <p className="border-b border-[var(--color-border-light)] px-2 pb-2 text-xs font-semibold">
-                      Your attention
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-2xl z-50">
+                  <div className="border-b border-slate-200 dark:border-slate-800 px-3 py-2">
+                    <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                      {state.user?.name || 'Student'}
                     </p>
-                    {dueCount > 0 ? (
-                      <Link
-                        to="/app/revision"
-                        onClick={() => setNotificationsOpen(false)}
-                        className="mt-2 flex items-start gap-2 rounded-lg bg-[var(--color-bg-subtle)] p-2.5 hover:bg-[var(--color-bg-muted)] transition-colors"
-                      >
-                        <RotateCcw className="mt-0.5 h-4 w-4 text-amber-500" />
-                        <span className="text-xs">
-                          <strong>
-                            {dueCount} revision{dueCount === 1 ? '' : 's'}
-                          </strong>{' '}
-                          ready for review
-                          <span className="mt-0.5 block text-[10px] text-[var(--color-text-muted)]">
-                            Open Revision Center to keep your memory fresh.
-                          </span>
-                        </span>
-                      </Link>
-                    ) : (
-                      <p className="px-2 py-5 text-center text-xs text-[var(--color-text-muted)]">
-                        You&apos;re all caught up.
-                      </p>
-                    )}
+                    <p className="truncate text-[11px] text-slate-500 dark:text-slate-400 font-tabular">
+                      {state.user?.email || 'dev@focusflow.local'}
+                    </p>
                   </div>
-                )}
-              </div>
-
-              {/* User menu */}
-              <div ref={userMenuRef} className="relative">
-                <button
-                  onClick={() => setUserMenuOpen((open) => !open)}
-                  className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-[var(--color-bg-subtle)] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-text)] cursor-pointer"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-ink-slate)] text-xs font-semibold text-white dark:bg-slate-700">
-                    {getInitials(state.user?.name || 'User')}
-                  </span>
-                  <ChevronDown className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-                </button>
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-1.5 shadow-xl z-50">
-                    <div className="border-b border-[var(--color-border-light)] px-3 py-2">
-                      <p className="truncate text-xs font-semibold">
-                        {state.user?.name || 'Student'}
-                      </p>
-                      <p className="truncate text-[10px] text-[var(--color-text-muted)]">
-                        {state.user?.email || ''}
-                      </p>
-                    </div>
+                  <div className="py-1">
                     <Link
                       to="/app/settings"
                       onClick={() => setUserMenuOpen(false)}
-                      className="mt-1 flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs hover:bg-[var(--color-bg-subtle)] transition-colors"
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                     >
-                      <User className="h-3.5 w-3.5" />
-                      Account settings
+                      <User className="h-3.5 w-3.5 text-slate-400" />
+                      <span>Academic Profile</span>
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                     >
                       <LogOut className="h-3.5 w-3.5" />
-                      Sign out
+                      <span>Sign Out</span>
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
-          </header>
+          </div>
+        </header>
 
-          {/* Page content */}
-          <main className="mx-auto w-full max-w-[1480px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-            <Outlet />
-          </main>
-        </div>
+        {/* Dynamic Outlet Main Content Container */}
+        <main className="flex-1 w-full max-w-[1540px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Outlet />
+        </main>
       </div>
 
-      {/* Command palette / search overlay */}
+      {/* ── COMMAND SPOTLIGHT MODAL (⌘K) ───────────────────────── */}
       <AnimatePresence>
         {searchOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/40 p-4 pt-[12vh] backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/60 p-4 pt-[10vh] backdrop-blur-xs">
             <motion.div
-              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -12, scale: 0.98 }}
-              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -12, scale: 0.98 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
-              className="w-full max-w-xl overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl"
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
+              className="w-full max-w-xl rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl overflow-hidden"
             >
-              {/* Search input row */}
               <div className="flex items-center gap-3 border-b border-[var(--color-border)] px-4 py-3">
-                <Search className="h-4 w-4 text-[var(--color-text-muted)]" />
+                <Search className="h-4 w-4 text-[var(--color-brand)] shrink-0" />
                 <input
                   autoFocus
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search subjects and topics..."
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Type to search courses, chapters, or syllabus units..."
+                  className="flex-1 bg-transparent text-sm outline-none text-[var(--color-text)] placeholder:text-[var(--color-text-muted)]"
                 />
                 <button
                   onClick={() => {
                     setSearchOpen(false)
                     setSearch('')
                   }}
-                  aria-label="Close search"
-                  className="cursor-pointer"
+                  className="p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)] cursor-pointer"
                 >
-                  <X className="h-4 w-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
-              {/* Results */}
-              <div className="max-h-80 overflow-y-auto p-3">
+              <div className="max-h-80 overflow-y-auto p-3 space-y-3">
                 {search && filteredSubjects.length === 0 && filteredTopics.length === 0 ? (
                   <p className="py-8 text-center text-xs text-[var(--color-text-muted)]">
-                    No subjects or topics found.
+                    No academic subjects or topics found matching &quot;{search}&quot;.
                   </p>
                 ) : (
-                  <div className="space-y-3">
+                  <>
                     {filteredSubjects.length > 0 && (
                       <div>
-                        <p className="px-2 pb-1 text-xs font-semibold text-[var(--color-text-muted)]">
-                          Subjects
+                        <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                          Enrolled Courses
                         </p>
-                        {filteredSubjects.map((subject) => (
-                          <button
-                            key={subject.id}
-                            onClick={() => {
-                              navigate(`/app/subjects/${subject.id}`)
-                              setSearchOpen(false)
-                              setSearch('')
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
-                          >
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ backgroundColor: subject.color }}
-                            />
-                            <span className="font-medium">{subject.name}</span>
-                            <span className="ml-auto text-[10px] text-[var(--color-text-muted)]">
-                              {subject.code}
-                            </span>
-                          </button>
-                        ))}
+                        <div className="space-y-1">
+                          {filteredSubjects.map((s) => (
+                            <Link
+                              key={s.id}
+                              to={`/app/subjects/${s.id}`}
+                              onClick={() => {
+                                setSearchOpen(false)
+                                setSearch('')
+                              }}
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--color-bg-subtle)] text-xs text-[var(--color-text)] transition-colors"
+                            >
+                              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                              <span className="font-semibold">{s.name}</span>
+                              {s.code && <span className="font-mono text-[10px] text-[var(--color-text-muted)]">({s.code})</span>}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     )}
+
                     {filteredTopics.length > 0 && (
                       <div>
-                        <p className="px-2 pb-1 text-xs font-semibold text-[var(--color-text-muted)]">
-                          Topics
+                        <p className="px-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                          Syllabus Topics
                         </p>
-                        {filteredTopics.slice(0, 8).map((topic) => (
-                          <button
-                            key={topic.id}
-                            onClick={() => {
-                              navigate(`/app/subjects/${topic.subjectId}`)
-                              setSearchOpen(false)
-                              setSearch('')
-                            }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
-                          >
-                            <BookOpen className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
-                            <span>{topic.name}</span>
-                            <span className="ml-auto text-[10px] text-[var(--color-text-muted)]">
-                              {topic.subjectName}
-                            </span>
-                          </button>
-                        ))}
+                        <div className="space-y-1">
+                          {filteredTopics.slice(0, 8).map((t) => (
+                            <Link
+                              key={t.id}
+                              to={`/app/subjects/${t.subjectId}`}
+                              onClick={() => {
+                                setSearchOpen(false)
+                                setSearch('')
+                              }}
+                              className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--color-bg-subtle)] text-xs text-[var(--color-text)] transition-colors"
+                            >
+                              <span className="font-medium">{t.name}</span>
+                              <span className="text-[10px] text-[var(--color-text-muted)]">{t.subjectName}</span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </motion.div>
-            <button
-              onClick={() => {
-                setSearchOpen(false)
-                setSearch('')
-              }}
-              className="absolute inset-0 -z-10 cursor-default"
-              aria-label="Close search"
-            />
           </div>
         )}
       </AnimatePresence>

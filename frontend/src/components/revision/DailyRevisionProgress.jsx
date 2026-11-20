@@ -45,17 +45,18 @@ export default function DailyRevisionProgress({
 
         <div className="flex items-center gap-3 self-end sm:self-auto text-xs">
           {remainingWorkloadMinutes > 0 ? (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-[var(--color-focus-amber)] bg-[var(--color-amber-tint)] px-2 py-0.5 rounded-md border border-[var(--color-amber-border)]/70">
-              <Clock className="w-3 h-3" />
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
               <span>~{remainingWorkloadMinutes} min workload remaining</span>
             </span>
           ) : hasTasks && percentage === 100 ? (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-[var(--color-emerald-dark)] bg-[var(--color-emerald-tint)] px-2 py-0.5 rounded-md border border-[var(--color-scholar-emerald)]/30">
-              <Sparkles className="w-3 h-3 text-[var(--color-scholar-emerald)]" />
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
               <span>Daily goal reached!</span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-subtle)] px-2 py-0.5 rounded-md border border-[var(--color-border)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />
               <span>Queue clear</span>
             </span>
           )}

@@ -286,7 +286,7 @@ export default function TopicStatusBadge({
         aria-controls={isOpen ? menuId : undefined}
         aria-label={`Learning status: ${currentConfig.label}. Click to change.`}
         className={cn(
-          'inline-flex items-center gap-1.5 font-medium rounded-full border transition-all select-none cursor-pointer',
+          'inline-flex items-center gap-1.5 font-medium rounded-md border transition-all select-none cursor-pointer',
           'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand)]',
           currentConfig.bgColor,
           currentConfig.borderColor,

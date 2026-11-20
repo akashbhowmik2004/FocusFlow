@@ -319,7 +319,7 @@ export default function Revision() {
       label: 'Overview',
       icon: Layers,
       badge: activeWorkloadTotal > 0 ? activeWorkloadTotal : null,
-      badgeColor: overdueTopics.length > 0 ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white',
+      badgeColor: 'bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)]',
     },
     {
       id: 'calendar',
@@ -384,7 +384,7 @@ export default function Revision() {
               {tab.badge !== null && (
                 <span
                   className={cn(
-                    'px-1.5 py-0.2 rounded-full font-mono tabular-nums text-[10px] font-bold leading-none',
+                    'px-1.5 py-0.5 rounded font-mono tabular-nums text-[10px] font-semibold leading-none',
                     isSelected ? 'bg-white/25 text-white' : tab.badgeColor
                   )}
                 >

@@ -145,12 +145,7 @@ export default function TopicRow({
               {/* Schedule type indicator badge */}
               {topic.nextRevision && (
                 <span
-                  className={cn(
-                    'text-[10px] px-1.5 py-0.2 rounded font-mono',
-                    isManual
-                      ? 'bg-amber-100/70 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
-                      : 'bg-indigo-100/70 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
-                  )}
+                  className="text-[10px] px-1.5 py-0.5 rounded-md font-mono bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)]"
                   title={isManual ? 'Manually scheduled by user' : 'Automatically scheduled by Spaced Repetition algorithm'}
                 >
                   {isManual ? 'Manual' : 'Spaced'}
@@ -166,7 +161,7 @@ export default function TopicRow({
         {/* Studied today indicator or Quick Focus action */}
         {isStudiedToday ? (
           <span
-            className="inline-flex items-center gap-1 text-xs h-8 px-2.5 font-medium rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40 select-none"
+            className="inline-flex items-center gap-1.5 text-xs h-8 px-2.5 font-medium rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] select-none"
             title={`Completed study session for "${topic.name}" today`}
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />

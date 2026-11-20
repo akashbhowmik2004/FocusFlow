@@ -209,7 +209,7 @@ export default function MyDay() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 sm:p-4.5 rounded-xl bg-gradient-to-r from-[var(--color-forest-deep)] to-[var(--color-scholar-emerald)] text-white border border-emerald-600/40 flex items-center justify-between shadow-sm"
+          className="p-4 sm:p-4.5 rounded-xl bg-[var(--color-brand)] text-white border border-blue-600/40 flex items-center justify-between shadow-xs"
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/15 text-white flex items-center justify-center font-bold shadow-xs shrink-0 ring-1 ring-white/20">
@@ -224,7 +224,7 @@ export default function MyDay() {
               </p>
             </div>
           </div>
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold text-white ring-1 ring-white/20 font-mono tabular-nums">
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/20 text-xs font-medium text-white border border-white/30 font-mono tabular-nums">
             100% Achieved
           </span>
         </motion.div>

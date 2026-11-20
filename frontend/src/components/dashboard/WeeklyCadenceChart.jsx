@@ -30,7 +30,7 @@ export default memo(function WeeklyCadenceChart({
   const dailyAverageHours = ((weeklyActualMinutes / 60) / divisor).toFixed(1)
 
   return (
-    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/25 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         {/* Header Row */}
         <div className="flex items-center justify-between mb-2">
@@ -42,7 +42,7 @@ export default memo(function WeeklyCadenceChart({
               Study Hours Distribution
             </h3>
           </div>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-tabular">
+          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] font-tabular">
             Goal: {dailyTargetHours}h / day
           </span>
         </div>

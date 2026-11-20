@@ -14,16 +14,16 @@ export default function TodayTimeline({
   onAddSession,
 }) {
   return (
-    <section className="bg-gradient-to-b from-[var(--color-surface-secondary)]/25 to-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
+    <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] shadow-xs p-5 sm:p-6 flex flex-col justify-between">
       <div>
         {/* Header Row */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[var(--color-scholar-emerald)]" />
+            <Calendar className="w-4 h-4 text-[var(--color-brand)]" />
             <h2 className="text-base font-bold text-[var(--color-text)] tracking-tight">
               Today’s Study Timeline
             </h2>
-            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border)] font-tabular">
+            <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] font-tabular">
               {todaySessions.length} {todaySessions.length === 1 ? 'Session' : 'Sessions'}
             </span>
           </div>
@@ -32,7 +32,7 @@ export default function TodayTimeline({
             variant="ghost"
             size="sm"
             onClick={onAddSession}
-            className="text-xs text-[var(--color-scholar-emerald)] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 gap-1 font-semibold"
+            className="text-xs text-[var(--color-brand)] hover:bg-[var(--color-brand-muted)]/30 gap-1 font-semibold"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add Session</span>
@@ -50,7 +50,7 @@ export default function TodayTimeline({
               <Button
                 onClick={onAddSession}
                 size="sm"
-                className="text-xs font-semibold gap-1.5 bg-[var(--color-scholar-emerald)] hover:bg-emerald-700 text-white"
+                className="text-xs font-semibold gap-1.5 bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] text-white"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Schedule Your First Session</span>

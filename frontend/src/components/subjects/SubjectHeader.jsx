@@ -64,14 +64,15 @@ export default function SubjectHeader({
               {subject.code}
             </span>
           )}
-          <span className="px-2.5 py-0.5 rounded-full bg-[var(--color-emerald-tint)] text-[var(--color-emerald-dark)] dark:bg-emerald-950/50 dark:text-emerald-300 border border-[var(--color-scholar-emerald)]/30 text-[11px] font-semibold">
-            Active Syllabus
+          <span className="px-2.5 py-0.5 rounded-md bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)] text-[11px] font-medium inline-flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <span>Active Syllabus</span>
           </span>
         </div>
       </div>
 
       {/* Main Course Header Card */}
-      <div className="rounded-xl border border-[var(--color-border)] bg-gradient-to-r from-[var(--color-surface)] via-[var(--color-surface-secondary)]/35 to-[var(--color-surface)] p-5 sm:p-6 shadow-xs">
+      <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           {/* Left: Swatch Icon, Title, Subtitle */}
           <div className="flex items-start gap-4 min-w-0 flex-1">
@@ -87,21 +88,17 @@ export default function SubjectHeader({
               <div className="flex items-center gap-2 flex-wrap mb-1.5">
                 {/* Exam Horizon Badge */}
                 {subject.examDate && examStatus?.isValid && (
-                  <span
-                    className={cn(
-                      'text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border',
-                      examStatus.isCompleted
-                        ? 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border-[var(--color-border)]'
-                        : examStatus.isUrgent
-                        ? 'bg-[var(--color-coral-tint)] text-[var(--color-soft-coral)] border border-[var(--color-coral-border)]/70'
-                        : 'bg-[var(--color-amber-tint)] text-[var(--color-focus-amber)] border border-[var(--color-amber-border)]/70'
-                    )}
-                  >
-                    {examStatus.isCompleted ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                    ) : (
-                      <Timer className="w-3.5 h-3.5" />
-                    )}
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-md inline-flex items-center gap-1.5 border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-[var(--color-text)]">
+                    <span
+                      className={cn(
+                        'w-1.5 h-1.5 rounded-full shrink-0',
+                        examStatus.isCompleted
+                          ? 'bg-slate-400'
+                          : examStatus.isUrgent
+                          ? 'bg-rose-500'
+                          : 'bg-amber-500'
+                      )}
+                    />
                     <span>
                       {examStatus.isCompleted
                         ? `Exam completed (${formatDate(subject.examDate, 'MMM d')})`

@@ -11,6 +11,11 @@ import {
 import { notifySessionSuccess } from '@/lib/sessionPresentation'
 import ScheduleSessionDialog from '@/components/sessions/ScheduleSessionDialog'
 import DashboardGreeting from '@/components/dashboard/DashboardGreeting'
+import ConceptTodayPlan from '@/components/dashboard/ConceptTodayPlan'
+import ConceptMetricsRow from '@/components/dashboard/ConceptMetricsRow'
+import ConceptSubjectPerformance from '@/components/dashboard/ConceptSubjectPerformance'
+import ConceptUpcomingDeadlines from '@/components/dashboard/ConceptUpcomingDeadlines'
+import ConceptQuoteCard from '@/components/dashboard/ConceptQuoteCard'
 import RecommendedNextFocus from '@/components/dashboard/RecommendedNextFocus'
 import DailyPacingDial from '@/components/dashboard/DailyPacingDial'
 import TodayTimeline from '@/components/dashboard/TodayTimeline'
@@ -86,6 +91,14 @@ export default function Dashboard() {
       (sub.topics?.filter((t) => t.status === 'completed').length || 0),
     0,
   )
+
+  const totalTopicsCount = (state.subjects || []).reduce(
+    (acc, sub) => acc + (sub.topics?.length || 0),
+    0,
+  )
+  const totalMasteryPct = totalTopicsCount > 0
+    ? Math.round((masteredTopicsCount / totalTopicsCount) * 100)
+    : 68
 
   const overdueRevision =
     revisionSummary.overdue[0] || revisionSummary.dueToday[0] || null
@@ -172,16 +185,49 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* 1. Header Section: Greeting, Context Milestone & Actions */}
-      <DashboardGreeting
-        user={state.user}
-        upcomingExams={upcomingExams}
-        todaySessionsCount={todaySessions.length}
-        onAddSession={handleOpenAddDialog}
+      {/* 1. Header Hero Grid (Concept Banner + Today's Plan Checklist) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <div className="lg:col-span-8 flex flex-col">
+          <DashboardGreeting
+            user={state.user}
+            upcomingExams={upcomingExams}
+            todaySessionsCount={todaySessions.length}
+            onAddSession={handleOpenAddDialog}
+          />
+        </div>
+        <div className="lg:col-span-4 flex flex-col">
+          <ConceptTodayPlan
+            todaySessions={todaySessions}
+            onCompleteSession={handleCompleteSession}
+            onStartFocus={handleFocus}
+            onAddSession={handleOpenAddDialog}
+          />
+        </div>
+      </div>
+
+      {/* 2. Middle Row: 4 Metric KPI Cards from Concept */}
+      <ConceptMetricsRow
+        overallProgress={totalMasteryPct}
+        streakDays={studyStreak || 1}
+        actualMinutes={todayTotals.actualMinutes || 0}
+        masteredPercentage={totalMasteryPct}
       />
 
-      {/* 2. Primary Workspace Bento (12 cols: 7 cols & 5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      {/* 3. Bottom Concept Row: Subject Performance Bar Chart, Upcoming Deadlines, Affirmation */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        <div className="lg:col-span-5 flex flex-col">
+          <ConceptSubjectPerformance subjects={state.subjects || []} />
+        </div>
+        <div className="lg:col-span-4 flex flex-col">
+          <ConceptUpcomingDeadlines upcomingExams={upcomingExams} />
+        </div>
+        <div className="lg:col-span-3 flex flex-col">
+          <ConceptQuoteCard />
+        </div>
+      </div>
+
+      {/* 4. Primary Workspace Bento (Recommended Next & Daily Pacing Dial) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch pt-2">
         <div className="lg:col-span-7 flex flex-col">
           <RecommendedNextFocus
             activeSession={activeFocusSession}

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-background: var(--color-bg);
@@ -60,67 +61,67 @@
 
 /* ── Design Tokens ─────────────────────────────────────── */
 :root {
-  /* ── Primary Identity (Scholar Emerald & Deep Forest) ── */
-  --color-brand: #087f5b;
-  --color-brand-primary: #087f5b;
-  --color-scholar-emerald: #087f5b;
-  --color-forest-deep: #123b32;
-  --color-emerald-tint: #e5f3ec;
-  --color-emerald-dark: #066348;
-  --color-emerald-subtle: #e5f3ec;
-  --color-brand-light: #10b981;
-  --color-brand-dark: #066348;
-  --color-brand-50: #e5f3ec;
-  --color-brand-100: #c8e6d7;
-  --color-brand-600: #087f5b;
-  --color-brand-700: #066348;
-  --color-brand-text: #066348;
+  /* ── Primary Identity (Editorial Cobalt & Deep Ultramarine) ── */
+  --color-brand: #2563eb;
+  --color-brand-primary: #2563eb;
+  --color-scholar-emerald: #2563eb;
+  --color-forest-deep: #1e3a8a;
+  --color-emerald-tint: #eff6ff;
+  --color-emerald-dark: #1d4ed8;
+  --color-emerald-subtle: #eff6ff;
+  --color-brand-light: #3b82f6;
+  --color-brand-dark: #1d4ed8;
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-text: #1d4ed8;
 
-  /* ── Secondary Identity (Academic Indigo - Planning & Organisation) ── */
-  --color-academic-indigo: #5756a5;
-  --color-indigo-tint: #eeeefa;
-  --color-indigo-dark: #3f3e85;
-  --color-indigo-border: #d4d3f3;
+  /* ── Secondary Identity (Editorial Violet - Planning & Organisation) ── */
+  --color-academic-indigo: #6366f1;
+  --color-indigo-tint: #eef2ff;
+  --color-indigo-dark: #4f46e5;
+  --color-indigo-border: #c7d2fe;
 
-  /* ── Supporting Identity (Study Teal - Progress & Learning Activity) ── */
-  --color-study-teal: #168a91;
-  --color-teal-tint: #e5f3f3;
-  --color-teal-dark: #0f6a70;
-  --color-teal-border: #c2e5e7;
+  /* ── Supporting Identity (Precision Azure - Progress & Learning Activity) ── */
+  --color-study-teal: #0284c7;
+  --color-teal-tint: #f0f9ff;
+  --color-teal-dark: #0369a1;
+  --color-teal-border: #bae6fd;
 
-  /* ── Supporting Identity (Focus Amber - Exams, Urgency & Streaks) ── */
-  --color-focus-amber: #b7791f;
-  --color-amber-tint: #fbf1de;
-  --color-amber-dark: #8c5b14;
-  --color-amber-border: #f4dcac;
-  --color-streak-amber: #b7791f;
+  /* ── Supporting Identity (Warm Amber - Exams, Urgency & Streaks) ── */
+  --color-focus-amber: #d97706;
+  --color-amber-tint: #fffbeb;
+  --color-amber-dark: #b45309;
+  --color-amber-border: #fde68a;
+  --color-streak-amber: #d97706;
 
-  /* ── Supporting Identity (Soft Coral - Overdue, Warnings & Alerts) ── */
-  --color-soft-coral: #c66a62;
-  --color-coral-tint: #f8eae7;
-  --color-coral-dark: #a14841;
-  --color-coral-border: #f2ccc6;
+  /* ── Supporting Identity (Sienna Coral - Overdue, Warnings & Alerts) ── */
+  --color-soft-coral: #dc2626;
+  --color-coral-tint: #fef2f2;
+  --color-coral-dark: #b91c1c;
+  --color-coral-border: #fecaca;
 
-  /* ── Neutrals & Surfaces (Warm Academic Foundation) ── */
-  --color-bg: #f5f6f2;
-  --color-canvas-base: #f5f6f2;
+  /* ── Neutrals & Surfaces (Clean Architectural Studio Canvas) ── */
+  --color-bg: #f8fafc;
+  --color-canvas-base: #f8fafc;
   --color-surface: #ffffff;
-  --color-surface-secondary: #eef1ec;
-  --color-surface-hover: #eef1ec;
-  --color-bg-subtle: #eef1ec;
-  --color-bg-muted: #e4e7e1;
-  --color-warm-sage: #e8efe5;
-  --color-muted-sage: #dde8d9;
-  --color-warm-ivory: #f7f4ea;
-  --color-border: #dce3dd;
-  --color-border-light: #e8ede8;
-  --color-border-hover: #c8d3cb;
-  --color-border-strong: #c8d3cb;
-  --color-text: #17231f;
-  --color-text-secondary: #53635b;
-  --color-text-muted: #68776f;
-  --color-ink-slate: #17231f;
-  --color-slate-core: #53635b;
+  --color-surface-secondary: #f1f5f9;
+  --color-surface-hover: #f1f5f9;
+  --color-bg-subtle: #f1f5f9;
+  --color-bg-muted: #e2e8f0;
+  --color-warm-sage: #f8fafc;
+  --color-muted-sage: #f1f5f9;
+  --color-warm-ivory: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+  --color-border-hover: #cbd5e1;
+  --color-border-strong: #94a3b8;
+  --color-text: #0f172a;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748b;
+  --color-ink-slate: #0f172a;
+  --color-slate-core: #334155;
 
   /* ── Semantic Category Aliases ── */
   --color-planning: var(--color-academic-indigo);
@@ -137,7 +138,7 @@
   --color-alert-border: var(--color-coral-border);
 
   /* Status */
-  --color-success: #087f5b;
+  --color-success: #16a34a;
   --color-success-light: #e5f3ec;
   --color-success-text: #066348;
   --color-success-border: #c8e6d7;
@@ -158,42 +159,42 @@
   --color-info-border: #d4d3f3;
 
   /* Item / Row state tokens */
-  --item-completed-bg: #eef1ec;
-  --item-completed-border: #dce3dd;
-  --item-completed-text: #53635b;
-  --item-live-bg: #e5f3ec;
-  --item-live-border: #a7f3d0;
-  --item-live-text: #066348;
+  --item-completed-bg: #f8fafc;
+  --item-completed-border: #e2e8f0;
+  --item-completed-text: #64748b;
+  --item-live-bg: #eff6ff;
+  --item-live-border: #bfdbfe;
+  --item-live-text: #1d4ed8;
 
   /* Charts */
-  --chart-primary: #087f5b;
-  --chart-secondary: #5756a5;
-  --chart-tertiary: #168a91;
-  --chart-quaternary: #b7791f;
-  --chart-grid: #e8ede8;
-  --chart-axis: #68776f;
+  --chart-primary: #2563eb;
+  --chart-secondary: #6366f1;
+  --chart-tertiary: #0284c7;
+  --chart-quaternary: #d97706;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #64748b;
   --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: #dce3dd;
-  --chart-tooltip-text: #17231f;
+  --chart-tooltip-border: #e2e8f0;
+  --chart-tooltip-text: #0f172a;
 
   /* Sidebar */
   --sidebar-bg: #ffffff;
-  --sidebar-fg: #17231f;
-  --sidebar-border: #dce3dd;
-  --sidebar-accent: #eef1ec;
-  --sidebar-accent-fg: #17231f;
-  --sidebar-active-bg: #087f5b;
+  --sidebar-fg: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-fg: #0f172a;
+  --sidebar-active-bg: #2563eb;
   --sidebar-active-fg: #ffffff;
 
   /* Subject Colors */
-  --subject-blue: #5756a5;
+  --subject-blue: #2563eb;
   --subject-purple: #7c3aed;
-  --subject-green: #087f5b;
-  --subject-orange: #b7791f;
-  --subject-pink: #c66a62;
-  --subject-teal: #168a91;
-  --subject-red: #c66a62;
-  --subject-yellow: #b7791f;
+  --subject-green: #16a34a;
+  --subject-orange: #d97706;
+  --subject-pink: #db2777;
+  --subject-teal: #0284c7;
+  --subject-red: #dc2626;
+  --subject-yellow: #ca8a04;
 
   /* Typography */
   --font-sans: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -258,71 +259,84 @@
   --card-shadow: 0 1px 3px 0 rgba(23, 35, 31, 0.04), 0 1px 2px -1px rgba(23, 35, 31, 0.03);
   --card-shadow-hover: 0 10px 24px -8px rgba(23, 35, 31, 0.12), 0 4px 8px -2px rgba(23, 35, 31, 0.04);
   --card-shadow-elevated: 0 12px 28px -4px rgba(23, 35, 31, 0.08);
+
+  /* Typography-First Academic Tags & Metadata Tokens */
+  --tag-bg: #f1f5f9;
+  --tag-border: #e2e8f0;
+  --tag-text: #0f172a;
+  --tag-text-secondary: #334155;
+  --tag-text-muted: #64748b;
 }
 
 /* Dark mode tokens */
 .dark {
+  /* Typography-First Academic Tags & Metadata Tokens */
+  --tag-bg: #1e293b;
+  --tag-border: #334464;
+  --tag-text: #f8fafc;
+  --tag-text-secondary: #94a3b8;
+  --tag-text-muted: #64748b;
   /* Brand */
-  --color-brand: #10b981;
-  --color-brand-light: #34d399;
-  --color-brand-dark: #059669;
-  --color-brand-50: rgba(16, 185, 129, 0.15);
-  --color-brand-100: rgba(16, 185, 129, 0.25);
-  --color-brand-600: #10b981;
-  --color-brand-700: #059669;
-  --color-brand-text: #6ee7b7;
+  --color-brand: #3b82f6;
+  --color-brand-light: #60a5fa;
+  --color-brand-dark: #2563eb;
+  --color-brand-50: rgba(59, 130, 246, 0.12);
+  --color-brand-100: rgba(59, 130, 246, 0.22);
+  --color-brand-600: #3b82f6;
+  --color-brand-700: #2563eb;
+  --color-brand-text: #93c5fd;
 
-  /* Neutrals & Surfaces (Permanent Midnight Dark Palette) */
-  --color-bg: #0b0f19;
-  --color-bg-subtle: #131b2e;
+  /* Neutrals & Surfaces (Midnight Obsidian Architectural Palette) */
+  --color-bg: #090d16;
+  --color-bg-subtle: #121826;
   --color-bg-muted: #1e293b;
   --color-surface: #111827;
-  --color-surface-secondary: #1e293b;
+  --color-surface-secondary: #172033;
   --color-surface-hover: #1e293b;
-  --color-warm-sage: #18221e;
-  --color-muted-sage: #131c19;
-  --color-warm-ivory: #151e1b;
-  --color-border: #233149;
+  --color-warm-sage: #0f172a;
+  --color-muted-sage: #111827;
+  --color-warm-ivory: #111827;
+  --color-border: #1f293d;
   --color-border-light: rgba(255, 255, 255, 0.08);
   --color-border-hover: #334464;
-  --color-border-strong: #334464;
-  --color-text: #f1f5f9;
+  --color-border-strong: #3e537a;
+  --color-text: #f8fafc;
   --color-text-secondary: #94a3b8;
   --color-text-muted: #64748b;
-  --color-brand-primary: #10b981;
-  --color-ink-slate: #f1f5f9;
+  --color-brand-primary: #3b82f6;
+  --color-ink-slate: #f8fafc;
   --color-slate-core: #94a3b8;
-  --color-canvas-base: #0b0f19;
+  --color-canvas-base: #090d16;
 
   /* Primary Identity */
-  --color-forest-deep: #a7f3d0;
-  --color-scholar-emerald: #10b981;
-  --color-emerald-tint: rgba(16, 185, 129, 0.18);
-  --color-emerald-dark: #34d399;
-  --color-emerald-subtle: rgba(16, 185, 129, 0.18);
+  --color-forest-deep: #93c5fd;
+  --color-scholar-emerald: #3b82f6;
+  --color-emerald-tint: rgba(59, 130, 246, 0.16);
+  --color-emerald-dark: #60a5fa;
+  --color-emerald-subtle: rgba(59, 130, 246, 0.16);
 
-  /* Secondary Identity (Academic Indigo) */
+  /* Secondary Identity (Editorial Violet) */
   --color-academic-indigo: #818cf8;
-  --color-indigo-tint: rgba(129, 140, 248, 0.18);
+  --color-indigo-tint: rgba(129, 140, 248, 0.16);
   --color-indigo-dark: #a5b4fc;
   --color-indigo-border: rgba(129, 140, 248, 0.35);
 
-  /* Supporting Identity (Study Teal) */
-  --color-study-teal: #2dd4bf;
-  --color-teal-tint: rgba(45, 212, 191, 0.18);
-  --color-teal-dark: #5eead4;
-  --color-teal-border: rgba(45, 212, 191, 0.35);
+  /* Supporting Identity (Precision Azure) */
+  --color-study-teal: #38bdf8;
+  --color-teal-tint: rgba(56, 189, 248, 0.16);
+  --color-teal-dark: #7dd3fc;
+  --color-teal-border: rgba(56, 189, 248, 0.35);
 
-  /* Supporting Identity (Focus Amber) */
-  --color-focus-amber: #f59e0b;
-  --color-amber-tint: rgba(245, 158, 11, 0.18);
-  --color-amber-dark: #fcd34d;
-  --color-amber-border: rgba(245, 158, 11, 0.35);
-  --color-streak-amber: #f59e0b;
+  /* Supporting Identity (Warm Amber) */
+  --color-focus-amber: #fbbf24;
+  --color-amber-tint: rgba(251, 191, 36, 0.16);
+  --color-amber-dark: #fde68a;
+  --color-amber-border: rgba(251, 191, 36, 0.35);
+  --color-streak-amber: #fbbf24;
 
-  /* Supporting Identity (Soft Coral) */
+  /* Supporting Identity (Sienna Coral) */
   --color-soft-coral: #f87171;
-  --color-coral-tint: rgba(248, 113, 113, 0.18);
+  --color-coral-tint: rgba(248, 113, 113, 0.16);
   --color-coral-dark: #fca5a5;
   --color-coral-border: rgba(248, 113, 113, 0.35);
 
@@ -367,40 +381,40 @@
   --item-completed-text: #94a3b8;
   --item-live-bg: rgba(16, 185, 129, 0.15);
   --item-live-border: rgba(16, 185, 129, 0.4);
-  --item-live-text: #a7f3d0;
+  --item-live-text: #93c5fd;
 
   /* Charts */
-  --chart-primary: #10b981;
+  --chart-primary: #3b82f6;
   --chart-secondary: #818cf8;
-  --chart-tertiary: #2dd4bf;
-  --chart-quaternary: #f59e0b;
+  --chart-tertiary: #38bdf8;
+  --chart-quaternary: #fbbf24;
   --chart-grid: rgba(255, 255, 255, 0.08);
   --chart-axis: #64748b;
   --chart-tooltip-bg: #111827;
-  --chart-tooltip-border: #233149;
-  --chart-tooltip-text: #f1f5f9;
+  --chart-tooltip-border: #1f293d;
+  --chart-tooltip-text: #f8fafc;
 
   /* Heatmap Tokens */
   --heatmap-level-0: var(--color-bg-subtle);
   --heatmap-level-0-border: var(--color-border-light);
   --heatmap-level-0-text: var(--color-text-muted);
-  --heatmap-level-1: rgba(167, 243, 208, 0.2);
-  --heatmap-level-1-border: rgba(110, 231, 183, 0.35);
-  --heatmap-level-1-text: #a7f3d0;
-  --heatmap-level-2: rgba(52, 211, 153, 0.4);
-  --heatmap-level-2-border: rgba(16, 185, 129, 0.5);
-  --heatmap-level-2-text: #d1fae5;
-  --heatmap-level-3: #059669;
-  --heatmap-level-3-border: #10b981;
+  --heatmap-level-1: rgba(147, 197, 253, 0.2);
+  --heatmap-level-1-border: rgba(96, 165, 250, 0.35);
+  --heatmap-level-1-text: #93c5fd;
+  --heatmap-level-2: rgba(59, 130, 246, 0.4);
+  --heatmap-level-2-border: rgba(37, 99, 235, 0.5);
+  --heatmap-level-2-text: #dbeafe;
+  --heatmap-level-3: #2563eb;
+  --heatmap-level-3-border: #3b82f6;
   --heatmap-level-3-text: #ffffff;
 
   /* Sidebar */
   --sidebar-bg: #111827;
-  --sidebar-fg: #f1f5f9;
-  --sidebar-border: #233149;
+  --sidebar-fg: #f8fafc;
+  --sidebar-border: #1f293d;
   --sidebar-accent: #1e293b;
-  --sidebar-accent-fg: #f1f5f9;
-  --sidebar-active-bg: #10b981;
+  --sidebar-accent-fg: #f8fafc;
+  --sidebar-active-bg: #2563eb;
   --sidebar-active-fg: #ffffff;
 
   /* Shadows */
@@ -411,12 +425,12 @@
 
   /* Card Design Tokens */
   --card-bg: #111827;
-  --card-bg-subtle: #0b0f19;
+  --card-bg-subtle: #090d16;
   --card-bg-muted: #1e293b;
-  --card-border: #233149;
+  --card-border: #1f293d;
   --card-border-subtle: rgba(255, 255, 255, 0.06);
   --card-border-hover: #334464;
-  --card-border-active: #10b981;
+  --card-border-active: #3b82f6;
   --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
   --card-shadow-hover: 0 6px 16px -2px rgba(0, 0, 0, 0.5);
   --card-shadow-elevated: 0 12px 28px -4px rgba(0, 0, 0, 0.6);
@@ -470,6 +484,34 @@ body {
   font-family: var(--font-tabular), 'Inter', monospace;
   font-feature-settings: 'tnum' on, 'cv05' on;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Typography-First Tag Utilities ── */
+.meta-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  background-color: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  color: var(--tag-text);
+}
+
+.meta-tag-subtle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  line-height: 0.875rem;
+  font-weight: 500;
+  background-color: transparent;
+  color: var(--tag-text-muted);
 }
 
 button,

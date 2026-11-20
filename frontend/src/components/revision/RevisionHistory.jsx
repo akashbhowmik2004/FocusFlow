@@ -16,26 +16,30 @@ import EmptyState from '@/components/ui/EmptyState'
 const RATING_CONFIG = {
   AGAIN: {
     label: 'Again',
-    color: 'text-rose-700 dark:text-rose-300',
-    bg: 'bg-rose-100 dark:bg-rose-950/60 border-rose-200 dark:border-rose-900',
+    color: 'text-[var(--color-text)]',
+    bg: 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]',
+    dot: 'bg-rose-500',
     icon: RotateCcw,
   },
   HARD: {
     label: 'Hard',
-    color: 'text-amber-800 dark:text-amber-300',
-    bg: 'bg-amber-100 dark:bg-amber-950/60 border-amber-200 dark:border-amber-900',
+    color: 'text-[var(--color-text)]',
+    bg: 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]',
+    dot: 'bg-amber-500',
     icon: AlertCircle,
   },
   GOOD: {
     label: 'Good',
-    color: 'text-indigo-700 dark:text-indigo-300',
-    bg: 'bg-indigo-100 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-900',
+    color: 'text-[var(--color-text)]',
+    bg: 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]',
+    dot: 'bg-blue-500',
     icon: CheckCircle2,
   },
   EASY: {
     label: 'Easy',
-    color: 'text-emerald-700 dark:text-emerald-300',
-    bg: 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-900',
+    color: 'text-[var(--color-text)]',
+    bg: 'bg-[var(--color-bg-subtle)] border-[var(--color-border)]',
+    dot: 'bg-emerald-500',
     icon: Sparkles,
   },
 }
@@ -237,12 +241,12 @@ export default function RevisionHistory({
                       <td className="py-3 px-4 whitespace-nowrap">
                         <span
                           className={cn(
-                            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border',
+                            'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border',
                             ratingConfig.bg,
                             ratingConfig.color
                           )}
                         >
-                          <RatingIcon className="w-3 h-3" />
+                          <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', ratingConfig.dot)} />
                           <span>{ratingConfig.label}</span>
                         </span>
                       </td>

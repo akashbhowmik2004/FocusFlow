@@ -364,26 +364,28 @@ export default function PlannerSidePanel({
                 className="p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] space-y-2 shadow-2xs hover:border-[var(--color-amber-border)]/60 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span
-                    className="px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-2xs"
-                    style={{
-                      backgroundColor:
-                        subject.color || 'var(--color-brand)',
-                    }}
-                  >
-                    {subject.code || subject.name}
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)]">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{
+                        backgroundColor:
+                          subject.color || 'var(--color-brand)',
+                      }}
+                    />
+                    <span>{subject.code || subject.name}</span>
                   </span>
-                  <span
-                    className={cn(
-                      'px-2 py-0.5 rounded text-[10px] font-bold',
-                      countdown.isToday
-                        ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200 border border-rose-300'
-                        : countdown.isTomorrow
-                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 border border-amber-300'
-                        : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] border border-[var(--color-border-light)]'
-                    )}
-                  >
-                    {countdown.label}
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                    <span
+                      className={cn(
+                        'w-1.5 h-1.5 rounded-full shrink-0',
+                        countdown.isToday
+                          ? 'bg-rose-500'
+                          : countdown.isTomorrow
+                          ? 'bg-amber-500'
+                          : 'bg-slate-400'
+                      )}
+                    />
+                    <span>{countdown.label}</span>
                   </span>
                 </div>
 

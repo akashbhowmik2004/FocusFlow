@@ -99,7 +99,7 @@ export default function PlannerDayView({
             className={cn(
               'w-11 h-11 rounded-xl flex flex-col items-center justify-center font-mono shrink-0 shadow-xs',
               isDayToday
-                ? 'bg-[var(--color-scholar-emerald)] text-white'
+                ? 'bg-[var(--color-brand)] text-white'
                 : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)]'
             )}
           >
@@ -117,7 +117,8 @@ export default function PlannerDayView({
                 {formatDate(selectedDate, 'EEEE, MMMM d, yyyy')}
               </h2>
               {isDayToday && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium bg-[var(--color-bg-subtle)] text-[var(--color-text)] border border-[var(--color-border)]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] shrink-0" />
                   Today
                 </span>
               )}
@@ -226,30 +227,30 @@ export default function PlannerDayView({
                   }}
                   className={cn(
                     'absolute p-3 sm:p-4 rounded-xl border transition-colors cursor-pointer select-none overflow-hidden flex flex-col justify-between shadow-xs',
-                    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)]',
+                    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
                     isCompleted
-                      ? 'bg-[var(--color-emerald-tint)]/40 border-emerald-300/70 dark:border-emerald-800/60'
+                      ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-85'
                       : isCancelled
                       ? 'bg-[var(--color-bg-subtle)] border-[var(--color-border)] opacity-60'
                       : isLive
-                      ? 'bg-[var(--color-emerald-tint)] dark:bg-emerald-950/60 border-[var(--color-scholar-emerald)] ring-2 ring-[var(--color-scholar-emerald)]/30 z-10'
+                      ? 'bg-[var(--color-brand-muted)] border-[var(--color-brand)] ring-2 ring-[var(--color-brand)]/30 z-10'
                       : isPaused
                       ? 'bg-[var(--color-amber-tint)] dark:bg-amber-950/50 border-[var(--color-focus-amber)] z-10'
-                      : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-scholar-emerald)]/50 hover:shadow-xs'
+                      : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-brand)]/50 hover:shadow-xs'
                   )}
                 >
                   <div>
                     {/* Header: Subject & Topic Badges + Live Status */}
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       {subject && (
-                        <span
-                          className="px-2 py-0.5 rounded-md text-xs font-semibold text-white shadow-2xs flex items-center gap-1"
-                          style={{
-                            backgroundColor:
-                              subject.color || 'var(--color-brand)',
-                          }}
-                        >
-                          <BookOpen className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--color-bg-subtle)] border border-[var(--color-border)] text-[var(--color-text)]">
+                          <span
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{
+                              backgroundColor:
+                                subject.color || 'var(--color-brand)',
+                            }}
+                          />
                           <span>{subject.code || subject.name}</span>
                         </span>
                       )}
@@ -261,22 +262,22 @@ export default function PlannerDayView({
                       )}
 
                       {isLive && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded-full">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-brand)] animate-pulse shrink-0" />
                           Live Now
                         </span>
                       )}
 
                       {isPaused && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-full">
-                          <Pause className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded-md">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                           Paused
                         </span>
                       )}
 
                       {isCompleted && (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-text)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5 rounded-md">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                           Completed
                         </span>
                       )}

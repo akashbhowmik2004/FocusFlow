@@ -65,9 +65,9 @@ export default function PlannerHeader({
               aria-pressed={viewMode === 'day'}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer',
-                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)] active:scale-95 disabled:pointer-events-none disabled:opacity-50',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-95 disabled:pointer-events-none disabled:opacity-50',
                 viewMode === 'day'
-                  ? 'bg-[var(--color-scholar-emerald)] text-white shadow-xs'
+                  ? 'bg-[var(--color-brand)] text-white shadow-xs'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]'
               )}
             >
@@ -79,9 +79,9 @@ export default function PlannerHeader({
               aria-pressed={viewMode === 'week'}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer',
-                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)] active:scale-95 disabled:pointer-events-none disabled:opacity-50',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-95 disabled:pointer-events-none disabled:opacity-50',
                 viewMode === 'week'
-                  ? 'bg-[var(--color-scholar-emerald)] text-white shadow-xs'
+                  ? 'bg-[var(--color-brand)] text-white shadow-xs'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]'
               )}
             >
@@ -93,9 +93,9 @@ export default function PlannerHeader({
               aria-pressed={viewMode === 'month'}
               className={cn(
                 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer',
-                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-scholar-emerald)] active:scale-95 disabled:pointer-events-none disabled:opacity-50',
+                'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] active:scale-95 disabled:pointer-events-none disabled:opacity-50',
                 viewMode === 'month'
-                  ? 'bg-[var(--color-scholar-emerald)] text-white shadow-xs'
+                  ? 'bg-[var(--color-brand)] text-white shadow-xs'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-subtle)]'
               )}
             >

@@ -26,7 +26,7 @@ function CustomTooltip({ active, payload, label, mode = 'planned_vs_actual' }) {
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-4">
           <span className="flex items-center gap-1.5 text-[var(--color-text-secondary)]">
-            <span className="w-2 h-2 rounded-xs bg-[var(--color-scholar-emerald)]" />
+            <span className="w-2 h-2 rounded-xs bg-[var(--color-brand)]" />
             Actual Logged:
           </span>
           <span className="font-semibold text-[var(--color-text)] tabular-nums">
@@ -50,7 +50,7 @@ function CustomTooltip({ active, payload, label, mode = 'planned_vs_actual' }) {
             <span
               className={`font-semibold tabular-nums ${
                 diff > 0
-                  ? 'text-[var(--color-scholar-emerald)]'
+                  ? 'text-[var(--color-brand)]'
                   : diff < 0
                   ? 'text-[var(--color-streak-amber)]'
                   : 'text-[var(--color-text-muted)]'
@@ -183,7 +183,7 @@ export default function StudyVelocityChart({
         {/* Legends */}
         <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-[var(--color-text-secondary)]">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-xs bg-[var(--color-scholar-emerald)] inline-block" />
+            <span className="w-3 h-3 rounded-xs bg-[var(--chart-primary)] inline-block" />
             <span className="font-semibold text-[var(--color-text)]">Actual Logged</span>
           </div>
           {activeView !== 'daily_duration' && (
@@ -240,7 +240,7 @@ export default function StudyVelocityChart({
                   )}
                   <Bar
                     dataKey="actual"
-                    fill="var(--color-scholar-emerald)"
+                    fill="var(--chart-primary)"
                     radius={[4, 4, 0, 0]}
                     name="Actual Logged"
                     maxBarSize={28}
@@ -264,7 +264,7 @@ export default function StudyVelocityChart({
 
       {/* Delta Variance Footnote Callout */}
       <div className="mt-4 p-3 bg-[var(--color-bg-subtle)] rounded-lg border border-[var(--color-border-light)] flex items-start gap-2.5 text-xs">
-        <Info className="w-4 h-4 text-[var(--color-scholar-emerald)] shrink-0 mt-0.5" />
+        <Info className="w-4 h-4 text-[var(--color-brand)] shrink-0 mt-0.5" />
         <div className="text-[var(--color-text-secondary)] flex-1 leading-relaxed">
           <strong className="text-[var(--color-text)] font-semibold">Delta Variance Metric: </strong>
           Net deviation of{' '}
