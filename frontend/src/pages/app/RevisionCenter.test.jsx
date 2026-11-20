@@ -9,6 +9,7 @@ import { topicService } from '@/services/topicService'
 import { sessionService } from '@/services/sessionService'
 import { getCalendarDateKey, getRevisionSummary } from '@/lib/revisionSummary'
 import { calculateNextRevision } from '@/lib/spacedRepetition'
+import { addDays } from '@/lib/dates'
 import { toast } from 'sonner'
 
 const mockNavigate = vi.fn()
@@ -62,6 +63,8 @@ vi.mock('sonner', () => ({
 
 describe('Revision Center — Phase 3D Comprehensive Verification Suite', () => {
   const todayStr = getCalendarDateKey(new Date())
+  const upcomingStr1 = getCalendarDateKey(addDays(new Date(), 5))
+  const upcomingStr2 = getCalendarDateKey(addDays(new Date(), 10))
 
   const mockSubjects = [
     {
@@ -115,7 +118,7 @@ describe('Revision Center — Phase 3D Comprehensive Verification Suite', () => 
           id: 'top-tree',
           name: 'Binary Search Trees & AVL',
           status: 'not-started',
-          nextRevision: '2026-11-10', // Case 3: Upcoming
+          nextRevision: upcomingStr1, // Case 3: Upcoming
           lastRevised: null,
           repetitions: 0,
           intervalDays: 1,
@@ -168,7 +171,7 @@ describe('Revision Center — Phase 3D Comprehensive Verification Suite', () => 
           id: 'top-induction',
           name: 'Mathematical Induction',
           status: 'in-progress',
-          nextRevision: '2026-11-15',
+          nextRevision: upcomingStr2,
           lastRevised: null,
           repetitions: 0,
           intervalDays: 1,
