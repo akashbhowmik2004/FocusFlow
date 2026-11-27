@@ -10,13 +10,9 @@ const RATING_QUALITY = {
 
 function calculateEaseFactor(currentEaseFactor, quality) {
   const updatedEaseFactor =
-    currentEaseFactor +
-    (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    currentEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
 
-  return Math.max(
-    MIN_EASE_FACTOR,
-    Number(updatedEaseFactor.toFixed(2))
-  );
+  return Math.max(MIN_EASE_FACTOR, Number(updatedEaseFactor.toFixed(2)));
 }
 
 function addDays(date, days) {
@@ -54,20 +50,14 @@ export function calculateNextRevision({
   let nextRepetitions;
   let nextInterval;
 
-  const nextEaseFactor = calculateEaseFactor(
-    easeFactor,
-    quality
-  );
+  const nextEaseFactor = calculateEaseFactor(easeFactor, quality);
 
   if (rating === "AGAIN") {
     nextRepetitions = 0;
     nextInterval = 1;
   } else if (rating === "HARD") {
     nextRepetitions = repetitions + 1;
-    nextInterval = Math.max(
-      1,
-      Math.ceil(intervalDays * 1.2) || 1
-    );
+    nextInterval = Math.max(1, Math.ceil(intervalDays * 1.2) || 1);
   } else if (rating === "GOOD") {
     nextRepetitions = repetitions + 1;
 
@@ -85,7 +75,7 @@ export function calculateNextRevision({
       nextInterval = 4;
     } else {
       nextInterval = Math.round(
-        Math.max(intervalDays, 1) * (nextEaseFactor + 0.3)
+        Math.max(intervalDays, 1) * (nextEaseFactor + 0.3),
       );
     }
   }
