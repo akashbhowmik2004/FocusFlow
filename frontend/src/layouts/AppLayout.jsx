@@ -32,13 +32,16 @@ import { getActiveStudyStreak } from '@/lib/analytics'
 import { toast } from 'sonner'
 import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 
-const navItems = [
+const primaryNavItems = [
   { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
   { label: 'My Day', path: '/app/day', icon: CheckCircle2 },
   { label: 'Planner', path: '/app/planner', icon: CalendarDays },
   { label: 'Subjects', path: '/app/subjects', icon: BookOpen },
   { label: 'Revision', path: '/app/revision', icon: RotateCcw },
   { label: 'Analytics', path: '/app/progress', icon: BarChart3 },
+]
+
+const utilityNavItems = [
   { label: 'Focus Timer', path: '/app/focus', icon: Clock },
   { label: 'Settings', path: '/app/settings', icon: Settings },
 ]
@@ -232,7 +235,7 @@ export default function AppLayout() {
                 </div>
 
                 <nav className="space-y-1">
-                  {navItems.map((item) => {
+                  {primaryNavItems.map((item) => {
                     const active = isCurrentPath(location.pathname, item.path)
                     const Icon = item.icon
                     return (
@@ -241,7 +244,7 @@ export default function AppLayout() {
                         to={item.path}
                         onClick={() => setMobileMenuOpen(false)}
                         className={cn(
-                          'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                          'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]',
                           active
                             ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
                             : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
@@ -251,12 +254,39 @@ export default function AppLayout() {
                           <Icon className={cn('h-4 w-4', active ? 'text-white' : 'text-[var(--color-text-muted)]')} />
                           <span>{item.label}</span>
                         </div>
-                        <span className={cn('text-[10px] uppercase font-bold tracking-wider', active ? 'text-blue-100' : 'text-[var(--color-text-muted)]')}>
-                          {item.tag}
-                        </span>
+                        {item.tag && (
+                          <span className={cn('text-[10px] font-semibold', active ? 'text-blue-100' : 'text-[var(--color-text-muted)]')}>
+                            {item.tag}
+                          </span>
+                        )}
                       </Link>
                     )
                   })}
+
+                  <div className="my-3 border-t border-[var(--color-border)] pt-3 space-y-1">
+                    {utilityNavItems.map((item) => {
+                      const active = isCurrentPath(location.pathname, item.path)
+                      const Icon = item.icon
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand)]',
+                            active
+                              ? 'bg-[var(--color-brand)] text-white shadow-xs font-semibold'
+                              : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text)]',
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon className={cn('h-4 w-4', active ? 'text-white' : 'text-[var(--color-text-muted)]')} />
+                            <span>{item.label}</span>
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
                 </nav>
               </div>
 
@@ -292,7 +322,7 @@ export default function AppLayout() {
 
           {/* Core Navigation Items */}
           <nav className="flex flex-col gap-1" aria-label="Main Navigation">
-            {navItems.map((item) => {
+            {primaryNavItems.map((item) => {
               const active = isCurrentPath(location.pathname, item.path)
               const Icon = item.icon
               return (
@@ -300,7 +330,7 @@ export default function AppLayout() {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150',
+                    'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500',
                     active
                       ? 'bg-indigo-50 text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 font-semibold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50',
@@ -312,6 +342,30 @@ export default function AppLayout() {
                 </Link>
               )
             })}
+
+            {/* Separated Utility Actions (Focus Timer & Settings) */}
+            <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-col gap-1">
+              {utilityNavItems.map((item) => {
+                const active = isCurrentPath(location.pathname, item.path)
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500',
+                      active
+                        ? 'bg-indigo-50 text-indigo-600 dark:bg-slate-800 dark:text-indigo-400 font-semibold'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/50',
+                    )}
+                    title={item.label}
+                  >
+                    <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500')} />
+                    <span>{item.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
           </nav>
         </div>
 

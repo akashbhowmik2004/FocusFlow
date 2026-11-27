@@ -250,6 +250,31 @@ describe('FocusFlow Dashboard Academic Workspace Integration', () => {
     await waitFor(() => {
       expect(screen.getByText(/your schedule is open today/i)).toBeInTheDocument()
       expect(screen.getByText('No study sessions scheduled for today yet')).toBeInTheDocument()
+      expect(screen.getByText('No tasks planned for today')).toBeInTheDocument()
+      expect(screen.getByText('0 of 0 tasks completed')).toBeInTheDocument()
+      expect(screen.queryByText(/Complete DBMS Revision/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Solve 50 MCQs/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Study Cloud Computing/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Take Mock Test/i)).not.toBeInTheDocument()
+    })
+  })
+
+  it("renders Today's Plan with real database sessions and completion count", async () => {
+    render(
+      <MemoryRouter initialEntries={['/app/dashboard']}>
+        <AppProvider>
+          <Routes>
+            <Route path="/app/dashboard" element={<Dashboard />} />
+          </Routes>
+        </AppProvider>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText("Today's Plan")).toBeInTheDocument()
+      expect(screen.getByText(/Focus: Reaction Mechanisms: Electrophilic Addition/i)).toBeInTheDocument()
+      expect(screen.getByText(/Completed: Orthogonal Projections Drill/i)).toBeInTheDocument()
+      expect(screen.getByText('1 of 2 tasks completed')).toBeInTheDocument()
     })
   })
 

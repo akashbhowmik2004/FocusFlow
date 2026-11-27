@@ -98,7 +98,7 @@ export default function Dashboard() {
   )
   const totalMasteryPct = totalTopicsCount > 0
     ? Math.round((masteredTopicsCount / totalTopicsCount) * 100)
-    : 68
+    : 0
 
   const overdueRevision =
     revisionSummary.overdue[0] || revisionSummary.dueToday[0] || null
@@ -199,6 +199,7 @@ export default function Dashboard() {
         <div className="lg:col-span-4 flex flex-col">
           <ConceptTodayPlan
             todaySessions={todaySessions}
+            isLoading={state.sessionsLoading}
             onCompleteSession={handleCompleteSession}
             onStartFocus={handleFocus}
             onAddSession={handleOpenAddDialog}
@@ -209,7 +210,7 @@ export default function Dashboard() {
       {/* 2. Middle Row: 4 Metric KPI Cards from Concept */}
       <ConceptMetricsRow
         overallProgress={totalMasteryPct}
-        streakDays={studyStreak || 1}
+        streakDays={studyStreak}
         actualMinutes={todayTotals.actualMinutes || 0}
         masteredPercentage={totalMasteryPct}
       />
