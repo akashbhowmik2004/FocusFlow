@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   X,
@@ -18,6 +18,9 @@ import { formatDate } from '@/lib/dates'
 import Button from '@/components/ui/Button'
 import Progress from '@/components/ui/Progress'
 import TopicStatusBadge from './TopicStatusBadge'
+import TopicLearningHub from '@/components/learning/TopicLearningHub'
+import TopicLearningModals from '@/components/learning/TopicLearningModals'
+import { learningService } from '@/services/learningService'
 import {
   getTopicRevisionMeta,
   formatRelativeRevision,
@@ -38,6 +41,37 @@ export default function TopicDetailsDrawer({
   isStudiedToday = false,
   onScheduleStudySession = null,
 }) {
+  const [activeLearningModal, setActiveLearningModal] = useState(null)
+  const [quizConfig, setQuizConfig] = useState(null)
+  const [aiUsage, setAiUsage] = useState(null)
+  const [hubData, setHubData] = useState(null)
+
+  const isBackendTopic = Boolean(topic?.id && !String(topic.id).startsWith('top-'))
+
+  const refreshLearningData = useCallback(async () => {
+    if (!isBackendTopic) return
+    try {
+      const [hubRes, usageRes] = await Promise.allSettled([
+        learningService.getTopicLearningHub(topic.id),
+        learningService.getAIUsage(),
+      ])
+      if (hubRes.status === 'fulfilled' && hubRes.value?.data) {
+        setHubData(hubRes.value.data)
+      }
+      if (usageRes.status === 'fulfilled' && usageRes.value?.data) {
+        setAiUsage(usageRes.value.data)
+      }
+    } catch {
+      // Non-fatal in offline/test mode
+    }
+  }, [isBackendTopic, topic?.id])
+
+  useEffect(() => {
+    if (open) {
+      refreshLearningData()
+    }
+  }, [open, refreshLearningData])
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === 'Escape') onClose()
@@ -64,7 +98,28 @@ export default function TopicDetailsDrawer({
   const isManual = topic.scheduleType === 'MANUAL' || meta.schedulingType === 'manual'
   const easeFactorDisplay = topic.easeFactor ? Number(topic.easeFactor).toFixed(2) : '2.50'
 
+  const backendAttempts = (hubData?.quizzes || []).flatMap((q) =>
+    (q.attempts || []).map((att) => ({
+      id: att.id,
+      type: q.title || 'AI Quiz',
+      dateLabel: att.createdAt ? formatDate(att.createdAt, 'MMM d') : 'Recent',
+      scoreLabel: `${Math.round(att.score)}% (${att.correctAnswers}/${att.totalQuestions})`,
+      rawScore: att.score,
+    }))
+  )
+
+  const backendPerformanceSummary = hubData
+    ? backendAttempts.length > 0
+      ? `${Math.round(backendAttempts.reduce((s, a) => s + a.rawScore, 0) / backendAttempts.length)}% avg across ${backendAttempts.length} ${backendAttempts.length === 1 ? 'quiz' : 'quizzes'}`
+      : 'No quiz attempts yet'
+    : undefined
+
+  const backendWeakConcepts = hubData
+    ? (hubData.mistakeLogs || []).slice(0, 4).map((m) => m.questionText)
+    : undefined
+
   return (
+    <>
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex justify-end">
@@ -298,6 +353,25 @@ export default function TopicDetailsDrawer({
                 </div>
               </div>
 
+              {/* Topic Learning Hub */}
+              <TopicLearningHub
+                topicTitle={topic.name}
+                subtitle={subject?.name ? `${subject.name} · Study & assessment` : 'Study & assessment'}
+                subjectName={subject?.name || ''}
+                masteryScore={hubData?.masteryScore ?? meta.retentionScore}
+                learningProgress={topic.status === 'completed' ? 100 : topic.status === 'in-progress' ? 60 : 15}
+                lastStudiedLabel={relativeLast?.text || 'Not yet studied'}
+                upcomingRevisionLabel={relativeNext?.text || 'Unscheduled'}
+                quizPerformanceSummary={backendPerformanceSummary}
+                weakConcepts={backendWeakConcepts}
+                recentAttempts={hubData ? backendAttempts : undefined}
+                aiUsage={aiUsage}
+                onGenerateQuiz={() => setActiveLearningModal('generator')}
+                onStartConceptCheck={() => setActiveLearningModal('concept')}
+                onStartFlashcards={() => setActiveLearningModal('flashcards')}
+                onReviewMistakes={() => setActiveLearningModal('mistakes')}
+              />
+
               {/* Revision Overview Section (Compact History) */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -430,5 +504,22 @@ export default function TopicDetailsDrawer({
         </div>
       )}
     </AnimatePresence>
+
+    <TopicLearningModals
+      activeModal={activeLearningModal}
+      onSetModal={setActiveLearningModal}
+      topicId={topic.id && !String(topic.id).startsWith('top-') ? topic.id : null}
+      topicTitle={topic.name}
+      subjectName={subject?.name || ''}
+      previousScore={backendAttempts[0]?.rawScore ?? null}
+      currentMastery={hubData?.masteryScore ?? null}
+      aiUsage={aiUsage}
+      quizConfig={quizConfig}
+      onSetQuizConfig={setQuizConfig}
+      onQuizComplete={refreshLearningData}
+      onConceptComplete={refreshLearningData}
+      onUsageChanged={refreshLearningData}
+    />
+    </>
   )
 }

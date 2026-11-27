@@ -1,4 +1,4 @@
-import { rateLimit } from "express-rate-limit";
+import { rateLimit, ipKeyGenerator } from "express-rate-limit";
 
 const configuredWindowMs = Number.parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10);
 const windowMs =
@@ -22,7 +22,9 @@ const customHandler = (defaultMessage) => (req, res, next, options) => {
 
   res.setHeader("Retry-After", retryAfterSec);
   res.status(429).json({
+    success: false,
     status: 429,
+    code: "AI_RATE_LIMIT_EXCEEDED",
     error: "Too Many Requests",
     message: typeof defaultMessage === "string" ? defaultMessage : options.message,
     retryAfter: retryAfterSec,
@@ -68,3 +70,33 @@ export const createCustomRateLimiter = (options = {}) => {
     ...options,
   });
 };
+
+const aiKeyGenerator = (req) => req.user?.id || ipKeyGenerator(req.ip);
+
+export const quizGenerationRateLimiter = createCustomRateLimiter({
+  windowMs: 60 * 1000,
+  max: 2,
+  keyGenerator: aiKeyGenerator,
+  message: "Quiz generation rate limit reached. Please wait a minute before trying again.",
+});
+
+export const conceptualEvaluationRateLimiter = createCustomRateLimiter({
+  windowMs: 60 * 1000,
+  max: 5,
+  keyGenerator: aiKeyGenerator,
+  message: "Conceptual evaluation rate limit reached. Please wait a minute before trying again.",
+});
+
+export const flashcardGenerationRateLimiter = createCustomRateLimiter({
+  windowMs: 60 * 1000,
+  max: 2,
+  keyGenerator: aiKeyGenerator,
+  message: "Flashcard generation rate limit reached. Please wait a minute before trying again.",
+});
+
+export const topicValidationRateLimiter = createCustomRateLimiter({
+  windowMs: 60 * 1000,
+  max: 5,
+  keyGenerator: aiKeyGenerator,
+  message: "Topic validation rate limit reached. Please wait a minute before trying again.",
+});

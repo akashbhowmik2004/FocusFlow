@@ -64,9 +64,16 @@ model User {
   defaultFocusDuration Int @default(25)
   defaultBreakDuration Int @default(5)
 
-  oauthAccounts OAuthAccount[]
-  subjects      Subject[]
-  studySessions StudySession[]
+  role String @default("USER")
+
+  oauthAccounts       OAuthAccount[]
+  subjects            Subject[]
+  studySessions       StudySession[]
+  quizAttempts        QuizAttempt[]
+  mistakeLogs         MistakeLog[]
+  quizReviewSchedules QuizReviewSchedule[]
+  aiUsageCounters     AIUsageCounter[]
+  aiUsageLogs         AIUsageLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,8 +124,14 @@ model Topic {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  studySessions StudySession[]
-  revisions     TopicRevision[]
+  studySessions       StudySession[]
+  revisions           TopicRevision[]
+  quizzes             Quiz[]
+  flashcards          Flashcard[]
+  mistakeLogs         MistakeLog[]
+  quizReviewSchedules QuizReviewSchedule[]
+
+  masteryScore Float?
 
   scheduleType RevisionScheduleType @default(SPACED)
   subject      Subject              @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -152,20 +165,20 @@ model TopicRevision {
 }
 
 model StudySession {
-  id        String   @id @default(cuid())
-  title     String
-  date      DateTime @db.Date
-  startTime String
-  endTime   String
-  duration  Int
-  status    String   @default("upcoming")
-  activeDurationSeconds Int @default(0)
+  id                    String    @id @default(cuid())
+  title                 String
+  date                  DateTime  @db.Date
+  startTime             String
+  endTime               String
+  duration              Int
+  status                String    @default("upcoming")
+  activeDurationSeconds Int       @default(0)
   actualDurationSeconds Int?
-  startedAt DateTime?
-  activeStartedAt DateTime?
-  pausedAt DateTime?
-  completedAt DateTime?
-  cancelledAt DateTime?
+  startedAt             DateTime?
+  activeStartedAt       DateTime?
+  pausedAt              DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
 
   userId    String
   subjectId String
@@ -182,4 +195,200 @@ model StudySession {
   @@index([userId, status, date])
   @@index([subjectId])
   @@index([topicId])
+}
+
+enum QuestionType {
+  mcq
+  conceptual
+}
+
+enum difficultyLevel {
+  easy
+  medium
+  hard
+  adaptive
+}
+
+model Quiz {
+  id      String @id @default(uuid())
+  topicId String
+  topic   Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  title   String
+
+  difficulty          difficultyLevel      @default(medium) // easy, medium, hard, adaptive
+  questions           QuizQuestion[]
+  attempts            QuizAttempt[]
+  quizReviewSchedules QuizReviewSchedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([topicId])
+}
+
+model QuizQuestion {
+  id               String           @id @default(uuid())
+  quizId           String
+  quiz             Quiz             @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type             QuestionType     @default(mcq)
+  question         String
+  options          String[] // Array of choices for MCQ (empty for CONCEPTUAL)
+  correctAnswer    String // Expected answer or key concept criteria
+  explanation      String // Why this answer is correct
+  hint             String?
+  expectedPoints   String[] // For conceptual questions: key concepts to look for
+  order            Int              @default(0)
+  fingerprint      String?
+  conceptTag       String?
+  generationSource String?
+  difficulty       difficultyLevel?
+
+  @@index([quizId])
+  @@index([fingerprint])
+}
+
+model QuizAttempt {
+  id             String   @id @default(uuid())
+  quizId         String
+  quiz           Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score          Float // Percentage (0 - 100)
+  totalQuestions Int
+  correctAnswers Int
+  timeSpentSec   Int      @default(0)
+  userAnswers    Json // Detailed question-by-question responses
+  feedback       Json? // AI evaluation breakdown (concepts understood, missing points)
+  createdAt      DateTime @default(now())
+
+  @@index([userId, quizId])
+}
+
+model Flashcard {
+  id           String    @id @default(uuid())
+  topicId      String
+  topic        Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  front        String
+  back         String
+  easeFactor   Float     @default(2.5) // SuperMemo SM-2 algorithm
+  intervalDays Int       @default(1)
+  repetitions  Int       @default(0)
+  nextReviewAt DateTime  @default(now())
+  lastReviewAt DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([topicId, nextReviewAt])
+}
+
+model MistakeLog {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicId         String
+  topic           Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  questionText    String
+  userResponse    String
+  correctSolution String
+  reason          String? // Why the user missed it
+  resolved        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@index([userId, topicId, resolved])
+}
+
+enum QuizReviewStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model QuizReviewSchedule {
+  id      String  @id @default(uuid())
+  userId  String
+  topicId String
+  quizId  String?
+
+  scheduledAt  DateTime
+  completedAt  DateTime?
+  intervalDays Int
+  status       QuizReviewStatus @default(PENDING)
+  reason       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  quiz  Quiz? @relation(fields: [quizId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status, scheduledAt])
+  @@index([topicId, scheduledAt])
+}
+
+enum AIFeature {
+  TOPIC_VALIDATION
+  QUIZ_GENERATION
+  CONCEPTUAL_EVALUATION
+  FLASHCARD_GENERATION
+}
+
+enum AIRequestStatus {
+  RESERVED
+  SUCCEEDED
+  FAILED
+  RELEASED
+  CACHED
+}
+
+model AIUsageCounter {
+  id            String    @id @default(uuid())
+  userId        String
+  feature       AIFeature
+  dateKey       String
+  usedCount     Int       @default(0)
+  reservedCount Int       @default(0)
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, feature, dateKey])
+  @@index([dateKey])
+}
+
+model AIUsageLog {
+  id               String          @id @default(uuid())
+  userId           String
+  feature          AIFeature
+  model            String
+  inputTokens      Int?
+  outputTokens     Int?
+  tokensEstimated  Boolean         @default(false)
+  estimatedCostUsd Float           @default(0)
+  status           AIRequestStatus
+  cacheHit         Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, feature, createdAt])
+}
+
+model AIQuotaConfig {
+  feature    AIFeature @id
+  dailyLimit Int
+  updatedAt  DateTime  @updatedAt
+}
+
+model AIResponseCache {
+  cacheKey      String    @id
+  feature       AIFeature
+  scopeUserId   String?
+  payload       Json
+  promptVersion String
+  expiresAt     DateTime
+  createdAt     DateTime  @default(now())
+
+  @@index([feature, expiresAt])
+  @@index([scopeUserId])
 }

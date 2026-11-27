@@ -1,10 +1,13 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  AlertCircle,
   Calendar,
   History,
   BarChart3,
   Layers,
+  Sparkles,
+  TrendingUp,
 } from 'lucide-react'
 import { useApp, useSubjects, useSessions } from '@/context/AppContext'
 import { formatDate, getDaysUntil } from '@/lib/dates'
@@ -23,6 +26,11 @@ import ActiveRecallDeck from '@/components/revision/ActiveRecallDeck'
 import RevisionCalendar from '@/components/revision/RevisionCalendar'
 import RevisionHistory from '@/components/revision/RevisionHistory'
 import RevisionAnalytics from '@/components/revision/RevisionAnalytics'
+import AdaptiveQuizSchedule from '@/components/revision/AdaptiveQuizSchedule'
+import MasteryOverview from '@/components/revision/MasteryOverview'
+import MistakeJournal from '@/components/revision/MistakeJournal'
+import AdaptiveRevisionAnalytics from '@/components/revision/AdaptiveRevisionAnalytics'
+import TopicLearningModals from '@/components/learning/TopicLearningModals'
 import StudySessionsWidget from '@/components/revision/StudySessionsWidget'
 import TopicReviewDialog from '@/components/topics/TopicReviewDialog'
 import ScheduleRevisionDialog from '@/components/topics/ScheduleRevisionDialog'
@@ -64,6 +72,13 @@ export default function Revision() {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false)
   const [modalTopic, setModalTopic] = useState(null)
+  const [learningModal, setLearningModal] = useState(null)
+  const [learningTarget, setLearningTarget] = useState({
+    topicTitle: 'Process Synchronization & Semaphores',
+    subjectName: 'Operating Systems',
+    difficulty: 'medium',
+  })
+  const [quizConfig, setQuizConfig] = useState(null)
 
   const revisionSummary = useMemo(
     () => getRevisionSummary(state.subjects || []),
@@ -339,6 +354,24 @@ export default function Revision() {
       icon: BarChart3,
       badge: null,
     },
+    {
+      id: 'adaptive',
+      label: 'Adaptive Quiz',
+      icon: Sparkles,
+      badge: null,
+    },
+    {
+      id: 'mastery',
+      label: 'Mastery',
+      icon: TrendingUp,
+      badge: null,
+    },
+    {
+      id: 'mistakes',
+      label: 'Mistake Journal',
+      icon: AlertCircle,
+      badge: null,
+    },
   ]
 
   const modalTopicSubject = modalTopic
@@ -477,9 +510,62 @@ export default function Revision() {
 
       {/* TAB 4: ANALYTICS */}
       {activeTab === 'analytics' && (
-        <RevisionAnalytics
-          subjects={subjects}
-          allTopics={allRevisionTopics}
+        <div className="space-y-8">
+          <RevisionAnalytics
+            subjects={subjects}
+            allTopics={allRevisionTopics}
+          />
+          <AdaptiveRevisionAnalytics />
+        </div>
+      )}
+
+      {/* TAB 5: ADAPTIVE QUIZ SCHEDULE */}
+      {activeTab === 'adaptive' && (
+        <AdaptiveQuizSchedule
+          onStartMiniQuiz={(item) => {
+            setLearningTarget({
+              topicTitle: item.topic,
+              subjectName: item.subject,
+            })
+            setQuizConfig({
+              difficulty: (item.difficulty || 'medium').toLowerCase(),
+              questionCount: 3,
+              timerEnabled: true,
+            })
+            setLearningModal('mcq')
+          }}
+        />
+      )}
+
+      {/* TAB 6: MASTERY OVERVIEW */}
+      {activeTab === 'mastery' && (
+        <MasteryOverview
+          onPracticeTopic={(item) => {
+            setLearningTarget({
+              topicTitle: item.topic,
+              subjectName: item.subject,
+            })
+            setLearningModal('generator')
+          }}
+        />
+      )}
+
+      {/* TAB 7: MISTAKE JOURNAL */}
+      {activeTab === 'mistakes' && (
+        <MistakeJournal
+          fetchFromBackend={true}
+          onPracticeAgain={(entry) => {
+            setLearningTarget({
+              topicTitle: entry.topic,
+              subjectName: entry.subject,
+            })
+            setQuizConfig({
+              difficulty: (entry.difficulty || 'medium').toLowerCase(),
+              questionCount: 3,
+              timerEnabled: true,
+            })
+            setLearningModal('mcq')
+          }}
         />
       )}
 
@@ -505,6 +591,16 @@ export default function Revision() {
         topic={modalTopic}
         subject={modalTopicSubject}
         onSchedule={handleSaveSchedule}
+      />
+
+      {/* AI Learning & Assessment Modals */}
+      <TopicLearningModals
+        activeModal={learningModal}
+        onSetModal={setLearningModal}
+        topicTitle={learningTarget.topicTitle}
+        subjectName={learningTarget.subjectName}
+        quizConfig={quizConfig}
+        onSetQuizConfig={setQuizConfig}
       />
     </div>
   )

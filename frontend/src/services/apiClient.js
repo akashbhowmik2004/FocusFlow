@@ -64,6 +64,8 @@ export async function request(url, options = {}) {
   if (!response.ok) {
     const error = new Error(data.message || data.error || `Request failed with status ${response.status}`)
     error.status = response.status
+    error.code = data.code || null
+    error.data = data.data || null
     error.errors = data.errors || []
     throw error
   }

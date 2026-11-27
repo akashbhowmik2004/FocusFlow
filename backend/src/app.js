@@ -12,6 +12,7 @@ import {
   generalRateLimiter,
   authRateLimiter,
 } from "./middleware/rateLimit.middleware.js";
+import learningRoutes from './routes/learning.route.js';
 
 const app = express();
 
@@ -71,6 +72,9 @@ app.use("/api/user", requireAuth, userRoutes);
 app.use("/api/topic", requireAuth, topicRoutes);
 app.use("/api/topics", requireAuth, topicRoutes);
 app.use("/api/session", requireAuth, sessionRoutes);
+
+// Learning routes
+app.use("/api/learning", requireAuth, learningRoutes);
 
 // Centralized safe error handler to prevent stack trace disclosure
 app.use((err, req, res, next) => {
