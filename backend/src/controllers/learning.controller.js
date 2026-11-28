@@ -1,6 +1,7 @@
 
 import * as learningService from "../services/learning.service.js";
 import { LearningServiceError } from "../services/learning.service.js";
+import * as blobService from "../services/blob.service.js";
 import {
   AIQuotaExhaustedError,
   getUserAIUsageSummary,
@@ -30,6 +31,39 @@ function handleLearningError(error, res, next) {
 
 /*
 |--------------------------------------------------------------------------
+| Signed Upstash Blob PDF Upload
+|--------------------------------------------------------------------------
+*/
+
+export async function requestPdfUploadUrl(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const { fileName = "document.pdf", size } = req.body || {};
+
+    const result = await blobService.createSignedPdfUpload({
+      userId,
+      fileName,
+      size: Number(size),
+    });
+
+    return res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    if (error?.status) {
+      return res.status(error.status).json({
+        success: false,
+        code: error.code || "UPLOAD_ERROR",
+        message: error.message,
+      });
+    }
+    return next(error);
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
 | Generate Quiz
 |--------------------------------------------------------------------------
 */
@@ -52,6 +86,7 @@ export async function generateQuiz(req, res, next) {
       questionCount = 5,
       questionTypes = ["mcq"],
       customNotes = "",
+      sourceDocument = null,
     } = req.body;
 
     const quiz = await learningService.generateLearningQuiz(
@@ -62,6 +97,7 @@ export async function generateQuiz(req, res, next) {
         questionCount: Number(questionCount),
         questionTypes,
         customNotes,
+        sourceDocument,
       },
       { signal: abortController.signal },
     );

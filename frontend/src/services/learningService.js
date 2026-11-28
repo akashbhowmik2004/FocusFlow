@@ -9,9 +9,22 @@ export async function getTopicLearningHub(topicId) {
   })
 }
 
+export async function requestPdfUploadUrl({ fileName, size }) {
+  return request(`${API_BASE}/uploads/pdf-url`, {
+    method: 'POST',
+    body: JSON.stringify({ fileName, size }),
+  })
+}
+
 export async function generateQuiz(
   topicId,
-  { difficulty = 'medium', questionCount = 5, questionTypes = ['mcq'], customNotes = '' } = {},
+  {
+    difficulty = 'medium',
+    questionCount = 5,
+    questionTypes = ['mcq'],
+    customNotes = '',
+    sourceDocument = null,
+  } = {},
   { signal } = {}
 ) {
   if (!topicId) throw new Error('Topic ID is required')
@@ -24,6 +37,7 @@ export async function generateQuiz(
       questionCount,
       questionTypes,
       customNotes,
+      ...(sourceDocument ? { sourceDocument } : {}),
     }),
   })
 }

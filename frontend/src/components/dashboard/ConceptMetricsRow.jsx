@@ -6,8 +6,13 @@ export default function ConceptMetricsRow({
   actualMinutes = 270,
   masteredPercentage = 78,
 }) {
-  const hours = Math.floor(actualMinutes / 60)
-  const mins = actualMinutes % 60
+  const safeProgress = typeof overallProgress === 'number' && !Number.isNaN(overallProgress) ? overallProgress : 0
+  const safeStreakDays = typeof streakDays === 'number' && !Number.isNaN(streakDays) ? streakDays : 0
+  const safeActualMinutes = typeof actualMinutes === 'number' && !Number.isNaN(actualMinutes) ? actualMinutes : 0
+  const safeMasteredPercentage = typeof masteredPercentage === 'number' && !Number.isNaN(masteredPercentage) ? masteredPercentage : 0
+
+  const hours = Math.floor(safeActualMinutes / 60)
+  const mins = safeActualMinutes % 60
   const timeStr = `${hours}h ${mins > 0 ? `${mins}m` : '00m'}`
 
   const cards = [
@@ -15,7 +20,7 @@ export default function ConceptMetricsRow({
       id: 'progress',
       icon: BookOpen,
       iconColor: 'text-indigo-600 dark:text-indigo-400',
-      value: `${overallProgress}%`,
+      value: `${safeProgress}%`,
       trend: '+5%',
       label: 'Overall Progress',
     },
@@ -23,7 +28,7 @@ export default function ConceptMetricsRow({
       id: 'streak',
       icon: Flame,
       iconColor: 'text-indigo-600 dark:text-indigo-400',
-      value: `${streakDays} Days`,
+      value: `${safeStreakDays} Days`,
       trend: '+1',
       label: 'Study Streak',
     },
@@ -39,7 +44,7 @@ export default function ConceptMetricsRow({
       id: 'accuracy',
       icon: BarChart3,
       iconColor: 'text-indigo-600 dark:text-indigo-400',
-      value: `${masteredPercentage}%`,
+      value: `${safeMasteredPercentage}%`,
       trend: '+3%',
       label: 'Accuracy',
     },
@@ -75,7 +80,7 @@ export default function ConceptMetricsRow({
                 <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-3">
                   <div
                     className="bg-indigo-500 dark:bg-indigo-400 h-full rounded-full transition-[width] duration-500"
-                    style={{ width: `${overallProgress}%` }}
+                    style={{ width: `${safeProgress}%` }}
                   />
                 </div>
               )}

@@ -42,11 +42,49 @@ const DIFFICULTIES = [
 
 const QUESTION_COUNTS = [3, 5, 10]
 
+const MAX_PDF_BYTES = 10 * 1024 * 1024
+const MAX_TEXT_BYTES = 5 * 1024 * 1024
+const MAX_NOTES_CHARS = 30000
+
 function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B'
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function readFileAsArrayBuffer(file) {
+  if (typeof file.arrayBuffer === 'function') {
+    return file.arrayBuffer()
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = () => reject(reader.error || new Error('Failed to read file'))
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+function readFileAsText(file) {
+  if (typeof file.text === 'function') {
+    return file.text()
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result || ''))
+    reader.onerror = () => reject(reader.error || new Error('Failed to read file'))
+    reader.readAsText(file)
+  })
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
 }
 
 export default function QuizGeneratorModal({
@@ -144,13 +182,31 @@ export default function QuizGeneratorModal({
             onTopicRenamed?.(trimmedEditedName)
           }
 
+          const effectiveCustomNotes =
+            sourceType === 'notes'
+              ? pastedNotes.trim()
+              : sourceType === 'text' && uploadedFile?.textContent
+                ? uploadedFile.textContent.trim().slice(0, MAX_NOTES_CHARS)
+                : ''
+
+          const sourceDocument =
+            sourceType === 'pdf' && uploadedFile?.base64
+              ? {
+                  fileName: uploadedFile.name,
+                  mimeType: 'application/pdf',
+                  data: uploadedFile.base64,
+                  ...(uploadedFile.blobPath ? { blobPath: uploadedFile.blobPath } : {}),
+                }
+              : null
+
           const res = await learningService.generateTopicQuiz(
             topicId,
             {
               difficulty,
               questionCount,
               questionTypes: backendTypes,
-              customNotes: pastedNotes.trim(),
+              customNotes: effectiveCustomNotes,
+              sourceDocument,
             },
             { signal: controller.signal }
           )
@@ -221,6 +277,22 @@ export default function QuizGeneratorModal({
               suggestion:
                 'Try switching difficulty (e.g. Hard or Adaptive) or pasting additional study notes.',
             })
+          } else if (code === 'IRRELEVANT_PDF_DOCUMENT') {
+            setValidationState({
+              code,
+              message:
+                err.message ||
+                'The uploaded PDF is not relevant to this topic.',
+              suggestion: err?.data?.detectedTopic
+                ? `Detected topic: ${err.data.detectedTopic}. Upload a PDF related to "${topicTitle}" or choose another source.`
+                : `Upload a PDF related to "${topicTitle}" or choose another source.`,
+            })
+          } else if (code === 'INVALID_PDF') {
+            setValidationState({
+              code,
+              message: err.message || 'The uploaded PDF could not be processed.',
+              suggestion: 'Upload a valid, non-empty .pdf document up to 10 MB.',
+            })
           } else {
             setValidationState({
               code: 'AI_SERVICE_UNAVAILABLE',
@@ -271,6 +343,7 @@ export default function QuizGeneratorModal({
     topicTitle,
     editableTopicName,
     pastedNotes,
+    uploadedFile,
     validationState?.code,
     subjectName,
     sourceType,
@@ -294,15 +367,112 @@ export default function QuizGeneratorModal({
     )
   }
 
-  const handleFileSelect = (file) => {
+  const handleFileSelect = async (file) => {
     if (!file) return
     setErrorMsg('')
-    setUploadedFile({
-      name: file.name,
-      size: file.size,
-      type: file.type || (sourceType === 'pdf' ? 'application/pdf' : 'text/plain'),
-    })
-    setUploadStatus('ready')
+    setValidationState(null)
+
+    const lowerName = (file.name || '').toLowerCase()
+    if (sourceType === 'pdf') {
+      const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf')
+      if (!isPdf) {
+        setErrorMsg('Please select a valid .pdf file.')
+        return
+      }
+      if (file.size === 0) {
+        setErrorMsg('The selected PDF file is empty.')
+        return
+      }
+      if (file.size > MAX_PDF_BYTES) {
+        setErrorMsg('PDF file must be 10 MB or smaller.')
+        return
+      }
+      try {
+        const buffer = await readFileAsArrayBuffer(file)
+        const headerBytes = new Uint8Array(buffer.slice(0, 5))
+        const header = String.fromCharCode(...headerBytes)
+        if (header !== '%PDF-') {
+          setErrorMsg('The selected file is not a valid PDF document.')
+          return
+        }
+        const base64 = arrayBufferToBase64(buffer)
+        const baseFileState = {
+          name: file.name,
+          size: file.size,
+          type: 'application/pdf',
+          base64,
+          blobPath: null,
+          storageProvider: 'local',
+        }
+        setUploadedFile(baseFileState)
+
+        // Upload directly to Upstash Blob when configured on the backend
+        if (typeof learningService.requestPdfUploadUrl === 'function') {
+          setUploadStatus('uploading')
+          try {
+            const signRes = await learningService.requestPdfUploadUrl({
+              fileName: file.name,
+              size: file.size,
+            })
+            const signData = signRes?.data
+            if (signData?.configured && signData?.uploadUrl && signData?.blobPath) {
+              const putRes = await fetch(signData.uploadUrl, {
+                method: 'PUT',
+                headers: signData.headers || { 'Content-Type': 'application/pdf' },
+                body: file,
+              })
+              if (putRes.ok) {
+                setUploadedFile({
+                  ...baseFileState,
+                  blobPath: signData.blobPath,
+                  storageProvider: 'upstash',
+                })
+              }
+            }
+          } catch {
+            // Fall back to local base64 payload if Upstash upload is unavailable
+          }
+        }
+        setUploadStatus('ready')
+      } catch {
+        setErrorMsg('Could not read the selected PDF file. Please try again.')
+      }
+      return
+    }
+
+    const isText =
+      file.type.startsWith('text/') ||
+      lowerName.endsWith('.txt') ||
+      lowerName.endsWith('.md') ||
+      lowerName.endsWith('.markdown')
+    if (!isText) {
+      setErrorMsg('Please select a valid .txt or .md file.')
+      return
+    }
+    if (file.size === 0) {
+      setErrorMsg('The selected text file is empty.')
+      return
+    }
+    if (file.size > MAX_TEXT_BYTES) {
+      setErrorMsg('Text file must be 5 MB or smaller.')
+      return
+    }
+    try {
+      const textContent = await readFileAsText(file)
+      if (!textContent.trim()) {
+        setErrorMsg('The selected text file contains no readable text.')
+        return
+      }
+      setUploadedFile({
+        name: file.name,
+        size: file.size,
+        type: file.type || 'text/plain',
+        textContent,
+      })
+      setUploadStatus('ready')
+    } catch {
+      setErrorMsg('Could not read the selected text file. Please try again.')
+    }
   }
 
   const handleDrop = (e) => {
@@ -335,6 +505,10 @@ export default function QuizGeneratorModal({
           ? 'Please attach a PDF file or choose another source.'
           : 'Please attach a text file or choose another source.'
       )
+      return
+    }
+    if (isUploadSource && uploadStatus === 'uploading') {
+      setErrorMsg('Please wait for the PDF upload to finish.')
       return
     }
     setErrorMsg('')
@@ -530,6 +704,10 @@ export default function QuizGeneratorModal({
                         type="button"
                         onClick={() => {
                           setSourceType(opt.id)
+                          if (opt.id !== sourceType) {
+                            setUploadedFile(null)
+                            setUploadStatus('idle')
+                          }
                           setErrorMsg('')
                         }}
                         aria-pressed={active}
@@ -601,7 +779,7 @@ export default function QuizGeneratorModal({
                           Drop your {sourceType === 'pdf' ? 'PDF document' : 'text file'} here, or click to browse
                         </p>
                         <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                          {sourceType === 'pdf' ? 'Accepts .pdf up to 10 MB' : 'Accepts .txt or .md up to 5 MB'} (local preview)
+                          {sourceType === 'pdf' ? 'Accepts .pdf up to 10 MB' : 'Accepts .txt or .md up to 5 MB'}
                         </p>
                         <input
                           ref={fileInputRef}
@@ -622,7 +800,13 @@ export default function QuizGeneratorModal({
                             <p className="text-xs text-[var(--color-text-muted)] font-tabular">
                               {formatBytes(uploadedFile.size)} · {uploadedFile.type} ·{' '}
                               <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                                {uploadStatus === 'ready' ? 'Ready' : 'Pending'}
+                                {uploadStatus === 'uploading'
+                                  ? 'Uploading to Upstash...'
+                                  : uploadStatus === 'ready'
+                                    ? uploadedFile.storageProvider === 'upstash'
+                                      ? 'Uploaded to Upstash'
+                                      : 'Ready'
+                                    : 'Pending'}
                               </span>
                             </p>
                           </div>

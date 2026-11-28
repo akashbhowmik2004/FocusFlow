@@ -125,7 +125,7 @@ export default function AnalyticsOverviewCards({
             </span>
             <div className="flex items-baseline gap-1.5 mt-2">
               <span className="text-3xl font-extrabold text-[var(--color-text)] font-tabular tabular-nums tracking-tight">
-                {activeStreak === null ? '—' : activeStreak}
+                {activeStreak ?? 0}
               </span>
               <span className="text-sm font-semibold text-[var(--color-text-secondary)]">Days</span>
             </div>

@@ -44,6 +44,29 @@ const getInitialTheme = () => {
   return "dark";
 };
 
+const getInitialIdList = (storageKey) => {
+  if (typeof window === "undefined" || isTestEnvironment) {
+    return [];
+  }
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+};
+
+const persistIdList = (storageKey, ids) => {
+  if (typeof window === "undefined" || isTestEnvironment) return;
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(ids));
+  } catch {
+    // localStorage might fail in restricted environments
+  }
+};
+
 const initialState = {
   subjects:
     isTestEnvironment
@@ -60,6 +83,8 @@ const initialState = {
   sidebarOpen: true,
   searchQuery: "",
   notifications: [],
+  readNotificationIds: getInitialIdList("focusflow_read_notifications"),
+  dismissedNotificationIds: getInitialIdList("focusflow_dismissed_notifications"),
   activeFocusSession: null,
   focusLoading: false,
   focusError: null,
@@ -305,12 +330,63 @@ function appReducer(state, action) {
       return {
         ...state,
         notifications: [
-          { id: generateId(), timestamp: new Date(), ...action.payload },
+          { id: generateId(), timestamp: new Date(), read: false, ...action.payload },
           ...state.notifications,
         ],
       };
+    case "MARK_NOTIFICATION_READ": {
+      const targetId = action.payload;
+      if (!targetId) return state;
+      const prevRead = state.readNotificationIds || [];
+      const nextRead = prevRead.includes(targetId) ? prevRead : [...prevRead, targetId];
+      persistIdList("focusflow_read_notifications", nextRead);
+      return {
+        ...state,
+        notifications: state.notifications.map((n) =>
+          n.id === targetId ? { ...n, read: true } : n,
+        ),
+        readNotificationIds: nextRead,
+      };
+    }
+    case "MARK_ALL_NOTIFICATIONS_READ": {
+      const extraIds = Array.isArray(action.payload) ? action.payload : [];
+      const nextRead = Array.from(
+        new Set([
+          ...(state.readNotificationIds || []),
+          ...state.notifications.map((n) => n.id),
+          ...extraIds,
+        ]),
+      );
+      persistIdList("focusflow_read_notifications", nextRead);
+      return {
+        ...state,
+        notifications: state.notifications.map((n) => ({ ...n, read: true })),
+        readNotificationIds: nextRead,
+      };
+    }
+    case "DISMISS_NOTIFICATION": {
+      const targetId = action.payload;
+      if (!targetId) return state;
+      const prevDismissed = state.dismissedNotificationIds || [];
+      const nextDismissed = prevDismissed.includes(targetId)
+        ? prevDismissed
+        : [...prevDismissed, targetId];
+      persistIdList("focusflow_dismissed_notifications", nextDismissed);
+      return {
+        ...state,
+        notifications: state.notifications.filter((n) => n.id !== targetId),
+        dismissedNotificationIds: nextDismissed,
+      };
+    }
     case "CLEAR_NOTIFICATIONS":
-      return { ...state, notifications: [] };
+      persistIdList("focusflow_read_notifications", []);
+      persistIdList("focusflow_dismissed_notifications", []);
+      return {
+        ...state,
+        notifications: [],
+        readNotificationIds: [],
+        dismissedNotificationIds: [],
+      };
 
     // Revision
     case "MARK_REVISED":

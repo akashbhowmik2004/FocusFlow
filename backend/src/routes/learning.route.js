@@ -1,6 +1,7 @@
 import express from "express";
 import {
   generateQuiz,
+  requestPdfUploadUrl,
   evaluateConcept,
   submitQuiz,
   getTopicLearningHub,
@@ -36,7 +37,8 @@ router.post("/topics/validate", topicValidationRateLimiter, validateTopic);
 // Topic learning hub
 router.get("/topics/:topicId/learning", getTopicLearningHub);
 
-// Quiz
+// Quiz & PDF upload
+router.post("/uploads/pdf-url", requestPdfUploadUrl);
 router.post("/topics/:topicId/quizzes", quizGenerationRateLimiter, generateQuiz);
 router.post("/questions/:questionId/evaluate", conceptualEvaluationRateLimiter, evaluateConcept);
 router.post("/quizzes/:quizId/submit", submitQuiz);

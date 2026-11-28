@@ -5,7 +5,9 @@ import {
   BarChart3,
   Bell,
   BookOpen,
+  CalendarClock,
   CalendarDays,
+  CheckCheck,
   CheckCircle2,
   ChevronDown,
   Command,
@@ -29,6 +31,7 @@ import { useAuth } from '@/context/AuthContext'
 import { cn, getInitials } from '@/lib/utils'
 import { getRevisionSummary } from '@/lib/revisionSummary'
 import { getActiveStudyStreak } from '@/lib/analytics'
+import { buildNotifications } from '@/lib/notifications'
 import { toast } from 'sonner'
 import FocusFlowLogo from '@/components/brand/FocusFlowLogo'
 
@@ -90,7 +93,29 @@ export default function AppLayout() {
   )
 
   const revisionSummary = useMemo(() => getRevisionSummary(state.subjects), [state.subjects])
-  const dueCount = revisionSummary.overdueCount + revisionSummary.dueTodayCount
+
+  const notificationsList = useMemo(
+    () =>
+      buildNotifications({
+        customNotifications: state.notifications || [],
+        revisionSummary,
+        subjects: state.subjects || [],
+        readIds: state.readNotificationIds || [],
+        dismissedIds: state.dismissedNotificationIds || [],
+      }),
+    [
+      state.notifications,
+      revisionSummary,
+      state.subjects,
+      state.readNotificationIds,
+      state.dismissedNotificationIds,
+    ],
+  )
+
+  const unreadNotificationCount = useMemo(
+    () => notificationsList.filter((item) => !item.read).length,
+    [notificationsList],
+  )
 
   const activeStreak = useMemo(() => {
     return getActiveStudyStreak(state.sessions) || 0
@@ -147,13 +172,32 @@ export default function AppLayout() {
         event.preventDefault()
         setSearchOpen((open) => !open)
       }
-      if (event.key === 'Escape' && searchOpen) {
-        setSearchOpen(false)
+      if (event.key === 'Escape') {
+        if (searchOpen) setSearchOpen(false)
+        if (notificationsOpen) setNotificationsOpen(false)
       }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [searchOpen])
+  }, [searchOpen, notificationsOpen])
+
+  const handleNotificationClick = (item) => {
+    dispatch({ type: 'MARK_NOTIFICATION_READ', payload: item.id })
+    setNotificationsOpen(false)
+  }
+
+  const handleDismissNotification = (event, id) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dispatch({ type: 'DISMISS_NOTIFICATION', payload: id })
+  }
+
+  const handleMarkAllRead = () => {
+    dispatch({
+      type: 'MARK_ALL_NOTIFICATIONS_READ',
+      payload: notificationsList.map((item) => item.id),
+    })
+  }
 
   const handleSignOut = async () => {
     setUserMenuOpen(false)
@@ -410,41 +454,114 @@ export default function AppLayout() {
             {/* Notifications Dropdown */}
             <div ref={notificationsRef} className="relative">
               <button
+                type="button"
                 onClick={() => setNotificationsOpen((o) => !o)}
                 className="relative p-2 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 cursor-pointer"
                 title="Notifications"
                 aria-label="Notifications"
+                aria-expanded={notificationsOpen}
               >
                 <Bell className="h-4 w-4" />
-                {dueCount > 0 && (
+                {unreadNotificationCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
                 )}
               </button>
 
               {notificationsOpen && (
-                <div className="absolute right-0 mt-2 w-72 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-2xl z-50">
-                  <p className="border-b border-slate-200 dark:border-slate-800 px-1 pb-2 text-xs font-bold text-slate-900 dark:text-white">
-                    Pending Spaced Reviews
-                  </p>
-                  {dueCount > 0 ? (
-                    <Link
-                      to="/app/revision"
-                      onClick={() => setNotificationsOpen(false)}
-                      className="mt-2 flex items-start gap-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                <div
+                  role="region"
+                  aria-label="Notifications panel"
+                  className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 shadow-2xl z-50"
+                >
+                  <div className="flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 px-1 pb-2">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">
+                        Notifications
+                      </p>
+                      {unreadNotificationCount > 0 && (
+                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-600/10 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 font-tabular">
+                          {unreadNotificationCount}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleMarkAllRead}
+                      disabled={unreadNotificationCount === 0}
+                      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40 disabled:opacity-40 disabled:pointer-events-none transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 cursor-pointer"
                     >
-                      <RotateCcw className="mt-0.5 h-4 w-4 text-amber-500 shrink-0" />
-                      <div>
-                        <p className="text-xs font-semibold text-slate-900 dark:text-white">
-                          {dueCount} topic {dueCount === 1 ? 'review' : 'reviews'} due today
-                        </p>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                          Reinforce retention through active recall now.
-                        </p>
-                      </div>
-                    </Link>
+                      <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>Mark all read</span>
+                    </button>
+                  </div>
+
+                  {notificationsList.length > 0 ? (
+                    <div className="mt-2 max-h-80 space-y-1 overflow-y-auto pr-0.5">
+                      {notificationsList.map((item) => {
+                        const Icon =
+                          item.type === 'revision'
+                            ? RotateCcw
+                            : item.type === 'exam'
+                              ? CalendarClock
+                              : Bell
+                        const iconClass =
+                          item.type === 'revision'
+                            ? 'text-amber-500'
+                            : item.type === 'exam'
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-slate-500 dark:text-slate-400'
+
+                        return (
+                          <div
+                            key={item.id}
+                            className={cn(
+                              'flex items-start gap-2 rounded-lg p-2 transition-colors',
+                              item.read
+                                ? 'opacity-75 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                : 'bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800',
+                            )}
+                          >
+                            <Link
+                              to={item.href}
+                              onClick={() => handleNotificationClick(item)}
+                              className="flex flex-1 min-w-0 items-start gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-blue-500"
+                            >
+                              <Icon className={cn('mt-0.5 h-4 w-4 shrink-0', iconClass)} aria-hidden="true" />
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  {!item.read && (
+                                    <span
+                                      className="h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 shrink-0"
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                  <p className="truncate text-xs font-semibold text-slate-900 dark:text-white">
+                                    {item.title}
+                                  </p>
+                                </div>
+                                {item.description && (
+                                  <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 dark:text-slate-400">
+                                    {item.description}
+                                  </p>
+                                )}
+                              </div>
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={(e) => handleDismissNotification(e, item.id)}
+                              className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-slate-200/70 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-slate-200 transition-colors focus-visible:outline-2 focus-visible:outline-blue-500 cursor-pointer"
+                              aria-label={`Clear notification: ${item.title}`}
+                              title="Clear notification"
+                            >
+                              <X className="h-3.5 w-3.5" aria-hidden="true" />
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
                   ) : (
-                    <p className="py-4 text-center text-xs text-slate-500 dark:text-slate-400">
-                      Your memory decay queue is all clear.
+                    <p className="py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+                      Your notification queue is all clear.
                     </p>
                   )}
                 </div>
